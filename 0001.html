@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera App</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        #camera {
+            display: block;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        /* 카메라 위에 텍스트 스타일 */
+        #text-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: red;
+            font-size: 30px;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px black;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 카메라 출력 -->
+<video id="camera" autoplay playsinline></video>
+
+<!-- 캔버스: 사람 인식 시 그 위에 그림을 그립니다 -->
+<canvas id="canvas"></canvas>
+
+<!-- 카메라 위에 표시되는 텍스트 -->
+<div id="text-overlay">People Equal Chocolate</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+<script>
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = 'trashImages/x.png'; // x.png 파일 경로
+
+    // 캔버스 크기 설정
+    function resizeCanvas() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+    }
+
+    // 카메라 접근 및 허용
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: "environment" } } // 후면 카메라 설정
+            });
+            video.srcObject = stream;
+
+            video.addEventListener('loadeddata', () => {
+                resizeCanvas(); // 비디오 로딩 후 캔버스 크기 설정
+            });
+        } catch (err) {
+            console.error('Error accessing the camera', err);
+        }
+    }
+
+    // 사람 인식 및 실시간 업데이트
+    async function detectPerson() {
+        const model = await cocoSsd.load();
+
+        async function detectFrame() {
+            const predictions = await model.detect(video);
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
+
+            predictions.forEach(prediction => {
+                if (prediction.class === 'person') {
+                    const [x, y, width, height] = prediction.bbox; // 사람의 위치와 크기
+                    const aspectRatio = img.width / img.height; // x.png 이미지 비율 유지
+
+                    // 이미지 비율을 유지하면서 너비에 맞추어 높이를 계산
+                    const imgWidth = width;
+                    const imgHeight = imgWidth / aspectRatio;
+
+                    // 이미지가 사람 Bounding Box의 중앙에 오도록 좌표 조정
+                    const offsetX = x + (width - imgWidth) / 2;
+                    const offsetY = y + (height - imgHeight) / 2;
+
+                    // 이미지 비율 유지하여 그리기
+                    ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+                }
+            });
+
+            requestAnimationFrame(detectFrame); // 실시간으로 반복
+        }
+
+        detectFrame(); // 첫 번째 프레임 탐지 시작
+    }
+
+    // 카메라 실행 및 사람 인식
+    startCamera().then(() => {
+        detectPerson();
+    });
+
+    // 윈도우 리사이즈 시 캔버스 크기 조정
+    window.addEventListener('resize', resizeCanvas);
+</script>
+
+</body>
+</html>
