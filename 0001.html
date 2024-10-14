@@ -13,43 +13,39 @@
             align-items: center;
             height: 100vh;
             background-color: #f9f9f9;
-            overflow: hidden; /* 화면 넘침 방지 */
         }
-
-        /* 비디오와 캔버스를 화면 크기에 맞춤 */
-        #camera, #canvas {
+        #container {
+            position: relative; /* 부모 요소를 상대적으로 설정 */
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+        }
+        #camera {
+            display: block;
+            width: 100%;
+            height: auto; /* 비디오의 높이를 자동으로 조정 */
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        #canvas {
             position: absolute;
             top: 0;
             left: 0;
-            width: 90vw; /* 화면 가로폭에 맞춤 */
-            height: 100vh; /* 화면 세로높이에 맞춤 */
-            object-fit: cover;
-        }
-
-        /* 텍스트 반응형 크기 */
-        #text-overlay {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            color: black; /* 텍스트 색상을 검정으로 설정 */
-            font-size: 5vw; /* 화면 너비에 따라 글자 크기 변경 */
-            font-weight: bold;
-            text-shadow: 2px 2px 5px white;
-            z-index: 10;
+            width: 100%; /* 캔버스를 비디오 크기에 맞게 설정 */
+            height: 100%;
+            pointer-events: none; /* 캔버스에서 클릭 이벤트를 비활성화 */
         }
     </style>
 </head>
 <body>
 
-<!-- 카메라 출력 -->
-<video id="camera" autoplay playsinline></video>
+<div id="container">
+    <!-- 카메라 출력 -->
+    <video id="camera" autoplay playsinline></video>
 
-<!-- 캔버스: 사람 인식 시 그 위에 그림을 그립니다 -->
-<canvas id="canvas"></canvas>
-
-<!-- 카메라 위에 표시되는 텍스트 -->
-<div id="text-overlay">People Equal Chocolate</div>
+    <!-- 캔버스: 사람 인식 시 그 위에 그림을 그립니다 -->
+    <canvas id="canvas"></canvas>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
@@ -60,12 +56,10 @@
     const img = new Image();
     img.src = 'trashImages/x.png'; // x.png 파일 경로
 
-    let personDetected = false; // 사람이 감지되었는지 여부를 저장
-
-    // 캔버스 크기를 비디오에 맞추어 조정
+    // 캔버스 크기 설정
     function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
     }
 
     // 카메라 접근 및 허용
@@ -88,38 +82,37 @@
     async function detectPerson() {
         const model = await cocoSsd.load();
 
-        setInterval(async () => {
+        async function detectFrame() {
             const predictions = await model.detect(video);
             ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
 
             predictions.forEach(prediction => {
                 if (prediction.class === 'person') {
-                    personDetected = true;
                     const [x, y, width, height] = prediction.bbox; // 사람의 위치와 크기
-
-                    // 비율 기반으로 캔버스 크기에 맞게 변환
-                    const canvasX = (x / video.videoWidth) * canvas.width;
-                    const canvasY = (y / video.videoHeight) * canvas.height;
-                    const canvasWidth = (width / video.videoWidth) * canvas.width;
-                    const canvasHeight = (height / video.videoHeight) * canvas.height;
-
                     const aspectRatio = img.width / img.height; // x.png 이미지 비율 유지
 
                     // 이미지 비율을 유지하면서 너비에 맞추어 높이를 계산
-                    const imgWidth = canvasWidth;
+                    const imgWidth = width;
                     const imgHeight = imgWidth / aspectRatio;
 
                     // 이미지가 사람 Bounding Box의 중앙에 오도록 좌표 조정
-                    const offsetX = canvasX;
-                    const offsetY = canvasY;
+                    const offsetX = x + (width - imgWidth) / 2;
+                    const offsetY = y + (height - imgHeight) / 2;
 
                     // 이미지 비율 유지하여 그리기
                     ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
-                } else {
-                    personDetected = false; // 사람이 감지되지 않았을 때 상태 변경
+
+                    // 사람 인식 박스 그리기
+                    ctx.strokeStyle = 'red'; // 박스 색상
+                    ctx.lineWidth = 2; // 박스 두께
+                    ctx.strokeRect(x, y, width, height); // 사람의 바운딩 박스 그리기
                 }
             });
-        }, 500); // 0.5초마다 업데이트
+
+            requestAnimationFrame(detectFrame); // 실시간으로 반복
+        }
+
+        detectFrame(); // 첫 번째 프레임 탐지 시작
     }
 
     // 카메라 실행 및 사람 인식
