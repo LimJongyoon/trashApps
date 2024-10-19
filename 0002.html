@@ -105,7 +105,8 @@
         // 이미지 추가 (모바일 포함)
         fileInput.addEventListener('change', (e) => {
             const files = e.target.files;
-            Array.from(files).forEach(file => {
+            // Files are processed in the order they are selected
+Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const img = document.createElement('img');
@@ -134,7 +135,8 @@
             dropZone.style.borderColor = '#ccc';
             const files = e.dataTransfer.files;
 
-            Array.from(files).forEach(file => {
+            // Files are processed in the order they are selected
+Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const img = document.createElement('img');
