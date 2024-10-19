@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,12 +76,8 @@
 <body>
 
     <div id="toolbar">
-        <label for="file-input">Select 🖼️</label>
+        <label for="file-input">Select Images</label>
         <input id="file-input" type="file" accept="image/*" multiple>
-        
-        <label for="folder-input">Select 📁</label>
-        <input id="folder-input" type="file" webkitdirectory directory>
-
         <button id="fit-height-btn">Fit ↕</button>
         <button id="fit-width-btn">Fit ↔</button>
         <button id="zoom-in-btn">+</button>
@@ -102,18 +97,10 @@
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomOutBtn = document.getElementById('zoom-out-btn');
         const fileInput = document.getElementById('file-input');
-        const folderInput = document.getElementById('folder-input');
         const dropText = document.getElementById('drop-text');
 
         let currentFit = 'auto'; // 이미지 크기 상태
         let currentZoom = 1; // 확대/축소 비율
-
-        // 숫자를 추출하여 정렬하는 함수
-        function naturalSort(a, b) {
-            const numA = a.name.match(/\d+/g) ? parseInt(a.name.match(/\d+/g)[0], 10) : Number.MAX_SAFE_INTEGER;
-            const numB = b.name.match(/\d+/g) ? parseInt(b.name.match(/\d+/g)[0], 10) : Number.MAX_SAFE_INTEGER;
-            return numA - numB;
-        }
 
         // 이미지 추가 (모바일 포함)
         fileInput.addEventListener('change', (e) => {
@@ -129,24 +116,6 @@
                     imageContainer.appendChild(img);
                     dropText.style.display = 'none';
                 }
-                reader.readAsDataURL(file);
-            });
-        });
-
-        // 폴더 선택 처리
-        folderInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files).sort(naturalSort); // 숫자 기반 정렬
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    img.style.width = currentFit === 'width' ? '100%' : 'auto';
-                    img.style.height = currentFit === 'height' ? '100vh' : 'auto';
-                    img.style.transform = `scale(${currentZoom})`;
-                    imageContainer.appendChild(img);
-                    dropText.style.display = 'none';
-                };
                 reader.readAsDataURL(file);
             });
         });
