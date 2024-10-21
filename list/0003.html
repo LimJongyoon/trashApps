@@ -15,12 +15,16 @@
             height: 350px; /* 높이를 자동으로 설정 */
             border: none;
             background-size: contain;
+            user-select: none; /* 선택 불가능하게 설정 */
         }
         #hornButton:active {
             transform: scale(0.95); /* 눌리는 이펙트 */
         }
         h1 {
             font-size: 24px;
+        }
+        h3 {
+            user-select: none; /* h3도 선택 불가능하게 설정 */
         }
     </style>
 </head>
