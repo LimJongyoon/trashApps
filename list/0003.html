@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horn App</title>
+    <style>
+        body {
+            text-align: center;
+            margin-top: 50px;
+        }
+        #hornButton {
+            background: url('../images/0003.png') no-repeat center;
+            width: 70vw; /* 화면의 70%로 설정 */
+            height: 70vw; /* 높이를 자동으로 설정 */
+            border: none;
+            background-size: contain;
+        }
+        #hornButton:active {
+            transform: scale(0.95); /* 눌리는 이펙트 */
+        }
+        h1 {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Turn on the volume and Click image</h3>
+    <button id="hornButton"></button>
+    <audio id="hornSound" src="../sounds/0003.mp3" loop></audio>
+
+    <script>
+        const hornButton = document.getElementById('hornButton');
+        const hornSound = document.getElementById('hornSound');
+
+        // 소리 재생 함수
+        const playSound = () => {
+            hornSound.play();
+        };
+
+        // 소리 멈추기 함수
+        const stopSound = () => {
+            hornSound.pause(); // 일시정지
+        };
+
+        // PC와 모바일 이벤트 모두 처리
+        hornButton.addEventListener('mousedown', playSound);
+        hornButton.addEventListener('mouseup', stopSound);
+        hornButton.addEventListener('mouseleave', stopSound);
+
+        // 모바일 터치 이벤트 추가
+        hornButton.addEventListener('touchstart', playSound);
+        hornButton.addEventListener('touchend', stopSound);
+    </script>
+</body>
+</html>
