@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -57,32 +58,37 @@
         .app-icon-container {
             display: flex;
             justify-content: center;
+            position: relative;
         }
 
         .app-icon {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, black, gray);
+            background-size: cover;
+            background-position: center;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            box-sizing: border-box;
         }
 
         .app-name-container {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
+            position: absolute;
+            top: 0;
+            background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent white background */
+            width: 100%;
+            text-align: center;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 0px 0px; /* Reduce padding for a thinner background */
         }
 
         .app-name {
             font-size: 14px;
+            color: black; /* Change text to black */
+        }
+
+        .app-description {
+            font-size: 12px; /* Fix description font size */
             color: #333;
+            margin-top: 5px;
         }
 
         a {
@@ -90,21 +96,6 @@
             color: inherit;
         }
 
-        /* 모바일 반응형 */
-        @media (max-width: 600px) {
-            .app-item {
-                padding: 10px;
-            }
-
-            .app-icon {
-                width: 70px;
-                height: 70px;
-            }
-
-            .app-name {
-                font-size: 12px;
-            }
-        }
     </style>
     <script>
         function searchApps() {
@@ -112,9 +103,9 @@
             const apps = document.getElementsByClassName('app-item');
 
             for (let i = 0; i < apps.length; i++) {
-                const appIcon = apps[i].getElementsByClassName('app-icon')[0].textContent.toLowerCase();
                 const appName = apps[i].getElementsByClassName('app-name')[0].textContent.toLowerCase();
-                if (appIcon.includes(searchValue) || appName.includes(searchValue)) {
+                const appDescription = apps[i].getElementsByClassName('app-description')[0].textContent.toLowerCase(); 
+                if (appName.includes(searchValue) || appDescription.includes(searchValue)) {
                     apps[i].style.display = 'block';
                 } else {
                     apps[i].style.display = 'none';
@@ -128,40 +119,42 @@
     <div class="title">TrashApps</div>
 
     <div class="search-container">
-        <input type="text" id="search-bar" class="search-bar" placeholder="🔍 
-Search by number or title..." onkeyup="searchApps()">
+        <input type="text" id="search-bar" class="search-bar" placeholder="🔍 Search by number or title..." onkeyup="searchApps()">
     </div>
     <div class="app-container">
         <div class="app-item">
             <a href="list/0002.html">
                 <div class="app-icon-container">
-                    <div class="app-icon">0002</div>
+                    <div class="app-icon" style="background-image: url('icons/0002.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0002</span>
+                    </div>
                 </div>
-                <div class="app-name-container">
-                    <span class="app-name">Webtoon viewer</span>
-                </div>
+                <div class="app-description">Webtoon viewer</div>
             </a>
         </div>
 
         <div class="app-item">
             <a href="list/0002PC.html">
                 <div class="app-icon-container">
-                    <div class="app-icon">0002 PC</div>
+                    <div class="app-icon" style="background-image: url('icons/0002PC.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0002 PC</span>
+                    </div>
                 </div>
-                <div class="app-name-container">
-                    <span class="app-name">Webtoon viewer for PC</span>
-                </div>
+                <div class="app-description">Webtoon viewer for PC</div>
             </a>
         </div>
 
         <div class="app-item">
             <a href="list/0001.html">
                 <div class="app-icon-container">
-                    <div class="app-icon">0001</div>
+                    <div class="app-icon" style="background-image: url('icons/0001.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0001</span>
+                    </div>
                 </div>
-                <div class="app-name-container">
-                    <span class="app-name">Camera people=shit</span>
-                </div>
+                <div class="app-description">Camera people=shit</div>
             </a>
         </div>
     </div>
