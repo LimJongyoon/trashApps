@@ -99,11 +99,14 @@
                     const offsetX = x + (width - imgWidth) / 2;
                     const offsetY = y + (height - imgHeight) / 2;
 
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; // 검정색, 투명도 30%
+                    ctx.fillRect(x, y, width, height);
+
                     // 이미지 비율 유지하여 그리기
                     ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
 
                     // 사람 인식 박스 그리기
-                    ctx.strokeStyle = 'red'; // 박스 색상
+                    ctx.strokeStyle = 'black'; // 박스 색상
                     ctx.lineWidth = 2; // 박스 두께
                     ctx.strokeRect(x, y, width, height); // 사람의 바운딩 박스 그리기
                 }
