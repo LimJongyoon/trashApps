@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Lunch Slot Machine</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000; /* 어두운 슬롯머신 배경 */
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+        }
+
+        h1 {
+            font-size: 8vw; /* 모바일에 맞게 반응형 폰트 크기 */
+            color: #ffdf00;
+            margin-bottom: 10vh;
+            text-shadow: 0 0 10px #ffdf00, 0 0 20px #ff6347, 0 0 30px #ff4500;
+            animation: glow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px #ffdf00, 0 0 20px #ff6347, 0 0 30px #ff4500; }
+            50% { text-shadow: 0 0 20px #ffdf00, 0 0 30px #ff4500, 0 0 40px #ff6347; }
+            100% { text-shadow: 0 0 10px #ffdf00, 0 0 20px #ff6347, 0 0 30px #ff4500; }
+        }
+
+        #slotMachine {
+            font-size: 12vw; /* 모바일에 맞는 크기 */
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(145deg, #ff4500, #ff6347);
+            border: 5px solid #ffdf00;
+            border-radius: 25px;
+            width: 80vw; /* 화면 너비에 맞게 조정 */
+            height: 20vh; /* 화면 높이에 맞게 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 69, 0, 0.7);
+            margin-bottom: 10vh;
+            letter-spacing: 2vw;
+            animation: slotSpin 1.5s ease-in-out infinite;
+        }
+
+        @keyframes slotSpin {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        #result {
+            font-size: 5vw; /* 반응형 폰트 */
+            font-weight: bold;
+            color: #ff4500;
+            margin-top: 5vh;
+            text-shadow: 0px 0px 10px #ff6347;
+        }
+
+        #spinButton {
+            padding: 4vh 10vw;
+            font-size: 6vw;
+            color: white;
+            background: linear-gradient(145deg, #ff4500, #ff6347);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 0 15px #ff6347, 0 0 25px #ff4500, 0 0 35px rgba(255, 99, 71, 0.7);
+        }
+
+        #spinButton:active {
+            background-color: #ff4500;
+            transform: translateY(3px); /* 클릭 시 살짝 눌리는 효과 */
+        }
+
+        #spinButton:hover {
+            background-color: #ff6347;
+        }
+
+        .slotWrapper {
+            background-color: #000;
+            padding: 10vh 5vw;
+            border-radius: 40px;
+            box-shadow: 0px 10px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes flash {
+            0%, 100% { text-shadow: 0px 0px 10px #fff, 0px 0px 20px #ff4500; }
+            50% { text-shadow: 0px 0px 20px #fff, 0px 0px 30px #ff4500; }
+        }
+
+    </style>
+</head>
+<body>
+
+<h1>What's for Lunch?</h1>
+
+<div class="slotWrapper">
+    <div id="slotMachine">???</div>
+</div>
+
+<button id="spinButton">Spin the Wheel</button>
+<div id="result"></div>
+
+<script>
+    const menuItems = [
+                       "Burger King", "Taco Bell",
+                             "Wendy's", "Dunkin'", "Chick-fil-A", "Domino's Pizza", "Pizza Hut",
+                             "KFC", "Sonic Drive-In", "Arby's", "Chipotle Mexican Grill", "Papa John's",
+                             "Little Caesars", "Five Guys", "Jack in the Box", "Popeyes", "Raising Cane's",
+                             "Jersey Mike's", "Wingstop", "Krispy Kreme", "Panera Bread", "The Cheesecake Factory",
+                             "Red Robin", "Applebee's", "Chili's", "Buffalo Wild Wings", "Olive Garden",
+                             "Red Lobster", "Outback Steakhouse", "Texas Roadhouse", "TGI Friday's", "IHOP",
+                             "Denny's", "Cracker Barrel", "Waffle House", "P.F. Chang's", "Moe's Southwest Grill",
+                             "Dairy Queen", "Blaze Pizza",
+                             "Grilled Salmon", "Beef Brisket", "Chicken Marsala", "Beef Burrito Bowl", "Tuna Melt",
+                             "Egg Salad Sandwich", "Barbecue Pulled Chicken", "Chicken Fajitas", "Lentil Soup", "Grilled Shrimp Skewers",
+                             "Beef Enchiladas", "Steak Tacos", "Turkey Meatballs", "Chicken Quesadilla", "Spinach and Feta Wrap",
+                             "Bacon Cheeseburger", "Greek Salad", "Chicken Tortilla Soup", "Margherita Flatbread", "Tuna Poke Bowl",
+                             "Korean BBQ Short Ribs", "BBQ Chicken Pizza", "Stuffed Bell Peppers", "Lamb Gyro", "Chicken Tikka Masala",
+                             "Vegetable Curry", "Salmon Caesar Salad", "Meatloaf", "Spaghetti Carbonara", "Fish Burrito",
+                             "Turkey Wrap", "Portobello Mushroom Burger", "Fried Catfish", "Broccoli Cheddar Soup", "Shrimp Scampi",
+                             "Eggplant Parmesan", "French Onion Soup", "Turkey Avocado Sandwich", "Chicken and Waffles", "Seafood Gumbo",
+                             "Spinach Salad with Strawberries", "Pork Tacos", "Shrimp Fried Rice", "Caprese Sandwich", "Buffalo Chicken Wrap",
+                             "Chicken Souvlaki", "Turkey Chili", "Corned Beef Sandwich", "Shrimp Po' Boy", "Baked Salmon",
+                             "Beef Lasagna", "Turkey Bacon Club", "Salmon Avocado Roll", "Steak Salad", "Black Bean Soup",
+                             "Chicken Pot Pie", "Chicken Satay", "Fried Calamari", "BBQ Pulled Pork", "Beef and Broccoli",
+                             "Chicken Caesar Salad", "Pasta Primavera", "Clam Linguine", "Falafel Wrap", "Chili Cheese Fries",
+                             "Turkey Reuben", "Jerk Pork", "Chicken Stir Fry", "Fish Tostadas", "Grilled Halibut",
+                             "Vegetable Soup", "Brisket Sandwich", "Zucchini Noodles", "Shrimp Alfredo", "Tofu Stir Fry",
+                             "Thai Red Curry", "Stuffed Cabbage Rolls", "Brussels Sprouts Salad", "Pulled Pork Sliders", "Coconut Shrimp",
+                             "BBQ Chicken Wrap", "Teriyaki Salmon", "Mahi Mahi Tacos", "Chicken Pho", "Pork Schnitzel",
+                             "Smoked Turkey Sandwich", "Beef Empanadas", "Chicken Gyro", "Avocado Bacon Burger", "Veggie Stir Fry",
+                             "Shrimp Louie Salad", "Caesar Wrap", "Lentil Chili", "Pork Belly Tacos", "Soba Noodle Salad",
+                              "Beef Shawarma", "Tofu Tacos", "Crab Cakes", "Bison Burger", "Thai Basil Chicken",
+                              "Pumpkin Soup", "Mussels Marinara", "Chicken Katsu", "Grilled Tuna Steak", "Tortilla Soup",
+                              "Cheeseburger", "Tacos", "Pizza", "Chicken Sandwich", "Caesar Salad", "Grilled Cheese",
+                              "Chicken Wrap", "Burrito", "Sushi", "Pasta", "BBQ Ribs", "Hot Dogs", "Steak",
+                              "Fried Chicken", "Shrimp Tacos", "Veggie Burger", "Philly Cheesesteak", "Clam Chowder",
+                              "Fish and Chips", "Mac and Cheese", "Chicken Alfredo", "Pulled Pork Sandwich", "Pad Thai",
+                              "Turkey Club", "Beef Stir Fry", "Quesadilla", "Fried Rice", "Ramen", "Chicken Tenders",
+                              "Falafel", "Shawarma", "Banh Mi", "Lobster Roll", "Gyro", "Pizza Bagels", "Spaghetti",
+                              "Beef Tacos", "Chicken Parmesan", "Mushroom Risotto", "Cobb Salad", "Pancakes",
+                              "Eggs Benedict", "French Toast", "Bagel with Lox", "Waffles", "Omelette", "Croissant Sandwich",
+                              "Frittata", "Avocado Toast", "Smoothie Bowl", "Breakfast Burrito", "BLT Sandwich",
+                              "Club Sandwich", "Reuben Sandwich", "Grilled Chicken Salad", "Cuban Sandwich",
+                              "Buffalo Wings", "Turkey Burger", "Seafood Paella", "Baked Ziti", "Lasagna", "Carbonara",
+                              "Margarita Pizza", "BBQ Chicken Pizza", "Mushroom Pizza", "Pepperoni Pizza", "Tuna Salad",
+                              "Chicken Caesar Wrap", "Chicken Pita", "Meatball Sub", "Chili", "French Dip Sandwich",
+                              "Miso Soup", "Tom Yum Soup", "Sashimi", "Teriyaki Chicken", "Spring Rolls", "Dim Sum",
+                              "Pho", "Beef Noodle Soup", "Kimchi Fried Rice", "Bulgogi", "Jerk Chicken", "Fajitas",
+                              "Tandoori Chicken", "Biryani", "Dumplings", "Pork Belly", "Chimichanga", "Enchiladas",
+                              "Lamb Chops", "Chicken Shawarma", "Vegetable Stir Fry", "Tofu Salad", "Cauliflower Tacos",
+                              "Fish Tacos", "Quinoa Salad", "Caprese Salad", "Spinach Quiche", "Hummus Plate", "Chickpea Salad"
+    ];
+
+    const spinButton = document.getElementById('spinButton');
+    const slotMachine = document.getElementById('slotMachine');
+    const result = document.getElementById('result');
+
+    spinButton.addEventListener('click', () => {
+        // 버튼 비활성화
+        spinButton.disabled = true;
+        let i = 0;
+        const randomIndex = Math.floor(Math.random() * menuItems.length);
+        
+        // 슬롯머신 애니메이션
+        const spinInterval = setInterval(() => {
+            slotMachine.textContent = menuItems[Math.floor(Math.random() * menuItems.length)];
+            i++;
+            if (i > 30) { // 30번 애니메이션 후 결과 고정
+                clearInterval(spinInterval);
+                result.textContent = `Or, how about this?: ${menuItems[randomIndex]}`;
+                result.style.animation = 'flash 1s ease-in-out infinite';
+                spinButton.disabled = false; // 버튼 다시 활성화
+            }
+        }, 100); // 100ms 간격으로 변경
+    });
+</script>
+
+</body>
+</html>
