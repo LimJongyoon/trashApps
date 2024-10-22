@@ -20,28 +20,41 @@
             font-size: 24px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .button-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             margin-bottom: 20px;
         }
 
         .button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
+            padding: 10px 12px; /* Reduced size */
+            background-color: #80B3FF; /* Pastel blue for left button */
+            color: black;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none;
             text-align: center;
+            margin: 0 10px; /* Margin between buttons */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+            flex: 1; /* Equal width for buttons */
         }
 
         .button:hover {
-            background-color: #45a049;
+            background-color: #6699FF; /* Darker pastel blue on hover */
+            transform: translateY(-2px); /* Lift effect on hover */
+        }
+
+        .button:nth-child(2) { /* Second button */
+            background-color: #FFCC80; /* Pastel pink for right button */
+        }
+
+        .button:nth-child(2):hover {
+            background-color: #FFB74D; /* Darker pastel pink on hover */
         }
 
         .search-container {
@@ -141,6 +154,18 @@
 <body>
 
     <div class="title">TrashApps</div>
+    
+    <div class="button-container">
+        <a href="appDownloadGuide.html" class="button">
+            How to Install<br>
+            <span style="font-size: 22px;">📥❓</span>
+        </a>
+        <a href="https://buymeacoffee.com/trashapps" class="button">
+            Support Us <br>plz!!
+            <span style="font-size: 22px;">🚀💖</span>
+        </a>
+
+    </div>
 
     <div class="search-container">
         <input type="text" id="search-bar" class="search-bar" placeholder="🔍 Search by number or title..." onkeyup="searchApps()">
