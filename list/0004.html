@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Camera App</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        #container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+        }
+        #camera {
+            width: 100%;
+            height: auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        #translatedText {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: red;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        select {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Translate Through Camera</h1>
+<select id="sourceLang">
+    <option value="en">English</option>
+    <option value="ko">Korean</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+</select>
+<select id="targetLang">
+    <option value="en">English</option>
+    <option value="ko">Korean</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+</select>
+
+<div id="container">
+    <video id="camera" autoplay playsinline></video>
+    <div id="translatedText"></div>
+    <canvas id="canvas" style="display: none;"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
+
+<script>
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const translatedText = document.getElementById('translatedText');
+    const sourceLang = document.getElementById('sourceLang');
+    const targetLang = document.getElementById('targetLang');
+
+    // 카메라 시작
+    async function startCamera() {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = stream;
+    }
+
+    // 비디오에서 이미지를 캡처하여 텍스트 추출
+    async function captureAndTranslateText() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Tesseract.js로 텍스트 인식
+        const { data: { text } } = await Tesseract.recognize(canvas, sourceLang.value);
+
+        if (text) {
+            // 번역 API 호출
+            fetch(`https://libretranslate.com/translate`, {
+                method: "POST",
+                body: JSON.stringify({
+                    q: text,
+                    source: sourceLang.value,
+                    target: targetLang.value,
+                    format: "text"
+                }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                translatedText.innerText = data.translatedText; // 번역된 텍스트 표시
+            });
+        }
+    }
+
+    // 5초마다 텍스트 추출 및 번역
+    startCamera().then(() => {
+        setInterval(captureAndTranslateText, 5000); // 매 5초마다 캡처 및 번역
+    });
+</script>
+
+</body>
+</html>
