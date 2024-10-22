@@ -9,6 +9,17 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
     <style>
+
+        .logo-container {
+            text-align: center; /* Center the logo */
+            margin-bottom: 10px;
+        }
+
+        .logo-container img {
+            width: 40%; /* Adjust width according to your layout */
+            max-width: 300px; /* Set a maximum width */
+        }
+        
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
@@ -78,7 +89,7 @@
         .search-container {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .search-bar {
@@ -171,8 +182,11 @@
 </head>
 <body>
 
-    <div class="title">TrashApps</div>
-    
+    <!--div class="title">TrashApps</div-->
+    <div class="logo-container">
+        <img src="logo/logow.png" alt="TrashApps Logo">
+    </div>
+
     <div class="button-container">
         <a href="appDownloadGuide.html" class="button">
             How to Install<br>
