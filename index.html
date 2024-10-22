@@ -31,9 +31,9 @@
 
         .button {
             padding: 10px 12px; /* Reduced size */
-            background-color: #80B3FF; /* Pastel blue for left button */
+            background-color: white; /* Pastel blue for left button */
             color: black;
-            border: none;
+            border: 0.1px solid #ccc;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none;
@@ -45,16 +45,32 @@
         }
 
         .button:hover {
-            background-color: #6699FF; /* Darker pastel blue on hover */
-            transform: translateY(-2px); /* Lift effect on hover */
+            background-color: #F0F0F0;
+            transform: translateY(-2px);
         }
 
-        .button:nth-child(2) { /* Second button */
-            background-color: #FFCC80; /* Pastel pink for right button */
+        .button:nth-child(2) {
+            background-color: white;
+            animation: sparkle 1s infinite alternate;
         }
 
         .button:nth-child(2):hover {
-            background-color: #FFB74D; /* Darker pastel pink on hover */
+            background-color: #F0F0F0;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                background-color: #FFFFFF;
+            }
+            80% {
+                background-color: #FFFFFF;
+            }
+            90% {
+                background-color: #ffffe6;
+            }
+            100% {
+                background-color: #FFFFFF;
+            }
         }
 
         .search-container {
