@@ -106,31 +106,29 @@
             background-color: #45a049;
         }
 
-        /* 화살표 스타일 추가 */
-        .arrow {
+        .center-arrow1 {
             position: absolute;
-            top: -35px;
+            top: 49%;
             left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-bottom: 30px solid red;
-            z-index: 10;
-        }
-
-        /* 중앙 화살표 추가 */
-        .center-arrow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            background-color: red;
+            width: 30px; /* 화살표 크기 조정 */
+            height: 30px; /* 화살표 크기 조정 */
+            background-color: white; /* 기본 색상 */
+            clip-path: polygon(50% 10%, 5% 100%, 95% 100%); /* 화살표 모양 */
             transform: translate(-50%, -50%);
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            display: none; /* 처음에는 숨김 */
             z-index: 15;
+        }
+        .center-arrow2 {
+            position: absolute;
+            top: 49%;
+            left: 50%;
+            width: 40px; /* 화살표 크기 조정 */
+            height: 40px; /* 화살표 크기 조정 */
+            background-color: black; /* 기본 색상 */
+            clip-path: polygon(50% -5%, -3% 100%, 103% 100%); /* 화살표 모양 */
+            transform: translate(-50%, -50%);
+            display: none; /* 처음에는 숨김 */
+            z-index: 14;
         }
 
     </style>
@@ -153,8 +151,8 @@
 </div>
 
 <div class="container">
-    <div class="arrow"></div> <!-- 화살표 추가 -->
-    <div class="center-arrow"></div> <!-- 중앙 화살표 추가 -->
+    <div class="center-arrow2"></div> <!-- 중앙 화살표 추가 -->
+    <div class="center-arrow1"></div> <!-- 중앙 화살표 추가 -->
     <div id="wheel"></div>
 </div>
 
@@ -163,6 +161,7 @@
 
 <script>
     let players = ['Player 1', 'Player 2'];
+    let totalRotation = 0; // 총 회전 각도 초기화
 
     function createWheel() {
         const wheel = document.getElementById('wheel');
@@ -170,44 +169,15 @@
 
         const segmentAngle = 360 / players.length;
 
-        if (players.length === 2) {
-            // 2명일 경우 데칼코마니 효과
-            const randomColor1 = `hsl(${Math.random() * 360}, 100%, 75%)`; // 플레이어 1의 랜덤 색상
-            const randomColor2 = `hsl(${Math.random() * 360}, 100%, 75%)`; // 플레이어 2의 랜덤 색상
-            for (let i = 0; i < 4; i++) {
-                const segment = document.createElement('div');
-                segment.classList.add('segment');
-                segment.style.transform = `rotate(${90 * i}deg)`;
-                segment.style.backgroundColor = i % 2 === 0 ? randomColor1 : randomColor2; // 두 색상 번갈아가며 사용
-                segment.innerHTML = `<span>${players[i % 2]}</span>`;
-                wheel.appendChild(segment);
-            }
-        } else if (players.length === 3) {
-            // 3명일 경우 번갈아 가면서 나오게, 색상 랜덤화
-            const colors = [
-                `hsl(${Math.random() * 360}, 100%, 75%)`,
-                `hsl(${Math.random() * 360}, 100%, 75%)`,
-                `hsl(${Math.random() * 360}, 100%, 75%)`
-            ];
-            for (let i = 0; i < 6; i++) {
-                const segment = document.createElement('div');
-                segment.classList.add('segment');
-                segment.style.transform = `rotate(${60 * i}deg)`;
-                segment.style.backgroundColor = colors[i % 3];
-                segment.innerHTML = `<span>${players[i % 3]}</span>`;
-                wheel.appendChild(segment);
-            }
-        } else {
-            // 4명 이상일 경우 360 / n으로 균일하게 나누기
-            players.forEach((player, index) => {
-                const segment = document.createElement('div');
-                segment.classList.add('segment');
-                segment.style.transform = `rotate(${segmentAngle * index}deg)`;
-                segment.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 75%)`;
-                segment.innerHTML = `<span>${player}</span>`;
-                wheel.appendChild(segment);
-            });
-        }
+        // 플레이어 수에 따라 세그먼트 생성
+        players.forEach((player, index) => {
+            const segment = document.createElement('div');
+            segment.classList.add('segment');
+            segment.style.transform = `rotate(${segmentAngle * index}deg)`;
+            segment.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 75%)`; // 랜덤 색상
+            segment.innerHTML = `<span>${player}</span>`;
+            wheel.appendChild(segment);
+        });
     }
 
     // Start 버튼 클릭 시 플레이어 입력 숨기고 휠 보이기
@@ -225,6 +195,8 @@
         if (players.length > 0) {
             document.getElementById('playerInput').style.display = 'none';
             document.getElementById('wheel').style.display = 'block';
+            document.querySelector('.center-arrow1').style.display = 'block'; // 중앙 화살표 보이기
+            document.querySelector('.center-arrow2').style.display = 'block'; // 중앙 화살표 보이기
             document.getElementById('spinButton').style.display = 'block';
             document.getElementById('editButton').style.display = 'block';
             createWheel();
@@ -245,9 +217,10 @@
     // Spin 버튼 클릭 시 휠 회전
     document.getElementById('spinButton').addEventListener('click', () => {
         const wheel = document.getElementById('wheel');
+        const randomDegree = Math.random() * 360; // 랜덤 각도
+        totalRotation += randomDegree + 1440; // 누적 회전
         wheel.style.transition = 'transform 4s ease-out';
-        const randomDegree = Math.random() * 360 + 1440; // 랜덤 각도 더하기
-        wheel.style.transform = `rotate(${randomDegree}deg)`;
+        wheel.style.transform = `rotate(${totalRotation}deg)`; // 총 회전 각도로 설정
     });
 
     // 플레이어 수정하기 버튼 클릭 시 초기 상태로 복귀
@@ -256,6 +229,9 @@
         document.getElementById('wheel').style.display = 'none';
         document.getElementById('spinButton').style.display = 'none';
         document.getElementById('editButton').style.display = 'none';
+        document.querySelector('.center-arrow1').style.display = 'none'; // 중앙 화살표 숨기기
+        document.querySelector('.center-arrow2').style.display = 'none'; // 중앙 화살표 숨기기
+        totalRotation = 0; // 회전 초기화
     });
 
 </script>
