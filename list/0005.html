@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1c1c1c, #333);
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        h1 {
+            font-size: 8vw;
+            margin-bottom: 5vh;
+            color: #ff6347;
+            text-shadow: 0px 0px 10px rgba(255, 99, 71, 0.8);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button {
+            width: 60vw;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 5vw;
+            border: none;
+            border-radius: 25px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            transform: translateY(3px);
+        }
+
+        #rpsImages {
+            display: flex;
+            justify-content: space-around;
+            width: 90vw;
+            margin-top: 10vh;
+            flex-wrap: wrap;
+        }
+
+        .rpsItem {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #fff; /* 박스 테두리 */
+            border-radius: 20px;
+            padding: 10px;
+            margin: 10px;
+            width: 100px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border-radius: 20px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .rpsLabel {
+            margin-top: 10px;
+            font-size: 4vw;
+            text-align: center;
+            color: white;
+        }
+
+        #result {
+            margin-top: 5vh;
+            font-size: 5vw;
+            text-align: center;
+        }
+
+        #startButton, #choosePlayerButton {
+            width: 60vw;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 5vw;
+            border: none;
+            border-radius: 25px;
+            background-color: #4CAF50;
+            color: white;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .rpsLabel {
+                font-size: 3.5vw;
+            }
+
+            .rpsItem {
+                width: 80px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Rock Paper Scissors</h1>
+
+<div id="playerSelection" class="container">
+    <div class="buttons">
+        <button onclick="setupGame(1)">1 Player</button>
+        <button onclick="setupGame(2)">2 Players</button>
+        <button onclick="setupGame(3)">3 Players</button>
+        <button onclick="setupGame(4)">4 Players</button>
+        <button onclick="setupGame(5)">5 Players</button>
+        <button onclick="setupGame(6)">6 Players</button>
+    </div>
+</div>
+
+<div id="gamePage" style="display: none;" class="container">
+    <div id="rpsImages"></div>
+    <div id="result"></div>
+    <div class="buttons">
+    <button id="startButton" onclick="startGame()">Start</button>
+    <button id="choosePlayerButton" onclick="choosePlayers()">Choose Players</button>
+    </div>
+</div>
+
+<script>
+    const choices = ['rock', 'paper', 'scissors'];
+    let currentPlayers = 0;
+
+    function setupGame(players) {
+        currentPlayers = players;
+        document.getElementById('playerSelection').style.display = 'none'; // 플레이어 선택 숨기기
+        document.getElementById('gamePage').style.display = 'block'; // 가위바위보 화면 표시
+        document.getElementById('rpsImages').innerHTML = ''; // 기존 이미지 삭제
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('startButton').style.display = 'block';
+        document.getElementById('startButton').textContent = 'Start'; // 버튼 초기 상태
+
+        // 플레이어 번호가 들어갈 박스 생성
+        for (let i = 0; i < players; i++) {
+            const rpsItem = document.createElement('div');
+            rpsItem.classList.add('rpsItem');
+            
+            const label = document.createElement('div');
+            label.classList.add('rpsLabel');
+            label.textContent = i + 1; // 플레이어 번호 표시
+            
+            rpsItem.appendChild(label);
+            document.getElementById('rpsImages').appendChild(rpsItem);
+        }
+    }
+
+    function startGame() {
+        document.getElementById('rpsImages').innerHTML = ''; // 기존 번호 삭제
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('startButton').style.display = 'none';
+
+        for (let i = 0; i < currentPlayers; i++) {
+            const rpsItem = document.createElement('div');
+            rpsItem.classList.add('rpsItem');
+            
+            const img = document.createElement('img');
+            img.src = `../images/QM.png`; // 기본 이미지 설정
+            img.classList.add('player' + i);
+            
+            const label = document.createElement('div');
+            label.classList.add('rpsLabel');
+            label.textContent = '?'; // 초기에 표시될 텍스트
+            
+            rpsItem.appendChild(img);
+            rpsItem.appendChild(label);
+            document.getElementById('rpsImages').appendChild(rpsItem);
+        }
+
+        setTimeout(() => {
+            for (let i = 0; i < currentPlayers; i++) {
+                const randomChoice = choices[Math.floor(Math.random() * choices.length)];
+                document.querySelector(`.player${i}`).src = `../images/${randomChoice}.png`;
+                document.querySelector(`.player${i}`).nextElementSibling.textContent = randomChoice.charAt(0).toUpperCase() + randomChoice.slice(1);
+            }
+            document.getElementById('result').innerHTML = ''; // 결과 출력 부분 비워둠
+            document.getElementById('startButton').style.display = 'block';
+            document.getElementById('startButton').textContent = 'Retry'; // 버튼이 Retry로 변경
+            document.getElementById('choosePlayerButton').style.display = 'block'; // 플레이어 선택 버튼 표시
+        }, 1000);
+    }
+
+    function choosePlayers() {
+        document.getElementById('gamePage').style.display = 'none';
+        document.getElementById('playerSelection').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
