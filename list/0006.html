@@ -90,7 +90,7 @@
             border: 1px solid #ccc;
         }
 
-        #spinButton {
+        #spinButton, #editButton {
             margin-top: 20px;
             padding: 15px 30px;
             font-size: 18px;
@@ -102,14 +102,14 @@
             display: none;
         }
 
-        #spinButton:hover {
+        #spinButton:hover, #editButton:hover {
             background-color: #45a049;
         }
 
         /* 화살표 스타일 추가 */
         .arrow {
             position: absolute;
-            top: -30px;
+            top: -35px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -117,6 +117,20 @@
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
             border-bottom: 30px solid red;
+            z-index: 10;
+        }
+
+        /* 중앙 화살표 추가 */
+        .center-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            transform: translate(-50%, -50%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 15;
         }
 
     </style>
@@ -140,10 +154,12 @@
 
 <div class="container">
     <div class="arrow"></div> <!-- 화살표 추가 -->
+    <div class="center-arrow"></div> <!-- 중앙 화살표 추가 -->
     <div id="wheel"></div>
 </div>
 
 <button id="spinButton">Spin the Wheel</button>
+<button id="editButton">플레이어 수정하기</button>
 
 <script>
     let players = ['Player 1', 'Player 2'];
@@ -155,24 +171,29 @@
         const segmentAngle = 360 / players.length;
 
         if (players.length === 2) {
-            // 2명일 경우 90도씩 4개 섹션, 색상 2개로 반반처럼 보이게 하기
+            // 2명일 경우 데칼코마니 효과
+            const randomColor1 = `hsl(${Math.random() * 360}, 100%, 75%)`; // 플레이어 1의 랜덤 색상
+            const randomColor2 = `hsl(${Math.random() * 360}, 100%, 75%)`; // 플레이어 2의 랜덤 색상
             for (let i = 0; i < 4; i++) {
                 const segment = document.createElement('div');
                 segment.classList.add('segment');
                 segment.style.transform = `rotate(${90 * i}deg)`;
-                const color = i % 2 === 0 ? 'hsl(120, 100%, 75%)' : 'hsl(240, 100%, 75%)'; // 색상 번갈아가며 사용
-                segment.style.backgroundColor = color;
+                segment.style.backgroundColor = i % 2 === 0 ? randomColor1 : randomColor2; // 두 색상 번갈아가며 사용
                 segment.innerHTML = `<span>${players[i % 2]}</span>`;
                 wheel.appendChild(segment);
             }
         } else if (players.length === 3) {
-            // 3명일 경우 60도씩 6개 섹션, 색상 3개로 120도처럼 보이게 하기
+            // 3명일 경우 번갈아 가면서 나오게, 색상 랜덤화
+            const colors = [
+                `hsl(${Math.random() * 360}, 100%, 75%)`,
+                `hsl(${Math.random() * 360}, 100%, 75%)`,
+                `hsl(${Math.random() * 360}, 100%, 75%)`
+            ];
             for (let i = 0; i < 6; i++) {
                 const segment = document.createElement('div');
                 segment.classList.add('segment');
                 segment.style.transform = `rotate(${60 * i}deg)`;
-                const color = i % 3 === 0 ? 'hsl(60, 100%, 75%)' : i % 3 === 1 ? 'hsl(180, 100%, 75%)' : 'hsl(300, 100%, 75%)'; // 색상 3개 번갈아가며 사용
-                segment.style.backgroundColor = color;
+                segment.style.backgroundColor = colors[i % 3];
                 segment.innerHTML = `<span>${players[i % 3]}</span>`;
                 wheel.appendChild(segment);
             }
@@ -193,9 +214,11 @@
     document.getElementById('startButton').addEventListener('click', () => {
         players = [];
         const playerInputs = document.querySelectorAll('#playerInput input');
-        playerInputs.forEach(input => {
+        playerInputs.forEach((input, index) => {
             if (input.value.trim()) {
                 players.push(input.value.trim());
+            } else {
+                players.push(`Player ${index + 1}`); // 입력이 없으면 기본값으로 Player 1, Player 2, ...
             }
         });
 
@@ -203,6 +226,7 @@
             document.getElementById('playerInput').style.display = 'none';
             document.getElementById('wheel').style.display = 'block';
             document.getElementById('spinButton').style.display = 'block';
+            document.getElementById('editButton').style.display = 'block';
             createWheel();
         }
     });
@@ -221,9 +245,17 @@
     // Spin 버튼 클릭 시 휠 회전
     document.getElementById('spinButton').addEventListener('click', () => {
         const wheel = document.getElementById('wheel');
-        const randomDegree = Math.random() * 360 + 1440; // 랜덤 각도 더하기
         wheel.style.transition = 'transform 4s ease-out';
+        const randomDegree = Math.random() * 360 + 1440; // 랜덤 각도 더하기
         wheel.style.transform = `rotate(${randomDegree}deg)`;
+    });
+
+    // 플레이어 수정하기 버튼 클릭 시 초기 상태로 복귀
+    document.getElementById('editButton').addEventListener('click', () => {
+        document.getElementById('playerInput').style.display = 'block';
+        document.getElementById('wheel').style.display = 'none';
+        document.getElementById('spinButton').style.display = 'none';
+        document.getElementById('editButton').style.display = 'none';
     });
 
 </script>
