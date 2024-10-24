@@ -134,6 +134,27 @@
                 height: 120px;
             }
         }
+
+        /* 승리한 박스에 빛나면서 떠오르는 애니메이션 */
+        @keyframes winnerGlow {
+            0% {
+                transform: translateY(0);
+                box-shadow: 0px 0px 10px rgba(255, 215, 0, 0.8);
+            }
+            50% {
+                transform: translateY(-10px);
+                box-shadow: 0px 0px 20px rgba(255, 215, 0, 1);
+            }
+            100% {
+                transform: translateY(0);
+                box-shadow: 0px 0px 10px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .winner {
+            animation: winnerGlow 1s ease-in-out infinite;
+            border-color: gold;
+        }
     </style>
 </head>
 <body>
@@ -192,6 +213,9 @@
         document.getElementById('result').innerHTML = '';
         document.getElementById('startButton').style.display = 'none';
 
+        let playerChoices = [];
+
+        // 플레이어들의 선택을 생성하고 화면에 표시
         for (let i = 0; i < currentPlayers; i++) {
             const rpsItem = document.createElement('div');
             rpsItem.classList.add('rpsItem');
@@ -207,15 +231,53 @@
             rpsItem.appendChild(img);
             rpsItem.appendChild(label);
             document.getElementById('rpsImages').appendChild(rpsItem);
+
+            // 플레이어 랜덤 선택 저장
+            playerChoices[i] = choices[Math.floor(Math.random() * choices.length)];
         }
 
         setTimeout(() => {
+            // 승자 결정 규칙 구현
+            let winners = [];
+            let rockCount = playerChoices.filter(choice => choice === 'rock').length;
+            let paperCount = playerChoices.filter(choice => choice === 'paper').length;
+            let scissorsCount = playerChoices.filter(choice => choice === 'scissors').length;
+
+            // 플레이어 선택을 표시 (비기든 이기든 모두 표시)
             for (let i = 0; i < currentPlayers; i++) {
-                const randomChoice = choices[Math.floor(Math.random() * choices.length)];
-                document.querySelector(`.player${i}`).src = `../images/${randomChoice}.png`;
-                document.querySelector(`.player${i}`).nextElementSibling.textContent = randomChoice.charAt(0).toUpperCase() + randomChoice.slice(1);
+                document.querySelector(`.player${i}`).src = `../images/${playerChoices[i]}.png`;
+                document.querySelector(`.player${i}`).nextElementSibling.textContent = playerChoices[i].charAt(0).toUpperCase() + playerChoices[i].slice(1);
             }
-            document.getElementById('result').innerHTML = ''; // 결과 출력 부분 비워둠
+
+            // 플레이어가 1명일 경우 메시지 없이 승자 애니메이션만
+            if (currentPlayers === 1) {
+                document.querySelector(`.player0`).parentElement.classList.add('winner');
+            } else {
+                // 승자가 없는 비긴 경우 처리
+                if ((rockCount > 0 && paperCount > 0 && scissorsCount > 0) || (rockCount === currentPlayers || paperCount === currentPlayers || scissorsCount === currentPlayers)) {
+                    document.getElementById('result').textContent = 'It\'s a tie!';
+                } else {
+                    // 승자 결정 (가위-바위-보의 규칙에 맞게 처리)
+                    let winningChoice = '';
+                    if (rockCount > 0 && scissorsCount > 0 && paperCount === 0) {
+                        winningChoice = 'rock';
+                    } else if (paperCount > 0 && rockCount > 0 && scissorsCount === 0) {
+                        winningChoice = 'paper';
+                    } else if (scissorsCount > 0 && paperCount > 0 && rockCount === 0) {
+                        winningChoice = 'scissors';
+                    }
+
+                    // 승자 표시
+                    for (let i = 0; i < currentPlayers; i++) {
+                        if (playerChoices[i] === winningChoice) {
+                            winners.push(i);
+                            document.querySelector(`.player${i}`).parentElement.classList.add('winner');
+                        }
+                    }
+                    document.getElementById('result').textContent = `Winner: ${winningChoice.charAt(0).toUpperCase() + winningChoice.slice(1)}!`;
+                }
+            }
+
             document.getElementById('startButton').style.display = 'block';
             document.getElementById('startButton').textContent = 'Retry'; // 버튼이 Retry로 변경
             document.getElementById('choosePlayerButton').style.display = 'block'; // 플레이어 선택 버튼 표시
