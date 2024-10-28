@@ -1,10 +1,10 @@
 const CACHE_NAME = 'trash-apps-cache-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/favicons/android-chrome-192x192.png',
-    '/favicons/android-chrome-512x512.png'
-  ];  
+    '/trashApps/',
+    '/trashApps/index.html',
+    '/trashApps/favicons/android-chrome-192x192.png',
+    '/trashApps/favicons/android-chrome-512x512.png'
+];
 
 // 설치 이벤트 - 초기 캐싱
 self.addEventListener('install', (event) => {
