@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trash-apps-cache-v1';
+const CACHE_NAME = 'TrashApp 1.6.2'; // 버전 업데이트
 const urlsToCache = [
     '/trashApps/',
     '/trashApps/index.html',
@@ -6,12 +6,13 @@ const urlsToCache = [
     '/trashApps/favicons/android-chrome-512x512.png'
 ];
 
-// 설치 이벤트 - 초기 캐싱
+// 설치 이벤트 - 초기 캐싱 및 즉시 활성화
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(urlsToCache))
   );
+  self.skipWaiting(); // 설치 후 즉시 활성화
 });
 
 // 요청 인터셉트하여 캐시 사용
@@ -36,4 +37,5 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  self.clients.claim(); // 활성화 후 즉시 컨트롤
 });

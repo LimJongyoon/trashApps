@@ -3,8 +3,8 @@
     "short_name": "TrashApps",
     "start_url": "/trashApps/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#000000",
+    "background_color": "#f5f5f5",
+    "theme_color": "#f5f5f5",
     "icons": [
       {
         "src": "/trashApps/favicons/android-chrome-192x192.png",
