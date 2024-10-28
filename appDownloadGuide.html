@@ -130,8 +130,23 @@
        4. Enter a name and tap "Add".<br>
        5. You can now use it like an app from your home screen.</p>
 
+    <div class="qr-container">
+        <h3>Share with a Friend</h3>
+        <canvas id="qr-code"></canvas> <!-- QR code canvas -->
+        <p>Scan this QR code to easily share TrashApps with a friend!</p>
+    </div>
+
     <a href="index.html" class="button">Go to the Web Page</a>
 </div>
+
+<script>
+    // Generate QR code for the specific URL
+    const qr = new QRious({
+        element: document.getElementById('qr-code'),
+        value: 'https://limjongyoon.github.io/trashApps/',  // URL to be embedded in the QR code
+        size: 150                      // QR code size (adjust if needed)
+    });
+</script>
 
 </body>
 </html>
