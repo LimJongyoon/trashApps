@@ -58,6 +58,36 @@
     <canvas id="canvas" style="display: none;"></canvas>
 </div>
 
+<!-- 도네이션 팝업 모달 -->
+<div id="donationModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Support My Dream!</h2>
+        <p>I'm just a poor unemployed developer trying to chase my dreams. Your support means the world to me!</p>
+        <button id="acceptButton" onclick="window.open('https://buymeacoffee.com/trashapps', '_blank');">Yes, I Want to Help!</button>
+        <button id="declineButton" onclick="document.getElementById('donationModal').style.display='none';">No, Thanks</button>
+        <div id="impactMessage">Your generosity fuels my passion!</div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const modal = document.getElementById("donationModal");
+        modal.style.display = "block"; // 페이지 로드 시 모달 표시
+
+        // 모달 닫기
+        const span = document.getElementsByClassName("close")[0];
+        span.onclick = function() {
+            modal.style.display = "none";
+        };
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+    };
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
 
@@ -122,6 +152,7 @@
         setInterval(captureAndTranslateText, 5000); // 매 5초마다 캡처 및 번역
     });
 </script>
+
 
 </body>
 </html>
