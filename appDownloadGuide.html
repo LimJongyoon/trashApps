@@ -97,6 +97,7 @@
     <a href="#safari" class="nav-link"><img src="icons/safari-icon.png" alt=""></a>
     <a href="#samsung" class="nav-link"><img src="icons/samsung-icon.png" alt=""></a>
     <a href="#firefox" class="nav-link"><img src="icons/firefox-icon.png" alt=""></a>
+    <a href="#shareQR" class="nav-link"><img src="icons/shareQR-icon.png" alt=""></a>
 </div>
 
 <div class="container">
@@ -131,7 +132,7 @@
        5. You can now use it like an app from your home screen.</p>
 
     <div class="qr-container">
-        <h3>Share with a Friend</h3>
+        <h3 id="shareQR">Share with a Friend</h3>
         <canvas id="qr-code"></canvas> <!-- QR code canvas -->
         <p>Scan this QR code to easily share TrashApps with a friend!</p>
     </div>
@@ -139,12 +140,14 @@
     <a href="index.html" class="button">Go to the Web Page</a>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script> <!-- QRious library -->
 <script>
-    // Generate QR code for the specific URL
-    const qr = new QRious({
-        element: document.getElementById('qr-code'),
-        value: 'https://limjongyoon.github.io/trashApps/',  // URL to be embedded in the QR code
-        size: 150                      // QR code size (adjust if needed)
+    document.addEventListener('DOMContentLoaded', function() {
+        const qr = new QRious({
+            element: document.getElementById('qr-code'),
+            value: 'https://limjongyoon.github.io/trashApps/',  // URL to embed in the QR code
+            size: 200  // QR code size
+        });
     });
 </script>
 
