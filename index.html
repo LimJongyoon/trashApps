@@ -222,7 +222,10 @@
         }
 
         // Close modal and set 3-day delay if checkbox is checked
+        console.log("Script Loaded"); // 이 메시지가 표시되는지 확인
+
         function closeModal() {
+            console.log("closeModal called"); // closeModal 함수가 호출되는지 확인
             const modal = document.getElementById('donationModal');
             modal.style.display = 'none';
 
@@ -232,34 +235,38 @@
                 nextShowDate.setDate(nextShowDate.getDate() + 3);
                 localStorage.setItem('noShowUntil', nextShowDate.getTime());
 
-                // Log stored value to verify
                 console.log("Stored noShowUntil:", localStorage.getItem('noShowUntil'));
             }
         }
 
-        // Check on page load if modal should be displayed
         window.onload = function() {
+            console.log("Window Loaded"); // 페이지가 로드될 때 실행되는지 확인
+
             const noShowUntil = localStorage.getItem('noShowUntil');
             const now = new Date().getTime();
 
-            // Show modal if noShowUntil has expired or is not set
+            console.log("Loaded noShowUntil:", noShowUntil);  // localStorage에서 가져온 값 확인
+            console.log("Current Time:", now);  // 현재 시간 확인
+
             if (!noShowUntil || now > parseInt(noShowUntil, 10)) {
+                console.log("Modal should be displayed"); // 조건이 맞아 모달이 표시되는지 확인
                 document.getElementById('donationModal').style.display = 'block';
             }
 
-            // Close button for modal
             document.getElementsByClassName("close")[0].onclick = function() {
+                console.log("Close button clicked"); // 닫기 버튼이 클릭되는지 확인
                 document.getElementById("donationModal").style.display = "none";
             };
         };
 
-        // Close modal when clicking outside the modal content
         window.onclick = function(event) {
             const modal = document.getElementById("donationModal");
             if (event.target === modal) {
+                console.log("Outside modal clicked"); // 모달 외부 클릭 이벤트 확인
                 modal.style.display = "none";
             }
         };
+
     </script>
 
 </head>
