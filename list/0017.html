@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Dice Roller</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .input-area {
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .button {
+            padding: 17px;
+            font-size: 1.1rem;
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 8px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .button:hover {
+            background-color: #388e3c;
+        }
+
+        #diceContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .dice {
+            width: 100px;
+            height: 100px;
+            background-color: #e6e6fa;
+            border: 2px solid #2b362c;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .dice .icon {
+            font-size: 3rem;
+            transition: transform 0.5s ease;
+        }
+
+        .rotate {
+            transform: rotate(360deg);
+        }
+
+        .dice img {
+            width: 50%; /* 박스의 60% 크기로 이미지 설정 */
+            height: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Digital Dice Roller</h1>
+
+<div class="input-area">
+    <div class="input-field">
+        <button class="button" id="decreaseButton">-</button>
+        <span id="diceCount">1</span>
+        <button class="button" id="increaseButton">+</button>
+    </div>
+    <button class="button" id="rollButton">Roll Dice</button>
+</div>
+
+<div id="diceContainer"></div>
+
+<script>
+    const rollButton = document.getElementById("rollButton");
+    const diceCountDisplay = document.getElementById("diceCount");
+    const diceContainer = document.getElementById("diceContainer");
+    let diceCount = 1;
+
+    document.getElementById("increaseButton").addEventListener("click", function() {
+        if (diceCount < 10) {
+            diceCount++;
+            diceCountDisplay.textContent = diceCount;
+            updateDiceDisplay();
+        }
+    });
+
+    document.getElementById("decreaseButton").addEventListener("click", function() {
+        if (diceCount > 1) {
+            diceCount--;
+            diceCountDisplay.textContent = diceCount;
+            updateDiceDisplay();
+        }
+    });
+
+    function updateDiceDisplay() {
+        diceContainer.innerHTML = '';
+        for (let i = 0; i < diceCount; i++) {
+            const diceDiv = document.createElement('div');
+            diceDiv.classList.add('dice');
+
+            const icon = document.createElement('span');
+            icon.classList.add('icon');
+            icon.textContent = '🎲';
+
+            diceDiv.appendChild(icon);
+            diceContainer.appendChild(diceDiv);
+        }
+    }
+
+    rollButton.addEventListener("click", function() {
+        const diceDivs = document.querySelectorAll(".dice");
+        
+        diceDivs.forEach(diceDiv => {
+            const roll = Math.floor(Math.random() * 6) + 1;
+            let icon = diceDiv.querySelector('.icon');
+            
+            // 애니메이션 효과 추가
+            icon.classList.add("rotate");
+
+            // 일정 시간 후 결과 이미지 표시
+            setTimeout(() => {
+                icon.classList.remove("rotate");
+
+                if (icon.tagName === "SPAN") {
+                    icon.remove(); // 기존 아이콘 제거
+                    icon = document.createElement("img"); // 이미지 요소 생성
+                    diceDiv.appendChild(icon);
+                }
+
+                icon.src = `../images/dice${roll}.png`;
+            }, 500);
+        });
+    });
+
+    // 초기 주사위 디스플레이 설정
+    updateDiceDisplay();
+</script>
+
+</body>
+</html>
