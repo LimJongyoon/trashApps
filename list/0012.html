@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker with Image Pan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 6vw;
+            color: #4CAF50;
+            margin: 20px 0;
+            text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 400px;
+            width: 100%;
+            gap: 15px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .color-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            font-size: 1rem;
+            color: black;
+        }
+
+        .color-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Color Picker</h1>
+
+<div class="container">
+    <input type="file" id="imageInput" accept="image/*" onchange="loadImage()" />
+    <label class="button" for="imageInput">Upload Image</label>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="colorContainer"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const colorContainer = document.getElementById("colorContainer");
+
+    let img = new Image();
+    let imgLoaded = false;
+    let offsetX = 0, offsetY = 0;
+    let startX, startY, isDragging = false;
+
+    function loadImage() {
+        const fileInput = document.getElementById("imageInput");
+        const file = fileInput.files[0];
+        img = new Image();
+
+        img.onload = function() {
+            imgLoaded = true;
+            offsetX = 0; 
+            offsetY = 0;
+            drawImage();
+        };
+
+        img.src = URL.createObjectURL(file);
+    }
+
+    function drawImage() {
+        if (imgLoaded) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, offsetX, offsetY, img.width, img.height, 0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    canvas.addEventListener("mousedown", (event) => {
+        isDragging = true;
+        startX = event.clientX - offsetX;
+        startY = event.clientY - offsetY;
+    });
+
+    canvas.addEventListener("mousemove", (event) => {
+        if (isDragging) {
+            offsetX = event.clientX - startX;
+            offsetY = event.clientY - startY;
+            drawImage();
+        }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isDragging = false;
+    });
+
+    canvas.addEventListener("click", function(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) - offsetX;
+        const y = (event.clientY - rect.top) - offsetY;
+
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const rgb = `${pixel[0]}, ${pixel[1]}, ${pixel[2]}`;
+        const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+
+        displayColor(hex, rgb);
+    });
+
+    function displayColor(hex, rgb) {
+        colorContainer.innerHTML = "";
+        const colorBox = document.createElement("div");
+        colorBox.className = "color-box";
+
+        const colorPreview = document.createElement("div");
+        colorPreview.className = "color-preview";
+        colorPreview.style.backgroundColor = hex;
+
+        colorBox.innerHTML = `${hex} / rgb(${rgb})`;
+        colorBox.insertAdjacentElement("beforeend", colorPreview);
+        colorContainer.appendChild(colorBox);
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0")).join("");
+    }
+</script>
+
+</body>
+</html>
