@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16 Number Puzzle</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 6vw;
+            color: #4CAF50;
+            margin: 20px 0;
+            text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            width: 100%;
+            max-width: 300px;
+            aspect-ratio: 1;
+            margin-top: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #333;
+            background-color: #e6e6fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .tile.empty {
+            background-color: transparent;
+            cursor: default;
+            box-shadow: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .counter {
+            font-size: 1.2rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<h1>16 Number Puzzle</h1>
+
+<div class="container">
+    <div class="grid" id="grid">
+        <!-- JavaScript에서 타일이 동적으로 추가됩니다 -->
+    </div>
+    <div class="controls">
+        <div class="counter" id="moveCounter">Moves: 0</div>
+        <button class="button" onclick="resetGame()">Reset</button>
+    </div>
+</div>
+
+<script>
+    const grid = document.getElementById('grid');
+    const moveCounter = document.getElementById('moveCounter');
+    let tiles = [];
+    let emptyIndex = 15;
+    let moves = 0;
+
+    // 게임 초기화 함수
+    function initGame() {
+        tiles = Array.from({ length: 15 }, (_, i) => i + 1); // 1~15까지 타일 생성
+        tiles.push(null); // 빈 공간 추가
+        shuffleTiles();
+        renderGrid();
+        moves = 0;
+        updateMoveCounter();
+    }
+
+    // 타일 배열 섞기
+    function shuffleTiles() {
+        for (let i = tiles.length - 2; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+        }
+    }
+
+    // 그리드에 타일 그리기
+    function renderGrid() {
+        grid.innerHTML = '';
+        tiles.forEach((tile, index) => {
+            const tileElement = document.createElement('div');
+            tileElement.classList.add('tile');
+            if (tile !== null) {
+                tileElement.textContent = tile;
+                tileElement.addEventListener('click', () => moveTile(index));
+            } else {
+                tileElement.classList.add('empty');
+                emptyIndex = index;
+            }
+            grid.appendChild(tileElement);
+        });
+    }
+
+    // 타일 이동 함수
+    function moveTile(index) {
+        const row = Math.floor(index / 4);
+        const col = index % 4;
+        const emptyRow = Math.floor(emptyIndex / 4);
+        const emptyCol = emptyIndex % 4;
+
+        const isAdjacent = Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1;
+        if (isAdjacent) {
+            [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+            emptyIndex = index;
+            moves++;
+            updateMoveCounter();
+            renderGrid();
+        }
+    }
+
+    // 이동 카운터 업데이트
+    function updateMoveCounter() {
+        moveCounter.textContent = `Moves: ${moves}`;
+    }
+
+    // 게임 리셋 함수
+    function resetGame() {
+        initGame();
+    }
+
+    // 초기화 실행
+    initGame();
+</script>
+
+</body>
+</html>
