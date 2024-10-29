@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearby Cafes</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            font-size: 2rem;
+            margin-top: 15px;
+            font-weight: bold;
+            text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        #map {
+            width: 90%; /* 좌우 여백 추가 */
+            height: 80vh;
+            max-width: 900px; /* 큰 화면에서 넓이 제한 */
+            border-radius: 15px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* 부드러운 그림자 */
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Find Nearby Cafes</h1>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map').setView([0, 0], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    function findCafes() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                map.setView([lat, lon], 15);
+                L.marker([lat, lon]).addTo(map).bindPopup("You are here").openPopup();
+
+                fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node["amenity"="cafe"](around:1000,${lat},${lon});out;`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.elements.forEach(cafe => {
+                            L.marker([cafe.lat, cafe.lon]).addTo(map).bindPopup("Cafe nearby");
+                        });
+                    });
+            });
+        } else { alert("Geolocation is not supported by this browser."); }
+    }
+
+    findCafes();
+</script>
+</body>
+</html>

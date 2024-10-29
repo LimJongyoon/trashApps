@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #E3F2FD, #90CAF9);
+            color: #333;
+        }
+
+        h1 {
+            color: #1976D2;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #location {
+            font-size: 1.2rem;
+            color: #1976D2;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .weather-card {
+            width: 85%;
+            max-width: 400px;
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+            margin: 10px 0;
+        }
+
+        .temperature {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .details {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .forecast {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #333;
+        }
+
+        .forecast-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .forecast-temp {
+            display: flex;
+            font-weight: bold;
+            align-items: center;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Weather Forecast</h1>
+<p id="location">Fetching your location...</p>
+
+<div class="weather-card">
+    <div id="icon" class="weather-icon">🌤️</div>
+    <div id="temperature" class="temperature">--°C</div>
+    <div class="details">
+        <span id="humidity">Humidity: --%</span>
+        <span id="wind">Wind: -- km/h</span>
+    </div>
+    <div class="forecast" id="forecast">
+        <!-- 주간 예보 표시 영역 -->
+    </div>
+</div>
+
+<script>
+    async function fetchWeather(lat, lon) {
+        try {
+            // Open-Meteo API에서 현재 및 주간 날씨 정보를 가져옴
+            const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_min,temperature_2m_max&timezone=auto`);
+            const weatherData = await weatherResponse.json();
+            const weather = weatherData.current_weather;
+            const daily = weatherData.daily;
+
+            // 현재 날씨 표시
+            const temperature = weather.temperature;
+            const weatherCode = weather.weathercode;
+            const humidity = weather.relative_humidity;
+            const windspeed = weather.windspeed;
+            document.getElementById("temperature").innerText = `${temperature}°C`;
+            document.getElementById("humidity").innerText = `Humidity: ${humidity}%`;
+            document.getElementById("wind").innerText = `Wind: ${windspeed} km/h`;
+
+            // 날씨 상태 코드에 따른 아이콘
+            const iconElement = document.getElementById("icon");
+            if (weatherCode < 3) iconElement.innerText = "☀️"; // 맑음
+            else if (weatherCode < 6) iconElement.innerText = "🌤️"; // 구름 조금
+            else if (weatherCode < 9) iconElement.innerText = "🌧️"; // 비
+            else iconElement.innerText = "❄️"; // 눈
+
+            // 주간 날씨 예보 표시
+            const forecastElement = document.getElementById("forecast");
+            forecastElement.innerHTML = "";
+            for (let i = 1; i < 5; i++) {  // 다음 4일간 예보만 표시
+                const dayTempMin = daily.temperature_2m_min[i];
+                const dayTempMax = daily.temperature_2m_max[i];
+                const dayName = new Date(daily.time[i]).toLocaleDateString('en-US', { weekday: 'short' });
+                forecastElement.innerHTML += `
+                    <div class="forecast-day">
+                        <span>${dayName}</span>
+                        <span class="forecast-temp">${dayTempMax}°C / ${dayTempMin}°C</span>
+                    </div>
+                `;
+            }
+
+            // 위치 정보에서 도시 이름 가져오기
+            const locationResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`);
+            const locationData = await locationResponse.json();
+            const city = locationData.address.city || locationData.address.town || locationData.address.village || "Unknown Location";
+
+            document.getElementById("location").innerText = city;
+        } catch (error) {
+            document.getElementById("temperature").innerText = "--°C";
+            document.getElementById("humidity").innerText = "Data unavailable";
+            document.getElementById("wind").innerText = "Data unavailable";
+            document.getElementById("forecast").innerText = "Unable to fetch forecast";
+        }
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => fetchWeather(position.coords.latitude, position.coords.longitude),
+            () => {
+                document.getElementById("location").innerText = "Geolocation denied";
+            }
+        );
+    } else {
+        document.getElementById("location").innerText = "Geolocation not supported";
+    }
+</script>
+
+</body>
+</html>
