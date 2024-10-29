@@ -210,7 +210,7 @@
     </style>
 
     <script>
-        // index.html의 검색 기능
+        // Search function for index.html
         function searchApps() {
             const searchValue = document.getElementById('search-bar').value.toLowerCase();
             const apps = document.getElementsByClassName('app-item');
@@ -221,36 +221,39 @@
             }
         }
 
+        // Close modal and set 3-day delay if checkbox is checked
         function closeModal() {
             const modal = document.getElementById('donationModal');
             modal.style.display = 'none';
 
             const noShowForWeek = document.getElementById('noShowForWeek').checked;
             if (noShowForWeek) {
-                // 현재 날짜를 기준으로 일주일 뒤의 타임스탬프를 localStorage에 저장
                 const nextShowDate = new Date();
                 nextShowDate.setDate(nextShowDate.getDate() + 3);
                 localStorage.setItem('noShowUntil', nextShowDate.getTime());
+
+                // Log stored value to verify
+                console.log("Stored noShowUntil:", localStorage.getItem('noShowUntil'));
             }
         }
 
-        // 페이지 로드 시 모달 표시 여부 확인 및 표시
+        // Check on page load if modal should be displayed
         window.onload = function() {
             const noShowUntil = localStorage.getItem('noShowUntil');
             const now = new Date().getTime();
 
-            // 현재 시간이 저장된 일주일 후 날짜를 지났다면 모달을 표시
+            // Show modal if noShowUntil has expired or is not set
             if (!noShowUntil || now > parseInt(noShowUntil, 10)) {
-            document.getElementById('donationModal').style.display = 'block';
-        }
+                document.getElementById('donationModal').style.display = 'block';
+            }
 
-            // 모달 닫기 버튼 설정
+            // Close button for modal
             document.getElementsByClassName("close")[0].onclick = function() {
                 document.getElementById("donationModal").style.display = "none";
             };
         };
 
-        // 배경 클릭 시 모달 닫기
+        // Close modal when clicking outside the modal content
         window.onclick = function(event) {
             const modal = document.getElementById("donationModal");
             if (event.target === modal) {
@@ -258,6 +261,7 @@
             }
         };
     </script>
+
 </head>
 <body>
 
