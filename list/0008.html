@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Size Comparison</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: black;
+        }
+
+        /* 제목 스타일 상단 배치 및 크기 조정 */
+        h1 {
+            font-size: 6vw;
+            color: #4CAF50;
+            margin: 20px 0;
+            text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
+        }
+
+        /* 메인 컨테이너 스타일 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* 입력 그룹 스타일 */
+        .monitorConfig {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        label {
+            font-size: 1rem;
+        }
+
+        select {
+            padding: 5px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        /* 미리보기 영역 스타일 */
+        .monitorPreview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-top: 30px;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* 모니터 스타일 */
+        .monitor {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-size: 0.8rem;
+            border: 1px solid #333;
+            border-radius: 3px;
+            touch-action: none;
+        }
+
+        /* 색상 조절을 위한 클래스 */
+        .monitor.color1 { background-color: #e6e6fa; } /* 연한 보라색 */
+        .monitor.color2 { background-color: #f0e68c; } /* 연한 노란색 */
+        .monitor.color3 { background-color: #add8e6; } /* 연한 파란색 */
+    </style>
+</head>
+<body>
+
+<h1>Monitor Size Comparison</h1>
+
+<div class="container">
+    <!-- 모니터 설정 -->
+    <div class="monitorConfig">
+        <input type="checkbox" id="monitor1Check" onclick="toggleMonitor(1)">
+        <label for="monitor1Check">Monitor 1</label>
+        <select id="monitorSize1" onchange="updateMonitor(1)">
+            <option value="24" selected>24"</option>
+            <option value="27">27"</option>
+            <option value="32">32"</option>
+            <option value="40">40"</option>
+        </select>
+        <select id="aspectRatio1" onchange="updateMonitor(1)">
+            <option value="16x9" selected>16:9</option>
+            <option value="16x10">16:10</option>
+            <option value="4x3">4:3</option>
+            <option value="9x16">9:16</option>
+        </select>
+    </div>
+
+    <div class="monitorConfig">
+        <input type="checkbox" id="monitor2Check" onclick="toggleMonitor(2)">
+        <label for="monitor2Check">Monitor 2</label>
+        <select id="monitorSize2" onchange="updateMonitor(2)">
+            <option value="24" selected>24"</option>
+            <option value="27">27"</option>
+            <option value="32">32"</option>
+            <option value="40">40"</option>
+        </select>
+        <select id="aspectRatio2" onchange="updateMonitor(2)">
+            <option value="16x9" selected>16:9</option>
+            <option value="16x10">16:10</option>
+            <option value="4x3">4:3</option>
+            <option value="9x16">9:16</option>
+        </select>
+    </div>
+
+    <div class="monitorConfig">
+        <input type="checkbox" id="monitor3Check" onclick="toggleMonitor(3)">
+        <label for="monitor3Check">Monitor 3</label>
+        <select id="monitorSize3" onchange="updateMonitor(3)">
+            <option value="24" selected>24"</option>
+            <option value="27">27"</option>
+            <option value="32">32"</option>
+            <option value="40">40"</option>
+        </select>
+        <select id="aspectRatio3" onchange="updateMonitor(3)">
+            <option value="16x9" selected>16:9</option>
+            <option value="16x10">16:10</option>
+            <option value="4x3">4:3</option>
+            <option value="9x16">9:16</option>
+        </select>
+    </div>
+
+    <!-- 모니터 크기 비교 영역 -->
+    <div class="monitorPreview" id="monitorPreview">
+        <!-- 모니터 미리보기 요소는 JavaScript에서 동적으로 추가됩니다 -->
+    </div>
+</div>
+
+<script>
+    const monitorPreview = document.getElementById('monitorPreview');
+
+    // 드래그 상태를 추적할 변수
+    let dragItem = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // 모니터 체크박스 토글
+    function toggleMonitor(monitorNumber) {
+        const isChecked = document.getElementById(`monitor${monitorNumber}Check`).checked;
+        if (isChecked) {
+            createMonitor(monitorNumber);
+        } else {
+            removeMonitor(monitorNumber);
+        }
+    }
+
+    // 모니터 생성
+    function createMonitor(monitorNumber) {
+        const monitor = document.createElement('div');
+        monitor.id = `monitor${monitorNumber}`;
+        monitor.classList.add('monitor', `color${monitorNumber}`);
+        monitor.setAttribute('draggable', 'true');
+        
+        // 드래그 이벤트 리스너 추가
+        monitor.addEventListener('touchstart', startDrag);
+        monitor.addEventListener('touchmove', drag);
+        monitor.addEventListener('touchend', endDrag);
+
+        monitorPreview.appendChild(monitor);
+        updateMonitor(monitorNumber); // 인치와 비율을 업데이트하여 즉시 반영
+    }
+
+    // 모니터 제거
+    function removeMonitor(monitorNumber) {
+        const monitor = document.getElementById(`monitor${monitorNumber}`);
+        if (monitor) {
+            monitor.removeEventListener('touchstart', startDrag);
+            monitor.removeEventListener('touchmove', drag);
+            monitor.removeEventListener('touchend', endDrag);
+            monitorPreview.removeChild(monitor);
+        }
+    }
+
+    // 모니터 업데이트 (인치와 비율 반영)
+    function updateMonitor(monitorNumber) {
+        const size = document.getElementById(`monitorSize${monitorNumber}`).value;
+        const aspectRatio = document.getElementById(`aspectRatio${monitorNumber}`).value;
+        const monitor = document.getElementById(`monitor${monitorNumber}`);
+
+        if (monitor) {
+            // 인치에 따라 크기 조정 (기본 크기 비율)
+            let baseWidth = 150;
+            let width, height;
+
+            // 비율에 따라 크기 계산
+            if (aspectRatio === "16x9") {
+                width = baseWidth * (size / 40);
+                height = (width / 16) * 9;
+            } else if (aspectRatio === "16x10") {
+                width = baseWidth * (size / 40);
+                height = (width / 16) * 10;
+            } else if (aspectRatio === "4x3") {
+                width = baseWidth * (size / 40);
+                height = (width / 4) * 3;
+            } else if (aspectRatio === "9x16") {
+                height = baseWidth * (size / 40);
+                width = (height / 16) * 9;
+            }
+
+            monitor.style.width = `${width}px`;
+            monitor.style.height = `${height}px`;
+            monitor.innerText = `${size}" ${aspectRatio}`;
+        }
+    }
+
+    // 드래그 시작
+    function startDrag(event) {
+        dragItem = event.target;
+        const rect = dragItem.getBoundingClientRect();
+        offsetX = event.touches[0].clientX - rect.left;
+        offsetY = event.touches[0].clientY - rect.top;
+    }
+
+    // 드래그 중
+    function drag(event) {
+        if (dragItem) {
+            event.preventDefault();
+            const x = event.touches[0].clientX - offsetX;
+            const y = event.touches[0].clientY - offsetY;
+
+            dragItem.style.left = `${x}px`;
+            dragItem.style.top = `${y}px`;
+        }
+    }
+
+    // 드래그 종료
+    function endDrag() {
+        dragItem = null;
+    }
+</script>
+
+</body>
+</html>
