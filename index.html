@@ -210,7 +210,7 @@
     </style>
 
     <script>
-        // Search function for index.html
+        // Function to handle search functionality in index.html
         function searchApps() {
             const searchValue = document.getElementById('search-bar').value.toLowerCase();
             const apps = document.getElementsByClassName('app-item');
@@ -222,10 +222,7 @@
         }
 
         // Close modal and set 3-day delay if checkbox is checked
-        console.log("Script Loaded"); // 이 메시지가 표시되는지 확인
-
         function closeModal() {
-            console.log("closeModal called");
             const modal = document.getElementById('donationModal');
             modal.style.display = 'none';
 
@@ -233,43 +230,30 @@
             if (noShowForWeek) {
                 const nextShowDate = new Date();
                 nextShowDate.setDate(nextShowDate.getDate() + 3);
-                
-                // Set the noShowUntil in localStorage
                 localStorage.setItem('noShowUntil', nextShowDate.getTime());
-                
-                // Confirm the value was set in localStorage
-                console.log("Stored noShowUntil:", localStorage.getItem('noShowUntil'));
             }
         }
 
+        // Check on page load if modal should be displayed based on stored delay
         window.onload = function() {
-            console.log("Window Loaded"); // 페이지가 로드될 때 실행되는지 확인
-
             const noShowUntil = localStorage.getItem('noShowUntil');
             const now = new Date().getTime();
 
-            console.log("Loaded noShowUntil:", noShowUntil);  // localStorage에서 가져온 값 확인
-            console.log("Current Time:", now);  // 현재 시간 확인
-
             if (!noShowUntil || now > parseInt(noShowUntil, 10)) {
-                console.log("Modal should be displayed"); // 조건이 맞아 모달이 표시되는지 확인
                 document.getElementById('donationModal').style.display = 'block';
             }
 
-            document.getElementsByClassName("close")[0].onclick = function() {
-                console.log("Close button clicked"); // 닫기 버튼이 클릭되는지 확인
-                document.getElementById("donationModal").style.display = "none";
-            };
+            // Bind "X" close button to closeModal function
+            document.getElementsByClassName("close")[0].onclick = closeModal;
         };
 
+        // Close modal when clicking outside the modal content
         window.onclick = function(event) {
             const modal = document.getElementById("donationModal");
             if (event.target === modal) {
-                console.log("Outside modal clicked"); // 모달 외부 클릭 이벤트 확인
-                modal.style.display = "none";
+                closeModal();
             }
         };
-
     </script>
 
 </head>
@@ -529,7 +513,8 @@
             <p style="font-size: 14px;">All apps are free to use and open to modification.<br>
                 If you enjoy this app, please consider supporting its development. Just a little... please.</p> 
             <button id="acceptButton" onclick="window.open('https://buymeacoffee.com/trashapps', '_blank');">Donate Now</button>
-            <button id="declineButton" onclick="document.getElementById('donationModal').style.display='none';">Maybe Later</button>
+            <button id="declineButton" onclick="closeModal()">Maybe Later</button>
+
             <div>
                 <label style="font-size: 12px; color: #535353;">
                     <input type="checkbox" id="noShowForWeek"> Do not show for 3 days
