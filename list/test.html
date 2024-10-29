@@ -1,153 +1,527 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#f5f5f5"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator and Scanner</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <title>TrashApps</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f5f5f5">
+    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
     <style>
-        * {
-            box-sizing: border-box;
+        /* index.html의 스타일 */
+        .logo-container {
+            text-align: center; /* Center the logo */
+            margin-bottom: 10px;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f5f5f5;
+        .logo-container img {
+            width: 40%; /* Adjust width according to your layout */
+            max-width: 300px; /* Set a maximum width */
+        }
+        
+        body {
             font-family: Arial, sans-serif;
-            color: #333;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            color: #4CAF50;
-            margin-bottom: 20px;
-            text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
-        }
-
-        .input-area {
-            margin: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .input-field {
+            background-color: #f5f5f5;
+            margin: 0;
             padding: 10px;
-            font-size: 1rem;
-            border: 2px solid #000000; /* 파란색 경계 */
-            border-radius: 5px;
-            width: 250px;
-            color: #333;
         }
 
-        #qrCode {
-            margin: 20px;
-            padding: 10px;
-            border: 2px dashed #4CAF50; /* 파란색 대시 경계 */
-            border-radius: 10px;
-            width: 200px;
-            height: 200px;
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .button-container {
             display: flex;
             justify-content: center;
-            align-items: center;
-            background-color: #e6e6fa; /* 연한 보라색 배경 */
+            margin-bottom: 20px;
+            padding: 0 40px;
         }
 
         .button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            background-color: #abf0ad; /* 연한 초록색 */
+            font-size: 15px;
+            padding: 7px 5px; /* Reduced size */
+            background-color: white; /* Pastel blue for left button */
             color: black;
-            border: none;
+            border: 0.1px solid #ccc;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            text-align: center;
+            margin: 0 10px; /* Margin between buttons */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+            flex: 1; /* Equal width for buttons */
         }
 
         .button:hover {
-            background-color: #388e3c; /* 다크 그린 호버 */
+            background-color: #F0F0F0;
+            transform: translateY(-2px);
         }
 
-        #reader {
-            width: 300px;
-            height: 300px;
-            margin-top: 20px;
-            display: none; /* 초기에는 숨김 */
+        .button:nth-child(2) {
+            background-color: white;
+            animation: sparkle 1s infinite alternate;
         }
+
+        .button:nth-child(2):hover {
+            background-color: #F0F0F0;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                background-color: #FFFFFF;
+            }
+            80% {
+                background-color: #FFFFFF;
+            }
+            90% {
+                background-color: #ffffe6;
+            }
+            100% {
+                background-color: #FFFFFF;
+            }
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .search-bar {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .app-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .app-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .app-icon-container {
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+        }
+
+        .app-name-container {
+            position: absolute;
+            top: 0;
+            background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent white background */
+            width: 100%;
+            text-align: center;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 0px 0px; /* Reduce padding for a thinner background */
+        }
+
+        .app-name {
+            font-size: 14px;
+            color: black; /* Change text to black */
+        }
+
+        .app-description {
+            font-size: 12px; /* Fix description font size */
+            color: #333;
+            margin-top: 5px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #ffffff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: red;
+            cursor: pointer;
+        }
+        #acceptButton, #declineButton {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #acceptButton { background-color: #4CAF50; color: white; }
+        #acceptButton:hover { background-color: #45a049; }
+        #declineButton { background-color: #e6e6fa; color: rgb(0, 0, 0); }
+        #declineButton:hover { background-color: #b6b6d3; }
     </style>
+    <script>
+        // index.html의 검색 기능
+        function searchApps() {
+            const searchValue = document.getElementById('search-bar').value.toLowerCase();
+            const apps = document.getElementsByClassName('app-item');
+            for (let i = 0; i < apps.length; i++) {
+                const appName = apps[i].getElementsByClassName('app-name')[0].textContent.toLowerCase();
+                const appDescription = apps[i].getElementsByClassName('app-description')[0].textContent.toLowerCase();
+                apps[i].style.display = appName.includes(searchValue) || appDescription.includes(searchValue) ? 'block' : 'none';
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('donationModal');
+            modal.style.display = 'none';
+
+            const noShowForWeek = document.getElementById('noShowForWeek').checked;
+            if (noShowForWeek) {
+                // 현재 날짜를 기준으로 일주일 뒤의 타임스탬프를 localStorage에 저장
+                const nextShowDate = new Date();
+                nextShowDate.setDate(nextShowDate.getDate() + 3);
+                localStorage.setItem('noShowUntil', nextShowDate.getTime());
+            }
+        }
+
+        // 페이지 로드 시 모달 표시 여부 확인 및 표시
+        window.onload = function() {
+            const noShowUntil = localStorage.getItem('noShowUntil');
+            const now = new Date().getTime();
+
+            // 현재 시간이 저장된 일주일 후 날짜를 지났다면 모달을 표시
+            if (!noShowUntil || now > noShowUntil) {
+                document.getElementById('donationModal').style.display = 'block';
+            }
+
+            // 모달 닫기 버튼 설정
+            document.getElementsByClassName("close")[0].onclick = function() {
+                document.getElementById("donationModal").style.display = "none";
+            };
+        };
+
+        // 배경 클릭 시 모달 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById("donationModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    </script>
 </head>
 <body>
 
-<h1>QR Code Generator and Scanner</h1>
+    <div class="logo-container">
+        <img src="logo/logow.png" alt="TrashApps Logo">
+    </div>
+    <div class="button-container">
+        <a href="appDownloadGuide.html" class="button">How to Install<br><span style="font-size: 22px;">📥❓</span></a>
+        <a href="https://buymeacoffee.com/trashapps" class="button">Donate to Us <br>plz!!<span style="font-size: 22px;">🚀💖</span></a>
+    </div>
+    <div class="search-container">
+        <input type="text" id="search-bar" class="search-bar" placeholder="🔍 Search by number or title..." onkeyup="searchApps()">
+    </div>
+    <!-- 앱 리스트 구성 -->
+    <div class="app-container">
+                                                                  
+        <div class="app-item">
+            <a href="list/0017.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0017.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0017</span>
+                    </div>
+                </div>
+                <div class="app-description">Digital Dice Roller</div>
+            </a>
+        </div> 
+                                                          
+        <div class="app-item">
+            <a href="list/0016.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0016.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0016</span>
+                    </div>
+                </div>
+                <div class="app-description">QR Code Generator</div>
+            </a>
+        </div> 
+                                                  
+        <div class="app-item">
+            <a href="list/0015.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0015.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0015</span>
+                    </div>
+                </div>
+                <div class="app-description">Tic Tac Toe</div>
+            </a>
+        </div>   
+                                                           
+        <div class="app-item">
+            <a href="list/0014.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0014.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0014</span>
+                    </div>
+                </div>
+                <div class="app-description">Current Location Weather Forecast</div>
+            </a>
+        </div>   
+                             
+        <div class="app-item">
+            <a href="list/0013.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0013.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0013</span>
+                    </div>
+                </div>
+                <div class="app-description">Find Nearby Cafes</div>
+            </a>
+        </div>   
+          
+        <div class="app-item">
+            <a href="list/0012.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0012.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0012</span>
+                    </div>
+                </div>
+                <div class="app-description">Color Picker HEX/RGB</div>
+            </a>
+        </div>   
 
-<div class="input-area">
-    <input type="text" id="qrInput" class="input-field" placeholder="Enter URL or Text">
-    <button class="button" id="generateButton">Generate QR Code</button>
-</div>
+        <div class="app-item">
+            <a href="list/0011.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0011.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0011</span>
+                    </div>
+                </div>
+                <div class="app-description">Signature Download Maker</div>
+            </a>
+        </div>      
+                        
+        <div class="app-item">
+            <a href="list/0010.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0010.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0010</span>
+                    </div>
+                </div>
+                <div class="app-description">35(36) Number Sliding Puzzle</div>
+            </a>
+        </div>
+                        
+        <div class="app-item">
+            <a href="list/0009.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0009.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0009</span>
+                    </div>
+                </div>
+                <div class="app-description">15(16) Number Sliding Puzzle</div>
+            </a>
+        </div>
+                
+        <div class="app-item">
+            <a href="list/0008.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0008.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0008</span>
+                    </div>
+                </div>
+                <div class="app-description">Monitor Size Layout Comparison Simulator</div>
+            </a>
+        </div>
 
-<div id="qrCode"></div>
+        <div class="app-item">
+            <a href="list/0007.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0007.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0007</span>
+                    </div>
+                </div>
+                <div class="app-description">Donation Prompt Popup</div>
+            </a>
+        </div>
+        
+        <div class="app-item">
+            <a href="list/0006.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0006.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0006</span>
+                    </div>
+                </div>
+                <div class="app-description">Spin Wheel of Decision</div>
+            </a>
+        </div>
+        
+        <div class="app-item">
+            <a href="list/0005.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0005.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0005</span>
+                    </div>
+                </div>
+                <div class="app-description">Rock Paper Scissors</div>
+            </a>
+        </div>
+        
+        <div class="app-item">
+            <a href="list/0004.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0004.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0004</span>
+                    </div>
+                </div>
+                <div class="app-description">Lunch decide slot machine</div>
+            </a>
+        </div>
 
-<div id="reader"></div>
+        <div class="app-item">
+            <a href="list/0003.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0003.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0003</span>
+                    </div>
+                </div>
+                <div class="app-description">Horn for crowded situations</div>
+            </a>
+        </div>
 
-<button class="button" id="scanButton">Start Scanning</button>
+        <div class="app-item">
+            <a href="list/0002.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0002.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0002</span>
+                    </div>
+                </div>
+                <div class="app-description">Webtoon viewer</div>
+            </a>
+        </div>
 
-<script>
-    // QR 코드 생성
-    document.getElementById("generateButton").addEventListener("click", function() {
-        const qrInput = document.getElementById("qrInput").value;
-        if (qrInput) {
-            $('#qrCode').empty(); // 이전 QR 코드 제거
-            $('#qrCode').qrcode({
-                width: 200,
-                height: 200,
-                text: qrInput
-            });
-        } else {
-            alert("Please enter a URL or text.");
-        }
-    });
+        <div class="app-item">
+            <a href="list/0002pc.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0002PC.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0002 PC</span>
+                    </div>
+                </div>
+                <div class="app-description">Webtoon viewer for PC</div>
+            </a>
+        </div>
 
-    // QR 코드 스캔
-    const html5QrCode = new Html5Qrcode("reader");
+        <div class="app-item">
+            <a href="list/0001.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/0001.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">0001</span>
+                    </div>
+                </div>
+                <div class="app-description">Camera people=shit</div>
+            </a>
+        </div>
+        
+        <div class="app-item">
+            <a href="list/test.html">
+                <div class="app-icon-container">
+                    <div class="app-icon" style="background-image: url('icons/test.webp');"></div>
+                    <div class="app-name-container">
+                        <span class="app-name">test</span>
+                    </div>
+                </div>
+                <div class="app-description">This app is currently in testing</div>
+            </a>
+        </div>
 
-    document.getElementById("scanButton").addEventListener("click", function() {
-        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-            alert(`QR Code decoded: ${decodedText}`);
-            html5QrCode.stop();
-            document.getElementById("reader").style.display = "none"; // 스캔 후 숨김
-        };
+    </div>
 
-        const qrCodeErrorCallback = (errorMessage) => {
-            // QR 코드 인식 실패시 동작
-        };
-
-        html5QrCode.start(
-            { facingMode: "environment" }, // 후면 카메라 사용
-            {
-                fps: 10,
-                qrbox: { width: 250, height: 250 } // QR 코드 영역 크기
-            },
-            qrCodeSuccessCallback,
-            qrCodeErrorCallback)
-        .then(() => {
-            document.getElementById("reader").style.display = "block"; // 스캔 시작 시 보이기
-        })
-        .catch(err => {
-            console.error(err);
-        });
-    });
-</script>
+    <!-- Donation Modal (0007.html의 내용) -->
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>
+                <img src="favicons/apple-touch-icon.png" alt="App Logo" style="width: 32px; height: 32px; vertical-align: middle; padding-bottom: 5px; margin-right: 2px;">
+                Notice
+            </h2>
+            <p style="font-size: 14px;">All apps are free to use and open to modification.<br>
+                If you enjoy this app, please consider supporting its development. Just a little... please.</p> 
+            <button id="acceptButton" onclick="window.open('https://buymeacoffee.com/trashapps', '_blank');">Donate Now</button>
+            <button id="declineButton" onclick="document.getElementById('donationModal').style.display='none';">Maybe Later</button>
+            <div>
+                <label style="font-size: 12px; color: #535353;">
+                    <input type="checkbox" id="noShowForWeek"> Do not show for 3 days
+                </label>
+             </div>
+        </div>
+    </div>
 
 </body>
 </html>
