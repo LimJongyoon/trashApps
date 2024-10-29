@@ -225,7 +225,7 @@
         console.log("Script Loaded"); // 이 메시지가 표시되는지 확인
 
         function closeModal() {
-            console.log("closeModal called"); // closeModal 함수가 호출되는지 확인
+            console.log("closeModal called");
             const modal = document.getElementById('donationModal');
             modal.style.display = 'none';
 
@@ -233,8 +233,11 @@
             if (noShowForWeek) {
                 const nextShowDate = new Date();
                 nextShowDate.setDate(nextShowDate.getDate() + 3);
+                
+                // Set the noShowUntil in localStorage
                 localStorage.setItem('noShowUntil', nextShowDate.getTime());
-
+                
+                // Confirm the value was set in localStorage
                 console.log("Stored noShowUntil:", localStorage.getItem('noShowUntil'));
             }
         }
