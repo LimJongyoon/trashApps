@@ -2,175 +2,167 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#f5f5f5"> 
+    <meta name="theme-color" content="#f5f5f5">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Forecast</title>
+    <title>Tic Tac Toe</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: linear-gradient(135deg, #E3F2FD, #90CAF9);
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
             color: #333;
         }
 
         h1 {
-            color: #1976D2;
             font-size: 2.5rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
 
-        #location {
-            font-size: 1.2rem;
-            color: #1976D2;
-            font-weight: 500;
-            margin-bottom: 15px;
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px;
         }
 
-        .weather-card {
-            width: 85%;
-            max-width: 400px;
-            background-color: #fff;
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        .cell {
+            width: 100px;
+            height: 100px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 10px;
-        }
-
-        .weather-icon {
-            font-size: 3rem;
-            margin: 10px 0;
-        }
-
-        .temperature {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .details {
-            display: flex;
-            gap: 15px;
-            width: 100%;
             justify-content: center;
+            font-size: 3rem;
+            color: #000000;
+            background-color: #d0d0d0;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .cell:hover {
+            background-color: #e6e6fa;
+        }
+
+        #status {
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
             font-size: 1rem;
-            color: #555;
+            background-color: #abf0ad;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
         }
 
-        .forecast {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            color: #333;
-        }
-
-        .forecast-day {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .forecast-temp {
-            display: flex;
-            font-weight: bold;
-            align-items: center;
-            margin-top: 3px;
+        .button:hover {
+            background-color: #388e3c;
         }
     </style>
 </head>
 <body>
 
-<h1>Weather Forecast</h1>
-<p id="location">Fetching your location...</p>
-
-<div class="weather-card">
-    <div id="icon" class="weather-icon">🌤️</div>
-    <div id="temperature" class="temperature">--°C</div>
-    <div class="details">
-        <span id="humidity">Humidity: --%</span>
-        <span id="wind">Wind: -- km/h</span>
-    </div>
-    <div class="forecast" id="forecast">
-        <!-- 주간 예보 표시 영역 -->
-    </div>
-</div>
+<h1>Tic Tac Toe</h1>
+<div id="gameBoard"></div>
+<div id="status">Current Player: X</div>
+<button class="button" id="resetButton">Reset Game</button>
 
 <script>
-    async function fetchWeather(lat, lon) {
-        try {
-            // Open-Meteo API에서 현재 및 주간 날씨 정보를 가져옴
-            const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_min,temperature_2m_max&timezone=auto`);
-            const weatherData = await weatherResponse.json();
-            const weather = weatherData.current_weather;
-            const daily = weatherData.daily;
+    const gameBoard = document.getElementById('gameBoard');
+    const statusDisplay = document.getElementById('status');
+    const resetButton = document.getElementById('resetButton');
+    let currentPlayer = 'X';
+    let gameActive = true;
+    let board = Array(9).fill(null);
 
-            // 현재 날씨 표시
-            const temperature = weather.temperature;
-            const weatherCode = weather.weathercode;
-            const humidity = weather.relative_humidity;
-            const windspeed = weather.windspeed;
-            document.getElementById("temperature").innerText = `${temperature}°C`;
-            document.getElementById("humidity").innerText = `Humidity: ${humidity}%`;
-            document.getElementById("wind").innerText = `Wind: ${windspeed} km/h`;
+    const winningConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+        [0, 4, 8], [2, 4, 6]            // diagonals
+    ];
 
-            // 날씨 상태 코드에 따른 아이콘
-            const iconElement = document.getElementById("icon");
-            if (weatherCode < 3) iconElement.innerText = "☀️"; // 맑음
-            else if (weatherCode < 6) iconElement.innerText = "🌤️"; // 구름 조금
-            else if (weatherCode < 9) iconElement.innerText = "🌧️"; // 비
-            else iconElement.innerText = "❄️"; // 눈
+    function createBoard() {
+        gameBoard.innerHTML = '';
+        board.forEach((cell, index) => {
+            const cellElement = document.createElement('div');
+            cellElement.classList.add('cell');
+            cellElement.setAttribute('data-index', index);
+            cellElement.innerText = cell ? cell : '';
+            cellElement.addEventListener('click', handleCellClick);
+            gameBoard.appendChild(cellElement);
+        });
+    }
 
-            // 주간 날씨 예보 표시
-            const forecastElement = document.getElementById("forecast");
-            forecastElement.innerHTML = "";
-            for (let i = 1; i < 5; i++) {  // 다음 4일간 예보만 표시
-                const dayTempMin = daily.temperature_2m_min[i];
-                const dayTempMax = daily.temperature_2m_max[i];
-                const dayName = new Date(daily.time[i]).toLocaleDateString('en-US', { weekday: 'short' });
-                forecastElement.innerHTML += `
-                    <div class="forecast-day">
-                        <span>${dayName}</span>
-                        <span class="forecast-temp">${dayTempMax}°C / ${dayTempMin}°C</span>
-                    </div>
-                `;
-            }
+    function handleCellClick(event) {
+        const clickedCellIndex = event.target.getAttribute('data-index');
 
-            // 위치 정보에서 도시 이름 가져오기
-            const locationResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`);
-            const locationData = await locationResponse.json();
-            const city = locationData.address.city || locationData.address.town || locationData.address.village || "Unknown Location";
-
-            document.getElementById("location").innerText = city;
-        } catch (error) {
-            document.getElementById("temperature").innerText = "--°C";
-            document.getElementById("humidity").innerText = "Data unavailable";
-            document.getElementById("wind").innerText = "Data unavailable";
-            document.getElementById("forecast").innerText = "Unable to fetch forecast";
+        if (board[clickedCellIndex] !== null || !gameActive) {
+            return;
         }
+
+        board[clickedCellIndex] = currentPlayer;
+        event.target.innerText = currentPlayer;
+        checkForWinner();
     }
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => fetchWeather(position.coords.latitude, position.coords.longitude),
-            () => {
-                document.getElementById("location").innerText = "Geolocation denied";
+    function checkForWinner() {
+        let roundWon = false;
+
+        for (let i = 0; i < winningConditions.length; i++) {
+            const [a, b, c] = winningConditions[i];
+            if (board[a] && (board[a] === board[b]) && (board[a] === board[c])) {
+                roundWon = true;
+                break;
             }
-        );
-    } else {
-        document.getElementById("location").innerText = "Geolocation not supported";
+        }
+
+        if (roundWon) {
+            statusDisplay.innerText = `Player ${currentPlayer} has won!`;
+            gameActive = false;
+            return;
+        }
+
+        if (!board.includes(null)) {
+            statusDisplay.innerText = 'Game ended in a draw!';
+            gameActive = false;
+            return;
+        }
+
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        statusDisplay.innerText = `Current Player: ${currentPlayer}`;
     }
+
+    resetButton.addEventListener('click', resetGame);
+
+    function resetGame() {
+        currentPlayer = 'X';
+        gameActive = true;
+        board = Array(9).fill(null);
+        statusDisplay.innerText = `Current Player: ${currentPlayer}`;
+        createBoard();
+    }
+
+    // Initialize the game
+    createBoard();
 </script>
 
 </body>
