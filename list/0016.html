@@ -27,10 +27,18 @@
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: 2.5rem;
             color: #4CAF50;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
+        }
+
+        .app-description {
+            font-size: 0.9rem; /* 크기 조정 */
+            color: #aaa; /* 연한 회색 */
+            margin-bottom: 30px;
+            text-align: center; /* 가운데 정렬 */
+            max-width: 300px; /* 최대 너비 설정 */
         }
 
         .input-area {
@@ -43,7 +51,7 @@
         .input-field {
             padding: 10px;
             font-size: 1rem;
-            border: 2px solid #4CAF50; /* 파란색 경계 */
+            border: 2px solid #4b4b4b; /* 파란색 경계 */
             border-radius: 5px;
             width: 250px;
             color: #333;
@@ -52,7 +60,7 @@
         #qrCode {
             margin: 20px;
             padding: 10px;
-            border: 2px dashed #4CAF50; /* 파란색 대시 경계 */
+            border: 2px dashed #4b4b4b; /* 파란색 대시 경계 */
             border-radius: 10px;
             width: 200px;
             height: 200px;
@@ -89,18 +97,18 @@
 </head>
 <body>
 
-<h1>QR Code Generator and Scanner</h1>
+<h1>QR Code Generator</h1>
+<p class="app-description">Enter the message or URL you want to convey to generate a QR code.</p>
 
 <div class="input-area">
     <input type="text" id="qrInput" class="input-field" placeholder="Enter URL or Text">
     <button class="button" id="generateButton">Generate QR Code</button>
+    <button class="button" id="downloadButton" style="display:none;">Download QR Code</button>
 </div>
 
 <div id="qrCode"></div>
 
 <div id="reader"></div>
-
-<button class="button" id="scanButton">Start Scanning</button>
 
 <script>
     // QR 코드 생성
@@ -113,8 +121,22 @@
                 height: 200,
                 text: qrInput
             });
+            document.getElementById("downloadButton").style.display = "block"; // 다운로드 버튼 보이기
         } else {
             alert("Please enter a URL or text.");
+        }
+    });
+
+    // QR 코드 다운로드
+    document.getElementById("downloadButton").addEventListener("click", function() {
+        const canvas = document.querySelector('#qrCode canvas');
+        if (canvas) {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png'); // QR 코드 이미지를 데이터 URL로 변환
+            link.download = 'qr_code.png'; // 다운로드 파일 이름
+            link.click(); // 다운로드 실행
+        } else {
+            alert("Please generate a QR code first.");
         }
     });
 
