@@ -208,6 +208,7 @@
         #declineButton { background-color: #e6e6fa; color: rgb(0, 0, 0); }
         #declineButton:hover { background-color: #b6b6d3; }
     </style>
+
     <script>
         // index.html의 검색 기능
         function searchApps() {
@@ -239,9 +240,9 @@
             const now = new Date().getTime();
 
             // 현재 시간이 저장된 일주일 후 날짜를 지났다면 모달을 표시
-            if (!noShowUntil || now > noShowUntil) {
-                document.getElementById('donationModal').style.display = 'block';
-            }
+            if (!noShowUntil || now > parseInt(noShowUntil, 10)) {
+            document.getElementById('donationModal').style.display = 'block';
+        }
 
             // 모달 닫기 버튼 설정
             document.getElementsByClassName("close")[0].onclick = function() {
