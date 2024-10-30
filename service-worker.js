@@ -1,4 +1,4 @@
-const CACHE_NAME = 'TrashApp 1.17.2'; // 버전 업데이트
+const CACHE_NAME = 'TrashApp 0.18.2'; // 버전 업데이트
 const urlsToCache = [
     '/trashApps/',
     '/trashApps/index.html',

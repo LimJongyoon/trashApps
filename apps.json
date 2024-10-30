@@ -1,5 +1,12 @@
 [
     {
+        "id": "0018",
+        "title": "Mobile Image Resizer",
+        "description": "Mobile Image Resizer",
+        "icon": "icons/0018.webp",
+        "link": "list/0018.html"
+    },
+    {
         "id": "0017",
         "title": "Digital Dice Roller",
         "description": "Digital Dice Roller",
