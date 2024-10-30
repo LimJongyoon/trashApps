@@ -254,6 +254,38 @@
                 closeModal();
             }
         };
+
+        async function loadApps() {
+            try {
+                const response = await fetch('apps.json'); 
+                const apps = await response.json(); 
+
+                const appContainer = document.querySelector('.app-container');
+                appContainer.innerHTML = ''; 
+
+                apps.forEach(app => {
+                    const appItem = document.createElement('div');
+                    appItem.classList.add('app-item');
+
+                    appItem.innerHTML = `
+                        <a href="${app.link}">
+                            <div class="app-icon-container">
+                                <div class="app-icon" style="background-image: url('${app.icon}');"></div>
+                                <div class="app-name-container">
+                                    <span class="app-name">${app.id}</span>
+                                </div>
+                            </div>
+                            <div class="app-description">${app.description}</div>
+                        </a>
+                    `;
+                    appContainer.appendChild(appItem); 
+                });
+            } catch (error) {
+                console.error('Failed to load apps:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadApps); 
     </script>
 
 </head>
@@ -271,235 +303,6 @@
     </div>
     <!-- 앱 리스트 구성 -->
     <div class="app-container">
-                                                                  
-        <div class="app-item">
-            <a href="list/0017.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0017.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0017</span>
-                    </div>
-                </div>
-                <div class="app-description">Digital Dice Roller</div>
-            </a>
-        </div> 
-                                                          
-        <div class="app-item">
-            <a href="list/0016.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0016.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0016</span>
-                    </div>
-                </div>
-                <div class="app-description">QR Code Generator</div>
-            </a>
-        </div> 
-                                                  
-        <div class="app-item">
-            <a href="list/0015.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0015.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0015</span>
-                    </div>
-                </div>
-                <div class="app-description">Tic Tac Toe</div>
-            </a>
-        </div>   
-                                                           
-        <div class="app-item">
-            <a href="list/0014.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0014.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0014</span>
-                    </div>
-                </div>
-                <div class="app-description">Current Location Weather Forecast</div>
-            </a>
-        </div>   
-                             
-        <div class="app-item">
-            <a href="list/0013.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0013.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0013</span>
-                    </div>
-                </div>
-                <div class="app-description">Find Nearby Cafes</div>
-            </a>
-        </div>   
-          
-        <div class="app-item">
-            <a href="list/0012.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0012.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0012</span>
-                    </div>
-                </div>
-                <div class="app-description">Color Picker HEX/RGB</div>
-            </a>
-        </div>   
-
-        <div class="app-item">
-            <a href="list/0011.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0011.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0011</span>
-                    </div>
-                </div>
-                <div class="app-description">Signature Download Maker</div>
-            </a>
-        </div>      
-                        
-        <div class="app-item">
-            <a href="list/0010.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0010.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0010</span>
-                    </div>
-                </div>
-                <div class="app-description">35(36) Number Sliding Puzzle</div>
-            </a>
-        </div>
-                        
-        <div class="app-item">
-            <a href="list/0009.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0009.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0009</span>
-                    </div>
-                </div>
-                <div class="app-description">15(16) Number Sliding Puzzle</div>
-            </a>
-        </div>
-                
-        <div class="app-item">
-            <a href="list/0008.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0008.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0008</span>
-                    </div>
-                </div>
-                <div class="app-description">Monitor Size Layout Comparison Simulator</div>
-            </a>
-        </div>
-
-        <div class="app-item">
-            <a href="list/0007.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0007.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0007</span>
-                    </div>
-                </div>
-                <div class="app-description">Donation Prompt Popup</div>
-            </a>
-        </div>
-        
-        <div class="app-item">
-            <a href="list/0006.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0006.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0006</span>
-                    </div>
-                </div>
-                <div class="app-description">Spin Wheel of Decision</div>
-            </a>
-        </div>
-        
-        <div class="app-item">
-            <a href="list/0005.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0005.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0005</span>
-                    </div>
-                </div>
-                <div class="app-description">Rock Paper Scissors</div>
-            </a>
-        </div>
-        
-        <div class="app-item">
-            <a href="list/0004.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0004.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0004</span>
-                    </div>
-                </div>
-                <div class="app-description">Lunch decide slot machine</div>
-            </a>
-        </div>
-
-        <div class="app-item">
-            <a href="list/0003.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0003.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0003</span>
-                    </div>
-                </div>
-                <div class="app-description">Horn for crowded situations</div>
-            </a>
-        </div>
-
-        <div class="app-item">
-            <a href="list/0002.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0002.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0002</span>
-                    </div>
-                </div>
-                <div class="app-description">Webtoon viewer</div>
-            </a>
-        </div>
-
-        <div class="app-item">
-            <a href="list/0002pc.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0002PC.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0002 PC</span>
-                    </div>
-                </div>
-                <div class="app-description">Webtoon viewer for PC</div>
-            </a>
-        </div>
-
-        <div class="app-item">
-            <a href="list/0001.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/0001.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">0001</span>
-                    </div>
-                </div>
-                <div class="app-description">Camera people=shit</div>
-            </a>
-        </div>
-        
-        <div class="app-item">
-            <a href="list/test.html">
-                <div class="app-icon-container">
-                    <div class="app-icon" style="background-image: url('icons/test.webp');"></div>
-                    <div class="app-name-container">
-                        <span class="app-name">test</span>
-                    </div>
-                </div>
-                <div class="app-description">This app is currently in testing</div>
-            </a>
-        </div>
-
     </div>
 
     <!-- Donation Modal (0007.html의 내용) -->
