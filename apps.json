@@ -29,7 +29,7 @@
     },
     {
         "id": "0014",
-        "title": "Current Location Weather Forecast",
+        "title": "Weather Forecast",
         "description": "Current Location Weather Forecast",
         "icon": "icons/0014.webp",
         "link": "list/0014.html"
@@ -50,8 +50,8 @@
     },
     {
         "id": "0011",
-        "title": "Signature Download Maker",
-        "description": "Signature Download Maker",
+        "title": "Save Autograph to Album",
+        "description": "Save Autograph to Album Signature Download Maker",
         "icon": "icons/0011.webp",
         "link": "list/0011.html"
     },
@@ -71,7 +71,7 @@
     },
     {
         "id": "0008",
-        "title": "Monitor Size Layout Comparison Simulator",
+        "title": "Monitor Layout Simulator",
         "description": "Monitor Size Layout Comparison Simulator",
         "icon": "icons/0008.webp",
         "link": "list/0008.html"

@@ -152,7 +152,7 @@
             color: black; /* Change text to black */
         }
 
-        .app-description {
+        .app-title {
             font-size: 12px; /* Fix description font size */
             color: #333;
             margin-top: 5px;
@@ -216,8 +216,14 @@
             const apps = document.getElementsByClassName('app-item');
             for (let i = 0; i < apps.length; i++) {
                 const appName = apps[i].getElementsByClassName('app-name')[0].textContent.toLowerCase();
-                const appDescription = apps[i].getElementsByClassName('app-description')[0].textContent.toLowerCase();
-                apps[i].style.display = appName.includes(searchValue) || appDescription.includes(searchValue) ? 'block' : 'none';
+                const appDescription = apps[i].querySelector('a').getAttribute('data-description').toLowerCase();
+                const appTitle = apps[i].getElementsByClassName('app-title')[0].textContent.toLowerCase();
+
+                apps[i].style.display = 
+                    appName.includes(searchValue) || 
+                    appDescription.includes(searchValue) || 
+                    appTitle.includes(searchValue)  
+                    ? 'block' : 'none';
             }
         }
 
@@ -268,14 +274,14 @@
                     appItem.classList.add('app-item');
 
                     appItem.innerHTML = `
-                        <a href="${app.link}">
+                        <a href="${app.link}" data-description="${app.description}">
                             <div class="app-icon-container">
                                 <div class="app-icon" style="background-image: url('${app.icon}');"></div>
                                 <div class="app-name-container">
                                     <span class="app-name">${app.id}</span>
                                 </div>
                             </div>
-                            <div class="app-description">${app.description}</div>
+                            <div class="app-title">${app.title}</div>
                         </a>
                     `;
                     appContainer.appendChild(appItem); 
