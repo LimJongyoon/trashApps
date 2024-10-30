@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Image Resizer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        select, .button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        select {
+            width: 130px;
+            background-color: #e6e6fa;
+            border: none;
+        }
+
+        .button {
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #388e3c;
+        }
+
+        button.button2 {
+            background-color: #e6e6fa;
+            color: black;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        button.button2:hover {
+            background-color: #b9b9e3;
+        }
+
+        .image-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #resizedImage {
+            max-width: 280px;
+            max-height: 280px;
+            border-radius: 15px;
+            border: 2px solid #2b362c;
+        }
+
+        #originalSize {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Mobile Image Resizer</h1>
+
+<div class="input-area">
+    <input type="file" id="imageInput" accept="image/*">
+</div>
+<div>
+    <select id="resizePercentage">
+        <option value="10">10%</option>
+        <option value="20">20%</option>
+        <option value="30">30%</option>
+        <option value="40">40%</option>
+        <option value="50">50%</option>
+        <option value="60">60%</option>
+        <option value="70">70%</option>
+        <option value="80">80%</option>
+        <option value="90">90%</option>
+        <option value="100" selected>100%</option>
+        <option value="110">110%</option>
+        <option value="120">120%</option>
+        <option value="130">130%</option>
+        <option value="140">140%</option>
+        <option value="150">150%</option>
+    </select>
+    <button class="button" id="resizeButton">Resize</button>
+</div>
+
+<div class="image-area">
+    <img id="resizedImage" src="../images/default.png" alt="Default Image">
+    <div id="originalSize">Image Size: Not selected</div>
+    <div>
+        <button class="button2" id="resetButton">🔄 Reset</button>
+        <button class="button" id="downloadButton">Download</button>
+    </div>
+</div>
+
+<script>
+    const imageInput = document.getElementById("imageInput");
+    const resizeButton = document.getElementById("resizeButton");
+    const downloadButton = document.getElementById("downloadButton");
+    const resetButton = document.getElementById("resetButton");
+    const resizedImage = document.getElementById("resizedImage");
+    const resizePercentage = document.getElementById("resizePercentage");
+    const originalSize = document.getElementById("originalSize");
+
+    let originalWidth = 0;
+    let originalHeight = 0;
+    let initialImageSrc = '../images/default.png';  // 최초 업로드된 이미지 URL 저장 변수
+
+    imageInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                resizedImage.src = e.target.result;
+                initialImageSrc = e.target.result;  // 최초 이미지 저장
+
+                const img = new Image();
+                img.onload = function() {
+                    originalWidth = img.width;
+                    originalHeight = img.height;
+                    originalSize.textContent = `Image Size: ${originalWidth} x ${originalHeight}px`;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    resizeButton.addEventListener("click", function() {
+        const img = new Image();
+        img.src = resizedImage.src;
+        img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const scale = resizePercentage.value / 100;
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            originalSize.textContent = `Image Size: ${canvas.width} x ${canvas.height}px`;
+            resizedImage.src = canvas.toDataURL("image/jpeg");
+        };
+    });
+
+    resetButton.addEventListener("click", function() {
+        resizePercentage.value = 100;
+        originalSize.textContent = `Image Size: ${originalWidth} x ${originalHeight}px`;
+        resizedImage.src = initialImageSrc;  // 최초 업로드된 이미지로 되돌림
+    }); 
+
+    downloadButton.addEventListener("click", function() {
+        const link = document.createElement("a");
+        link.href = resizedImage.src;
+        link.download = "resized-image.jpg";
+        link.click();
+    });
+</script>
+
+</body>
+</html>
