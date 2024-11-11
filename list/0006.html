@@ -22,9 +22,19 @@
             font-family: Arial, sans-serif;
             color: black;
         }
+        
+        @media (min-width: 600px) {
+            body {
+                width: 600px;
+                margin: 0.5vh auto !important; /* Center the body */
+                border: 2px solid #d3d3d360; /* Dark gray border */
+                border-radius: 15px; /* Rounded corners */
+                box-sizing: border-box; /* Ensure padding and border are included in max-height */
+            }
+        }
 
         h1 {
-            font-size: 8vw;
+            font-size: 2.5rem;
             margin-bottom: 5vh;
             color: #4CAF50;
             text-shadow: 0px 0px 10px rgba(76, 175, 80, 0.8);

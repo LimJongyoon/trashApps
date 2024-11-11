@@ -21,9 +21,20 @@
             color: black;
         }
 
+        @media (min-width: 600px) {
+            body {
+                width: 600px;
+                min-height: 800px;
+                margin: 0.5vh auto !important; /* Center the body */
+                border: 2px solid #d3d3d360; /* Dark gray border */
+                border-radius: 15px; /* Rounded corners */
+                box-sizing: border-box; /* Ensure padding and border are included in max-height */
+            }
+        }
+
         /* 제목 스타일 상단 배치 및 크기 조정 */
         h1 {
-            font-size: 6vw;
+            font-size: 2.5rem;
             color: #4CAF50;
             margin: 20px 0;
             text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);

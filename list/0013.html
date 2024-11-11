@@ -17,6 +17,17 @@
             align-items: center;
         }
 
+        @media (min-width: 600px) {
+            body {
+                width: 600px;
+                min-height: 800px;
+                margin: 0.5vh auto !important; /* Center the body */
+                border: 2px solid #d3d3d360; /* Dark gray border */
+                border-radius: 15px; /* Rounded corners */
+                box-sizing: border-box; /* Ensure padding and border are included in max-height */
+            }
+        }
+
         h1 {
             color: #4CAF50;
             text-align: center;
