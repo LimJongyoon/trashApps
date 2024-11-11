@@ -13,28 +13,28 @@
             body {
                 width: 600px;
                 min-height: 800px;
-                margin: 0.5vh auto !important; /* Center the body */
-                border: 2px solid #d3d3d360; /* Dark gray border */
-                border-radius: 15px; /* Rounded corners */
-                box-sizing: border-box; /* Ensure padding and border are included in max-height */
+                margin: 0.5vh auto !important;
+                border: 2px solid #d3d3d360; 
+                border-radius: 15px;
+                box-sizing: border-box; 
             }
         }
         #hornButton {
             background: url('../images/0003.png') no-repeat center;
-            width: 350px; /* 화면의 70%로 설정 */
-            height: 350px; /* 높이를 자동으로 설정 */
+            width: 350px;
+            height: 350px;
             border: none;
             background-size: contain;
-            user-select: none; /* 선택 불가능하게 설정 */
+            user-select: none; 
         }
         #hornButton:active {
-            transform: scale(0.95); /* 눌리는 이펙트 */
+            transform: scale(0.95);
         }
         h1 {
             font-size: 24px;
         }
         h3 {
-            user-select: none; /* h3도 선택 불가능하게 설정 */
+            user-select: none; 
         }
     </style>
 </head>
@@ -47,22 +47,18 @@
         const hornButton = document.getElementById('hornButton');
         const hornSound = document.getElementById('hornSound');
 
-        // 소리 재생 함수
         const playSound = () => {
             hornSound.play();
         };
 
-        // 소리 멈추기 함수
         const stopSound = () => {
-            hornSound.pause(); // 일시정지
+            hornSound.pause();
         };
 
-        // PC와 모바일 이벤트 모두 처리
         hornButton.addEventListener('mousedown', playSound);
         hornButton.addEventListener('mouseup', stopSound);
         hornButton.addEventListener('mouseleave', stopSound);
 
-        // 모바일 터치 이벤트 추가
         hornButton.addEventListener('touchstart', playSound);
         hornButton.addEventListener('touchend', stopSound);
     </script>

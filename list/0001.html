@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#f5f5f5"> <!-- 메타 태그에 색상 설정 -->
+    <meta name="theme-color" content="#f5f5f5"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camera App</title>
     <style>
@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* 제목을 상단에 추가하기 위해 컬럼 정렬 */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -28,7 +28,7 @@
             margin-bottom: 20px;
         }
         #container {
-            position: relative; /* 부모 요소를 상대적으로 설정 */
+            position: relative;
             width: 100%;
             max-width: 600px;
             height: auto;
@@ -36,7 +36,7 @@
         #camera {
             display: block;
             width: 100%;
-            height: auto; /* 비디오의 높이를 자동으로 조정 */
+            height: auto;
             border: 2px solid #ccc;
             border-radius: 10px;
         }
@@ -44,22 +44,19 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%; /* 캔버스를 비디오 크기에 맞게 설정 */
+            width: 100%;
             height: 100%;
-            pointer-events: none; /* 캔버스에서 클릭 이벤트를 비활성화 */
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-<h1>Watch people through the camera</h1> <!-- 제목 추가 -->
+<h1>Watch people through the camera</h1>
 <p>If you can see a person, refresh the page</p>
 
 <div id="container">
-    <!-- 카메라 출력 -->
     <video id="camera" autoplay playsinline></video>
-
-    <!-- 캔버스: 사람 인식 시 그 위에 그림을 그립니다 -->
     <canvas id="canvas"></canvas>
 </div>
 
@@ -70,76 +67,67 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    img.src = '../images/x.png'; // x.png 파일 경로
+    img.src = '../images/x.png';
 
-    // 캔버스 크기 설정
     function resizeCanvas() {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
     }
 
-    // 카메라 접근 및 허용
     async function startCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: "environment" } } // 후면 카메라 설정
+                video: { facingMode: { ideal: "environment" } }
             });
             video.srcObject = stream;
 
             video.addEventListener('loadeddata', () => {
-                resizeCanvas(); // 비디오 로딩 후 캔버스 크기 설정
+                resizeCanvas();
             });
         } catch (err) {
             console.error('Error accessing the camera', err);
         }
     }
 
-    // 사람 인식 및 실시간 업데이트
     async function detectPerson() {
         const model = await cocoSsd.load();
 
         async function detectFrame() {
             const predictions = await model.detect(video);
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             predictions.forEach(prediction => {
                 if (prediction.class === 'person') {
-                    const [x, y, width, height] = prediction.bbox; // 사람의 위치와 크기
-                    const aspectRatio = img.width / img.height; // x.png 이미지 비율 유지
+                    const [x, y, width, height] = prediction.bbox;
+                    const aspectRatio = img.width / img.height;
 
-                    // 이미지 비율을 유지하면서 너비에 맞추어 높이를 계산
                     const imgWidth = width;
                     const imgHeight = imgWidth / aspectRatio;
 
-                    // 이미지가 사람 Bounding Box의 중앙에 오도록 좌표 조정
                     const offsetX = x + (width - imgWidth) / 2;
                     const offsetY = y + (height - imgHeight) / 2;
 
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // 검정색, 투명도 50%
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                     ctx.fillRect(x, y, width, height);
 
-                    // 이미지 비율 유지하여 그리기
                     ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
 
-                    // 사람 인식 박스 그리기
-                    ctx.strokeStyle = 'black'; // 박스 색상
-                    ctx.lineWidth = 2; // 박스 두께
-                    ctx.strokeRect(x, y, width, height); // 사람의 바운딩 박스 그리기
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, width, height);
                 }
             });
 
-            requestAnimationFrame(detectFrame); // 실시간으로 반복
+            requestAnimationFrame(detectFrame);
         }
 
-        detectFrame(); // 첫 번째 프레임 탐지 시작
+        detectFrame();
     }
 
-    // 카메라 실행 및 사람 인식
     startCamera().then(() => {
         detectPerson();
     });
 
-    // 윈도우 리사이즈 시 캔버스 크기 조정
     window.addEventListener('resize', resizeCanvas);
 </script>
 

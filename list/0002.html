@@ -99,10 +99,9 @@
         const fileInput = document.getElementById('file-input');
         const dropText = document.getElementById('drop-text');
 
-        let currentFit = 'auto'; // 이미지 크기 상태
-        let currentZoom = 1; // 확대/축소 비율
+        let currentFit = 'auto'; 
+        let currentZoom = 1; 
 
-        // 이미지 추가 (모바일 포함)
         fileInput.addEventListener('change', (e) => {
             const files = e.target.files;
             // Files are processed in the order they are selected
@@ -151,7 +150,6 @@ Array.from(files).forEach(file => {
             });
         });
 
-        // 버튼 클릭으로 이미지 크기 조정
         fitHeightBtn.addEventListener('click', () => {
             currentFit = 'height';
             Array.from(imageContainer.children).forEach(img => {
@@ -168,7 +166,6 @@ Array.from(files).forEach(file => {
             });
         });
 
-        // 확대/축소 기능
         zoomInBtn.addEventListener('click', () => {
             Array.from(imageContainer.children).forEach(img => {
                 let currentWidth = parseFloat(window.getComputedStyle(img).width);
