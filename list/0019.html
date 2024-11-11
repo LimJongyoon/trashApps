@@ -102,6 +102,7 @@
             max-height: 90vh;
             overflow-y: auto;
             margin-top: 20px;
+            justify-content: center;
         }
         .thumbnail {
             width: 60px;
@@ -110,6 +111,42 @@
             cursor: pointer;
             border-radius: 5px;
             border: 2px solid #d3d3d3;
+        }
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+        .modal img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .back-button, .download-button {
+            background-color: #e6e6fa;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
@@ -135,7 +172,7 @@
     </select>
 </div>
 
-<video id="videoPreview" controls></video>
+<video id="videoPreview" controls playsinline muted></video>
 <div id="outputInfo">Video length: 0s &nbsp;&nbsp; Extracted frames: 0</div>
 
 <div class="button-area">
@@ -145,6 +182,17 @@
 
 <div class="preview-area" id="previewArea"></div>
 
+<!-- Modal for enlarged image preview -->
+<div class="modal" id="imageModal">
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="Frame Preview">
+        <div class="modal-buttons">
+            <button class="back-button" id="backButton">Back</button>
+            <button class="download-button" id="downloadButton">Download</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const videoInput = document.getElementById("videoInput");
     const frameRate = document.getElementById("frameRate");
@@ -153,92 +201,101 @@
     const resetButton = document.getElementById("resetButton");
     const downloadFramesButton = document.getElementById("downloadFramesButton");
     const previewArea = document.getElementById("previewArea");
+    const imageModal = document.getElementById("imageModal");
+    const modalImage = document.getElementById("modalImage");
+    const backButton = document.getElementById("backButton");
+    const downloadButton = document.getElementById("downloadButton");
 
     let frames = [];  // Array to store the extracted frames
     let videoDuration = 0;
 
-    // Automatically extract frames based on selected frame rate after video upload
     videoInput.addEventListener("change", function(event) {
         const file = event.target.files[0];
         if (file) {
             const url = URL.createObjectURL(file);
             videoPreview.src = url;
-            frames = [];  // Reset frames array on new video upload
-            previewArea.innerHTML = "";  // Clear preview area
+            frames = [];
+            previewArea.innerHTML = "";
             videoPreview.onloadedmetadata = () => {
                 videoDuration = videoPreview.duration;
                 outputInfo.textContent = `Video length: ${videoDuration.toFixed(2)}s    Extracted frames: 0`;
-                extractFrames(); // Call extract frames automatically after loading video
+                extractFrames();
             };
         }
     });
 
-    // Extract frames when frame rate selection is changed
     frameRate.addEventListener("change", extractFrames);
 
-    // Function to extract frames based on selected frame rate
     async function extractFrames() {
-        frames = [];  // Clear previous frames
-        previewArea.innerHTML = "";  // Clear previous thumbnails
+        frames = [];
+        previewArea.innerHTML = "";
         const selectedFrameRate = parseInt(frameRate.value);
-        const interval = 1 / selectedFrameRate;  // Interval for frame extraction
-        let extractedFramesCount = 0;  // Track the number of extracted frames
+        const interval = 1 / selectedFrameRate;
+        let extractedFramesCount = 0;
 
         for (let time = 0; time < videoDuration; time += interval) {
-            await seekToTime(time);  // Wait for video to seek to the correct time
-
+            await seekToTime(time);
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             canvas.width = videoPreview.videoWidth;
             canvas.height = videoPreview.videoHeight;
             ctx.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
             const frameData = canvas.toDataURL("image/jpeg");
-            frames.push(frameData);  // Save frame as image
+            frames.push(frameData);
             extractedFramesCount++;
-
-            // Update output info with extracted frame count
             outputInfo.textContent = `Video length: ${videoDuration.toFixed(2)}s   Extracted frames: ${extractedFramesCount}`;
 
-            // Create a thumbnail preview
             const img = document.createElement("img");
             img.src = frameData;
             img.className = "thumbnail";
-            img.addEventListener("click", () => {
-                const largePreview = window.open("", "_blank");
-                largePreview.document.write(`<img src="${frameData}" style="width:100%">`);
-            });
+            img.addEventListener("click", () => openModal(frameData));
             previewArea.appendChild(img);
         }
     }
 
-    // Seek video to a specific time and return a promise that resolves when seeked
     function seekToTime(time) {
         return new Promise((resolve) => {
             videoPreview.currentTime = time;
+            videoPreview.play();
             videoPreview.addEventListener("seeked", function onSeeked() {
+                videoPreview.pause();
                 videoPreview.removeEventListener("seeked", onSeeked);
                 resolve();
             });
         });
     }
 
-    // Reset the video input and frames array
     resetButton.addEventListener("click", function() {
-        frameRate.value = 1;  // Reset to default frame rate
-        videoPreview.src = "";  // Clear video preview
-        frames = [];  // Clear frames array
-        previewArea.innerHTML = "";  // Clear preview area
+        frameRate.value = 1;
+        videoPreview.src = "";
+        frames = [];
+        previewArea.innerHTML = "";
         outputInfo.textContent = "Video length: 0 s, Extracted frames: 0";
     });
 
-    // Download each extracted frame as an image file
     downloadFramesButton.addEventListener("click", function() {
         frames.forEach((frame, index) => {
             const link = document.createElement("a");
             link.href = frame;
             link.download = `frame-${index + 1}.jpg`;
-            link.click();  // Trigger download for each frame
+            link.click();
         });
+    });
+
+    function openModal(frameData) {
+        modalImage.src = frameData;
+        imageModal.style.display = "flex";
+
+        downloadButton.onclick = () => {
+            const link = document.createElement("a");
+            link.href = frameData;
+            link.download = `frame.jpg`;
+            link.click();
+        };
+    }
+
+    backButton.addEventListener("click", () => {
+        imageModal.style.display = "none";
     });
 </script>
 
