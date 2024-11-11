@@ -1,8 +1,8 @@
 [
     {
         "id": "0019",
-        "title": "Video Frame Extractor",
-        "description": "Video Frame rates Extractor video to images Upload FPS download",
+        "title": "Video to Photos",
+        "description": "Video to Photos Video Frame rates Extractor video to images Upload FPS download",
         "icon": "icons/0019.webp",
         "link": "list/0019.html"
     },
