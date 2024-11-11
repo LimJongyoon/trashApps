@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame Extractor</title>
+    <style>
+        /* Existing styling */
+        * {
+            box-sizing: border-box;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        @media (min-width: 600px) {
+            body {
+                width: 600px;
+                min-height: 600px;
+                margin: 0.5vh auto !important;
+                border: 2px solid #d3d3d360;
+                border-radius: 15px;
+                box-sizing: border-box;
+            }
+        }
+        h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        .input-area, .frame-select, .button-area {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .instruction-text {
+            font-size: 0.9rem;
+            color: gray;
+            margin-bottom: 10px;
+        }
+        select, .button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        select {
+            width: 180px;
+            background-color: #e6e6fa;
+            border: none;
+        }
+        .button {
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #388e3c;
+        }
+        button.button2 {
+            background-color: #e6e6fa;
+            color: black;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        button.button2:hover {
+            background-color: #b9b9e3;
+        }
+        #videoPreview {
+            max-width: 280px;
+            max-height: 280px;
+            margin-top: 20px;
+            border-radius: 15px;
+            border: 4px solid #849184;
+        }
+        #outputInfo {
+            font-size: 1rem;
+            margin-top: 10px;
+            color: #333;
+        }
+        .preview-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 2px solid #d3d3d3;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Video Frame Extractor</h1>
+
+<div class="input-area">
+    <input type="file" id="videoInput" accept="video/*">
+</div>
+<div class="instruction-text">
+    Select how many frames per second to extract from the video.
+</div>
+<div class="frame-select">
+    <select id="frameRate">
+        <option value="1">1 FPS</option>
+        <option value="6">6 FPS</option>
+        <option value="12">12 FPS</option>
+        <option value="24">24 FPS (cinematic)</option>
+        <option value="30">30 FPS (standard)</option>
+        <option value="60">60 FPS</option>
+        <option value="120">120 FPS</option>
+    </select>
+</div>
+
+<video id="videoPreview" controls></video>
+<div id="outputInfo">Video length: 0s &nbsp;&nbsp; Extracted frames: 0</div>
+
+<div class="button-area">
+    <button class="button2" id="resetButton">🔄 Reset</button>
+    <button class="button" id="downloadFramesButton">Download Images</button>
+</div>
+
+<div class="preview-area" id="previewArea"></div>
+
+<script>
+    const videoInput = document.getElementById("videoInput");
+    const frameRate = document.getElementById("frameRate");
+    const videoPreview = document.getElementById("videoPreview");
+    const outputInfo = document.getElementById("outputInfo");
+    const resetButton = document.getElementById("resetButton");
+    const downloadFramesButton = document.getElementById("downloadFramesButton");
+    const previewArea = document.getElementById("previewArea");
+
+    let frames = [];  // Array to store the extracted frames
+    let videoDuration = 0;
+
+    // Automatically extract frames based on selected frame rate after video upload
+    videoInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            videoPreview.src = url;
+            frames = [];  // Reset frames array on new video upload
+            previewArea.innerHTML = "";  // Clear preview area
+            videoPreview.onloadedmetadata = () => {
+                videoDuration = videoPreview.duration;
+                outputInfo.textContent = `Video length: ${videoDuration.toFixed(2)}s    Extracted frames: 0`;
+                extractFrames(); // Call extract frames automatically after loading video
+            };
+        }
+    });
+
+    // Extract frames when frame rate selection is changed
+    frameRate.addEventListener("change", extractFrames);
+
+    // Function to extract frames based on selected frame rate
+    async function extractFrames() {
+        frames = [];  // Clear previous frames
+        previewArea.innerHTML = "";  // Clear previous thumbnails
+        const selectedFrameRate = parseInt(frameRate.value);
+        const interval = 1 / selectedFrameRate;  // Interval for frame extraction
+        let extractedFramesCount = 0;  // Track the number of extracted frames
+
+        for (let time = 0; time < videoDuration; time += interval) {
+            await seekToTime(time);  // Wait for video to seek to the correct time
+
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = videoPreview.videoWidth;
+            canvas.height = videoPreview.videoHeight;
+            ctx.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
+            const frameData = canvas.toDataURL("image/jpeg");
+            frames.push(frameData);  // Save frame as image
+            extractedFramesCount++;
+
+            // Update output info with extracted frame count
+            outputInfo.textContent = `Video length: ${videoDuration.toFixed(2)}s   Extracted frames: ${extractedFramesCount}`;
+
+            // Create a thumbnail preview
+            const img = document.createElement("img");
+            img.src = frameData;
+            img.className = "thumbnail";
+            img.addEventListener("click", () => {
+                const largePreview = window.open("", "_blank");
+                largePreview.document.write(`<img src="${frameData}" style="width:100%">`);
+            });
+            previewArea.appendChild(img);
+        }
+    }
+
+    // Seek video to a specific time and return a promise that resolves when seeked
+    function seekToTime(time) {
+        return new Promise((resolve) => {
+            videoPreview.currentTime = time;
+            videoPreview.addEventListener("seeked", function onSeeked() {
+                videoPreview.removeEventListener("seeked", onSeeked);
+                resolve();
+            });
+        });
+    }
+
+    // Reset the video input and frames array
+    resetButton.addEventListener("click", function() {
+        frameRate.value = 1;  // Reset to default frame rate
+        videoPreview.src = "";  // Clear video preview
+        frames = [];  // Clear frames array
+        previewArea.innerHTML = "";  // Clear preview area
+        outputInfo.textContent = "Video length: 0 s, Extracted frames: 0";
+    });
+
+    // Download each extracted frame as an image file
+    downloadFramesButton.addEventListener("click", function() {
+        frames.forEach((frame, index) => {
+            const link = document.createElement("a");
+            link.href = frame;
+            link.download = `frame-${index + 1}.jpg`;
+            link.click();  // Trigger download for each frame
+        });
+    });
+</script>
+
+</body>
+</html>

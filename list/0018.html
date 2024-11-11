@@ -27,10 +27,10 @@
             body {
                 width: 600px;
                 min-height: 600px;
-                margin: 0.5vh auto !important; /* Center the body */
-                border: 2px solid #d3d3d360; /* Dark gray border */
-                border-radius: 15px; /* Rounded corners */
-                box-sizing: border-box; /* Ensure padding and border are included in max-height */
+                margin: 0.5vh auto !important;
+                border: 2px solid #d3d3d360;
+                border-radius: 15px;
+                box-sizing: border-box;
             }
         }
 
@@ -95,8 +95,6 @@
         }
 
         #resizedImage {
-            max-width: 280px;
-            max-height: 280px;
             border-radius: 15px;
             border: 4px solid #849184;
         }
@@ -135,7 +133,6 @@
         <option value="140">140%</option>
         <option value="150">150%</option>
     </select>
-    <button class="button" id="resizeButton">Resize</button>
 </div>
 
 <div class="image-area">
@@ -149,7 +146,6 @@
 
 <script>
     const imageInput = document.getElementById("imageInput");
-    const resizeButton = document.getElementById("resizeButton");
     const downloadButton = document.getElementById("downloadButton");
     const resetButton = document.getElementById("resetButton");
     const resizedImage = document.getElementById("resizedImage");
@@ -158,49 +154,82 @@
 
     let originalWidth = 0;
     let originalHeight = 0;
-    let initialImageSrc = '../images/default.png';  // 최초 업로드된 이미지 URL 저장 변수
+    let initialImageSrc = '../images/default.png';
+    let originalImage = new Image();  // Original image
+
+    function resizeImage() {
+        const scale = resizePercentage.value / 100;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = originalImage.width * scale;
+        canvas.height = originalImage.height * scale;
+        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+
+        // Update resized image and size info
+        originalSize.textContent = `Image Size: ${canvas.width} x ${canvas.height}px`;
+        resizedImage.src = canvas.toDataURL("image/jpeg");
+
+        // Set max dimensions for preview
+        setMaxDimensions();
+    }
+
+    function setMaxDimensions() {
+        const maxPreviewSizes = {
+            10: 200,
+            20: 205,
+            30: 210,
+            40: 215,
+            50: 220,
+            60: 225,
+            70: 230,
+            80: 240,
+            90: 245,
+            100: 250,
+            110: 255,
+            120: 260,
+            130: 265,
+            140: 270,
+            150: 275
+        };
+
+        const selectedPercentage = parseInt(resizePercentage.value);
+        const maxSize = maxPreviewSizes[selectedPercentage] || 250;
+        resizedImage.style.maxWidth = `${maxSize}px`;
+        resizedImage.style.maxHeight = `${maxSize}px`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        resizedImage.src = initialImageSrc;
+        setMaxDimensions();
+    });
 
     imageInput.addEventListener("change", function(event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                resizedImage.src = e.target.result;
-                initialImageSrc = e.target.result;  // 최초 이미지 저장
+                originalImage.src = e.target.result;  // Set the original image
+                initialImageSrc = e.target.result;
 
-                const img = new Image();
-                img.onload = function() {
-                    originalWidth = img.width;
-                    originalHeight = img.height;
+                originalImage.onload = function() {
+                    originalWidth = originalImage.width;
+                    originalHeight = originalImage.height;
                     originalSize.textContent = `Image Size: ${originalWidth} x ${originalHeight}px`;
+                    resizeImage();  // Automatically resize on image upload
                 };
-                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
     });
 
-    resizeButton.addEventListener("click", function() {
-        const img = new Image();
-        img.src = resizedImage.src;
-        img.onload = function() {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            const scale = resizePercentage.value / 100;
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            originalSize.textContent = `Image Size: ${canvas.width} x ${canvas.height}px`;
-            resizedImage.src = canvas.toDataURL("image/jpeg");
-        };
-    });
+    resizePercentage.addEventListener("change", resizeImage);
 
     resetButton.addEventListener("click", function() {
         resizePercentage.value = 100;
         originalSize.textContent = `Image Size: ${originalWidth} x ${originalHeight}px`;
-        resizedImage.src = initialImageSrc;  // 최초 업로드된 이미지로 되돌림
-    }); 
+        resizedImage.src = initialImageSrc;
+        setMaxDimensions();
+    });
 
     downloadButton.addEventListener("click", function() {
         const link = document.createElement("a");
