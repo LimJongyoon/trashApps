@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="theme-color" content="#ffffff"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Escape Game</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #ffffff;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        @media (min-width: 600px) {
+            body {
+                width: 600px;
+                min-height: 600px;
+                margin: 0.5vh auto !important;
+                border: 2px solid #d3d3d360;
+                border-radius: 15px;
+                box-sizing: border-box;
+            }
+        }
+        .container-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            font-size: 1.44rem;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #gameCanvas {
+            border: 2px solid #d3d3d3;
+            background-color: #b9b9e3;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        #message {
+            color: #4CAF50;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: none;
+            animation: popUp 0.8s ease-out forwards;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .controls-row {
+            display: flex;
+            gap: 10px;
+        }
+        .control-button {
+            padding: 10px 18px;
+            font-size: 1rem;
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        .control-button:active {
+            background-color: #388e3c;
+        }
+        .change-button {
+            margin-bottom: 15px;
+        }
+        /* Success animation */
+        @keyframes popUp {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; color: #ff6347; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-wrapper">
+    <h1>Maze Escape Game</h1>
+    <button class="control-button change-button" onclick="changeMaze()">Change Maze</button>
+    <canvas id="gameCanvas"></canvas>
+    <div id="message">Escape Success!</div>
+
+    <div class="controls">
+        <button class="control-button" onclick="movePlayer('up')">▲</button>
+        <div class="controls-row">
+            <button class="control-button" onclick="movePlayer('left')">◀</button>
+            <button class="control-button" onclick="movePlayer('down')">▼</button>
+            <button class="control-button" onclick="movePlayer('right')">▶</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const mazes = [
+        [
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1],
+            [1,1,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1],
+            [1,0,0,0,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+            [1,0,1,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1],
+            [1,1,1,0,0,0,0,1,0,1,1,1,0,1,0,1,1,1],
+            [0,1,1,1,1,1,0,1,0,0,0,1,0,1,0,0,0,1],
+            [1,1,0,0,0,1,0,1,1,1,0,1,0,1,0,1,0,1],
+            [1,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,1],
+            [1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,1],
+            [1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1],
+            [1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1],
+            [0,0,0,0,0,1,1,1,1,1,1,1,1,1,3,1,1,1]
+        ],
+
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [0,2,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1],
+            [1,1,0,1,1,1,0,1,0,1,0,0,0,1,1,0,1,1,0,1],
+            [0,1,0,0,0,1,0,1,0,1,1,1,0,1,0,0,0,0,0,1],
+            [1,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+            [1,1,1,1,1,1,0,1,0,1,1,0,1,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1,0,1],
+            [1,1,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,1],
+            [1,0,1,1,1,0,1,1,0,1,1,0,1,0,1,0,1,1,0,1],
+            [1,0,0,0,1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,1],
+            [1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1,1,1,1,0,1,0,0,0,0,1],
+            [1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1],
+            [1,0,0,0,1,0,1,1,1,0,1,1,1,1,1,0,0,1,0,3],
+            [1,1,1,0,1,0,1,0,1,0,0,0,0,0,1,1,0,1,0,1],
+            [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],  
+
+        [
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,0,0,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
+            [1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,0,0,0,0,1],
+            [1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,0,1],
+            [1,1,1,1,0,0,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
+            [1,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,0,0,0,1,0,1,1,1,1,1,1,0,1,1,0,1,0,1],
+            [1,0,1,1,1,1,0,1,0,0,0,1,1,0,1,0,0,1,0,1],
+            [1,0,0,0,0,1,0,0,0,1,0,0,1,0,1,0,1,1,0,1],
+            [1,1,1,1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,0,1],
+            [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,1],
+            [1,1,1,1,0,1,0,1,1,1,0,0,0,0,1,1,1,1,0,1],
+            [1,1,1,1,0,1,0,1,0,1,1,1,1,0,1,0,0,0,0,1],
+            [1,0,0,0,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,1],
+            [1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,3],
+            [1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1],
+            [0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1],
+            [1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1]
+        ],
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],
+            [0,2,0,0,0,1,0,0,0,1,0,0,1,1,1,1,1,1],
+            [1,0,1,1,0,1,1,1,0,1,1,0,1,0,0,1,0,1],
+            [1,0,0,1,0,0,0,0,0,0,0,0,1,1,0,1,0,1],
+            [1,1,0,1,1,1,0,1,1,1,1,0,0,0,0,0,0,1],
+            [0,1,0,1,0,0,0,1,0,0,0,0,1,1,1,1,0,1],
+            [1,1,0,1,1,1,1,1,1,0,1,1,1,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,1],
+            [1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,0],
+            [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0],
+            [1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0],
+            [1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
+            [1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1],
+            [1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,0],
+            [1,1,1,1,0,1,0,1,1,0,1,1,1,0,1,0,1,0],
+            [0,0,0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0],
+            [0,1,0,1,0,0,0,1,0,0,1,1,1,0,0,0,1,0],
+            [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0],
+            [1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,3,1,1]
+        ],
+        [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,2,0],
+            [1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,1],
+            [1,0,0,1,0,1,0,0,0,0,1,1,0,1,0,1,0,1],
+            [1,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1,0,1],
+            [1,1,1,1,0,1,1,0,0,0,1,0,0,0,0,1,0,1],
+            [0,1,0,0,0,0,1,1,1,0,1,0,1,1,0,0,0,1],
+            [1,1,1,0,1,0,0,0,0,0,1,0,1,0,0,1,1,1],
+            [1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1],
+            [1,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,1],
+            [1,0,1,1,1,0,1,1,1,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1],
+            [1,0,1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,1],
+            [1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,0,1],
+            [1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+            [1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ]
+    ];
+
+    let currentMazeIndex = Math.floor(Math.random() * mazes.length);
+    let maze = mazes[currentMazeIndex];
+    let player = { x: 0, y: 0 };
+    let finishPoint = { x: 0, y: 0 };
+
+    function setStartAndFinish() {
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === 2) {
+                    player = { x, y };
+                } else if (maze[y][x] === 3) {
+                    finishPoint = { x, y };
+                }
+            }
+        }
+    }
+
+    function resizeCanvas() {
+        const numRows = maze.length;
+        const numCols = maze[0].length;
+        const cellSize = Math.floor(Math.min(window.innerWidth * 0.9, 500) / numCols);
+        canvas.width = cellSize * numCols;
+        canvas.height = cellSize * numRows;
+        drawMaze();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawMaze() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cellWidth = canvas.width / maze[0].length;
+        const cellHeight = canvas.height / maze.length;
+
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === 1) {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                } else {
+                    ctx.fillStyle = '#b9b9e3';
+                    ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                }
+            }
+        }
+        drawPlayer(cellWidth, cellHeight);
+    }
+
+    function drawPlayer(cellWidth, cellHeight) {
+        ctx.fillStyle = '#ff6347';
+        ctx.fillRect(player.x * cellWidth, player.y * cellHeight, cellWidth, cellHeight);
+    }
+
+    function movePlayer(direction) {
+        let newX = player.x;
+        let newY = player.y;
+
+        switch (direction) {
+            case 'up': newY--; break;
+            case 'down': newY++; break;
+            case 'left': newX--; break;
+            case 'right': newX++; break;
+        }
+
+        if (maze[newY] && (maze[newY][newX] === 0 || maze[newY][newX] === 3)) {
+            player.x = newX;
+            player.y = newY;
+            drawMaze();
+            checkForEscape();
+        }
+    }
+
+    function checkForEscape() {
+        if (player.x === finishPoint.x && player.y === finishPoint.y) {
+            const message = document.getElementById('message');
+            message.style.display = 'block';
+            message.style.animation = 'popUp 0.8s ease-out forwards';
+        }
+    }
+
+    function changeMaze() {
+        currentMazeIndex = (currentMazeIndex + 1) % mazes.length;
+        maze = mazes[currentMazeIndex];
+        document.getElementById('message').style.display = 'none';
+        setStartAndFinish();
+        resizeCanvas();
+    }
+
+    setStartAndFinish();
+    drawMaze();
+</script>
+
+</body>
+</html>

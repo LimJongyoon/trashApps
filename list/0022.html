@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="theme-color" content="#ffffff"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Maze Editor</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #ffffff;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            gap: 20px;
+        }
+        #gameCanvas {
+            flex: 1;
+            border: 2px solid #d3d3d3;
+            background-color: #b9b9e3;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #mazeInput {
+            flex: 1;
+            height: 500px;
+            width: 800px;
+            font-family: monospace;
+            font-size: 1rem;
+            padding: 10px;
+            border: 1px solid #d3d3d3;
+            border-radius: 5px;
+            resize: none;
+            white-space: pre;
+            overflow-wrap: break-word;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Dynamic Maze Editor</h1>
+<div class="container">
+    <div>
+        <label for="mazeInput">Maze Array (Click on canvas to edit or modify here):</label>
+        <textarea id="mazeInput"></textarea>
+    </div>
+    <canvas id="gameCanvas" width="500" height="500"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const mazeInput = document.getElementById('mazeInput');
+
+    let rows, cols, cellSize;
+    let maze;
+
+    // 캔버스 크기에 맞게 행과 열 자동 계산
+    function initializeMaze() {
+        rows = 18;
+        cols = 18;
+        cellSize = canvas.width / cols;
+        maze = Array.from({ length: rows }, () => Array(cols).fill(0));
+        drawMaze();
+        updateMazeInput();
+    }
+
+    // 미로 배열을 그리기 함수
+    function drawMaze() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                ctx.fillStyle = maze[y][x] === 1 ? '#000000' : '#b9b9e3';
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        }
+    }
+
+    // 클릭 시 벽(1)과 길(0) 전환
+    function toggleCell(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((event.clientX - rect.left) / cellSize);
+        const y = Math.floor((event.clientY - rect.top) / cellSize);
+
+        maze[y][x] = maze[y][x] === 1 ? 0 : 1;
+        drawMaze();
+        updateMazeInput();
+    }
+
+    // 미로 배열을 텍스트로 업데이트
+    function updateMazeInput() {
+        mazeInput.value = '[\n' + maze.map(row => '    ' + JSON.stringify(row)).join(',\n') + '\n]';
+    }
+
+    // textarea 수정 시 미로 업데이트
+    function updateMazeFromInput() {
+        try {
+            const newMaze = JSON.parse(mazeInput.value);
+            if (Array.isArray(newMaze) && newMaze.length > 0 && newMaze[0].length > 0) {
+                rows = newMaze.length;
+                cols = newMaze[0].length;
+                cellSize = canvas.width / cols;
+                maze = newMaze;
+                drawMaze();
+            }
+        } catch (e) {
+            // 오류 발생 시 무시
+        }
+    }
+
+    // 초기 설정 및 이벤트 리스너
+    initializeMaze();
+    canvas.addEventListener('click', toggleCell);
+    mazeInput.addEventListener('input', updateMazeFromInput);
+
+</script>
+
+</body>
+</html>
