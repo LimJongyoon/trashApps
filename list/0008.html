@@ -21,26 +21,13 @@
             color: black;
         }
 
-        @media (min-width: 600px) {
-            body {
-                width: 600px;
-                min-height: 800px;
-                margin: 0.5vh auto !important; /* Center the body */
-                border: 2px solid #d3d3d360; /* Dark gray border */
-                border-radius: 15px; /* Rounded corners */
-                box-sizing: border-box; /* Ensure padding and border are included in max-height */
-            }
-        }
-
-        /* 제목 스타일 상단 배치 및 크기 조정 */
         h1 {
-            font-size: 2.5rem;
+            font-size: 6vw;
             color: #4CAF50;
             margin: 20px 0;
             text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
         }
 
-        /* 메인 컨테이너 스타일 */
         .container {
             display: flex;
             flex-direction: column;
@@ -49,7 +36,6 @@
             max-width: 400px;
         }
 
-        /* 입력 그룹 스타일 */
         .monitorConfig {
             display: flex;
             align-items: center;
@@ -69,7 +55,6 @@
             border: 1px solid #ccc;
         }
 
-        /* 미리보기 영역 스타일 */
         .monitorPreview {
             display: flex;
             justify-content: center;
@@ -85,7 +70,6 @@
             touch-action: none;
         }
 
-        /* 모니터 스타일 */
         .monitor {
             position: absolute;
             display: flex;
@@ -98,10 +82,9 @@
             touch-action: none;
         }
 
-        /* 색상 조절을 위한 클래스 */
-        .monitor.color1 { background-color: #e6e6fa; } /* 연한 보라색 */
-        .monitor.color2 { background-color: #f0e68c; } /* 연한 노란색 */
-        .monitor.color3 { background-color: #add8e6; } /* 연한 파란색 */
+        .monitor.color1 { background-color: #e6e6fa; } 
+        .monitor.color2 { background-color: #f0e68c; } 
+        .monitor.color3 { background-color: #add8e6; } 
     </style>
 </head>
 <body>
@@ -109,7 +92,6 @@
 <h1>Monitor Size Comparison</h1>
 
 <div class="container">
-    <!-- 모니터 설정 -->
     <div class="monitorConfig">
         <input type="checkbox" id="monitor1Check" onclick="toggleMonitor(1)">
         <label for="monitor1Check">Monitor 1</label>
@@ -242,21 +224,17 @@
         </select>
     </div>
 
-    <!-- 모니터 크기 비교 영역 -->
     <div class="monitorPreview" id="monitorPreview">
-        <!-- 모니터 미리보기 요소는 JavaScript에서 동적으로 추가됩니다 -->
     </div>
 </div>
 
 <script>
     const monitorPreview = document.getElementById('monitorPreview');
 
-    // 드래그 상태를 추적할 변수
     let dragItem = null;
     let offsetX = 0;
     let offsetY = 0;
 
-    // 모니터 체크박스 토글
     function toggleMonitor(monitorNumber) {
         const isChecked = document.getElementById(`monitor${monitorNumber}Check`).checked;
         if (isChecked) {
@@ -266,23 +244,20 @@
         }
     }
 
-    // 모니터 생성
     function createMonitor(monitorNumber) {
         const monitor = document.createElement('div');
         monitor.id = `monitor${monitorNumber}`;
         monitor.classList.add('monitor', `color${monitorNumber}`);
         monitor.setAttribute('draggable', 'true');
         
-        // 드래그 이벤트 리스너 추가
         monitor.addEventListener('touchstart', startDrag);
         monitor.addEventListener('touchmove', drag);
         monitor.addEventListener('touchend', endDrag);
 
         monitorPreview.appendChild(monitor);
-        updateMonitor(monitorNumber); // 인치와 비율을 업데이트하여 즉시 반영
+        updateMonitor(monitorNumber); 
     }
 
-    // 모니터 제거
     function removeMonitor(monitorNumber) {
         const monitor = document.getElementById(`monitor${monitorNumber}`);
         if (monitor) {
@@ -293,18 +268,15 @@
         }
     }
 
-    // 모니터 업데이트 (인치와 비율 반영)
     function updateMonitor(monitorNumber) {
     const size = document.getElementById(`monitorSize${monitorNumber}`).value;
     const aspectRatio = document.getElementById(`aspectRatio${monitorNumber}`).value;
     const monitor = document.getElementById(`monitor${monitorNumber}`);
 
     if (monitor) {
-        // 인치에 따라 크기 조정 (기본 크기 비율)
         let baseWidth = 150;
         let width, height;
 
-        // 비율에 따라 크기 계산
         switch (aspectRatio) {
             case "16:9":
                 width = baseWidth * (size / 40);
@@ -381,7 +353,7 @@
             default:
                 console.warn(`Unrecognized aspect ratio: ${aspectRatio}`);
                 width = baseWidth * (size / 40);
-                height = width; // 기본적으로 정사각형으로 표시
+                height = width;
         }
 
         monitor.style.width = `${width}px`;
@@ -390,7 +362,6 @@
     }
 }
 
-    // 드래그 시작
     function startDrag(event) {
         dragItem = event.target;
         const rect = dragItem.getBoundingClientRect();
@@ -398,7 +369,6 @@
         offsetY = event.touches[0].clientY - rect.top + 250;
     }
 
-    // 드래그 중
     function drag(event) {
         if (dragItem) {
             event.preventDefault();
@@ -410,7 +380,6 @@
         }
     }
 
-    // 드래그 종료
     function endDrag() {
         dragItem = null;
     }
