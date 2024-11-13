@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Powerball Number Generator</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .container-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+        h1 {
+            font-size: 1.44rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+            margin-bottom: 35px;
+        }
+        .button:hover {
+            background-color: #388e3c;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 280px;
+            transform: rotate(-15deg);
+            border: 2px solid #d3d3d3;
+            border-right: none;
+            padding: 8px;
+            border-radius: 10px 0px 0px 10px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .ball {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e6e6fa;
+            border-radius: 50%;
+            font-size: 1rem;
+            font-weight: bold;
+            position: relative;
+            transform: translateX(200%);
+            opacity: 0;
+            animation: rollIn 0.3s ease-out forwards;
+        }
+        .ball.powerball {
+            background-color: #ff6347;
+        }
+        @keyframes rollIn {
+            0% { transform: translateX(200%) rotate(0deg); opacity: 0; }
+            100% { transform: translateX(0) rotate(-720deg); opacity: 1; }
+        }
+        @media (min-width: 600px) {
+            body {
+                width: 600px;
+                min-height: 600px;
+                margin: 0.5vh auto !important;
+                border: 2px solid #d3d3d360;
+                border-radius: 15px;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-wrapper">
+    <h1>Powerball Number Generator</h1>
+    <button class="button" onclick="generateNumbers()">Generate Numbers</button>
+    <div id="containerWrapper"></div>
+</div>
+
+<script>
+    async function generateNumbers() {
+        const containerWrapper = document.getElementById('containerWrapper');
+        containerWrapper.innerHTML = '';
+        const lineCount = 5;
+
+        for (let line = 0; line < lineCount; line++) {
+            const container = document.createElement('div');
+            container.className = 'container';
+            containerWrapper.appendChild(container);
+            
+            const mainNumbers = new Set();
+            while (mainNumbers.size < 5) mainNumbers.add(Math.floor(Math.random() * 69) + 1);
+            const powerBall = Math.floor(Math.random() * 26) + 1;
+            
+            let delay = 0;
+            
+            for (const num of mainNumbers) {
+                const ball = document.createElement('div');
+                ball.className = 'ball';
+                ball.textContent = num;
+                ball.style.animationDelay = `${delay}s`;
+                container.appendChild(ball);
+                delay += 0.3;
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            
+            const powerBallDiv = document.createElement('div');
+            powerBallDiv.className = 'ball powerball';
+            powerBallDiv.textContent = powerBall;
+            powerBallDiv.style.animationDelay = `${delay}s`;
+            container.appendChild(powerBallDiv);
+            
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
+    }
+</script>
+
+</body>
+</html>

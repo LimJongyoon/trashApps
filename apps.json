@@ -1,5 +1,12 @@
 [
     {
+        "id": "0020",
+        "title": "Powerball Number Generator",
+        "description": "Powerball Number Generator quickly generate random Powerball numbers for lottery enthusiasts Simulator Lucky lotto",
+        "icon": "icons/0020.webp",
+        "link": "list/0020.html"
+    },
+    {
         "id": "0019",
         "title": "Video to Photos",
         "description": "Video to Photos Video Frame rates Extractor video to images Upload FPS download",
