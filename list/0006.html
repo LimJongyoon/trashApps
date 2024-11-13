@@ -26,10 +26,10 @@
         @media (min-width: 600px) {
             body {
                 width: 600px;
-                margin: 0.5vh auto !important; /* Center the body */
-                border: 2px solid #d3d3d360; /* Dark gray border */
-                border-radius: 15px; /* Rounded corners */
-                box-sizing: border-box; /* Ensure padding and border are included in max-height */
+                margin: 0.5vh auto !important; 
+                border: 2px solid #d3d3d360; 
+                border-radius: 15px; 
+                box-sizing: border-box; 
             }
         }
 
@@ -133,12 +133,12 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 40px; /* 화살표 크기 조정 */
-            height: 40px; /* 화살표 크기 조정 */
-            background-color: black; /* 기본 색상 */
-            clip-path: polygon(50% -5%, -3% 100%, 103% 100%); /* 화살표 모양 */
+            width: 40px; 
+            height: 40px; 
+            background-color: black;
+            clip-path: polygon(50% -5%, -3% 100%, 103% 100%);
             transform: translate(-50%, -50%);
-            display: none; /* 처음에는 숨김 */
+            display: none; 
             z-index: 14;
         }
 
@@ -162,8 +162,8 @@
 </div>
 
 <div class="container">
-    <div class="center-arrow2"></div> <!-- 중앙 화살표 추가 -->
-    <div class="center-arrow1"></div> <!-- 중앙 화살표 추가 -->
+    <div class="center-arrow2"></div>
+    <div class="center-arrow1"></div> 
     <div id="wheel"></div>
 </div>
 
@@ -172,26 +172,24 @@
 
 <script>
     let players = ['Player 1', 'Player 2'];
-    let totalRotation = 0; // 총 회전 각도 초기화
+    let totalRotation = 0; 
 
     function createWheel() {
         const wheel = document.getElementById('wheel');
-        wheel.innerHTML = ''; // 기존 세그먼트 삭제
+        wheel.innerHTML = ''; 
 
         const segmentAngle = 360 / players.length;
 
-        // 플레이어 수에 따라 세그먼트 생성
         players.forEach((player, index) => {
             const segment = document.createElement('div');
             segment.classList.add('segment');
             segment.style.transform = `rotate(${segmentAngle * index}deg)`;
-            segment.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 75%)`; // 랜덤 색상
+            segment.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 75%)`;
             segment.innerHTML = `<span>${player}</span>`;
             wheel.appendChild(segment);
         });
     }
 
-    // Start 버튼 클릭 시 플레이어 입력 숨기고 휠 보이기
     document.getElementById('startButton').addEventListener('click', () => {
         players = [];
         const playerInputs = document.querySelectorAll('#playerInput input');
@@ -199,22 +197,21 @@
             if (input.value.trim()) {
                 players.push(input.value.trim());
             } else {
-                players.push(`Player ${index + 1}`); // 입력이 없으면 기본값으로 Player 1, Player 2, ...
+                players.push(`Player ${index + 1}`); 
             }
         });
 
         if (players.length > 0) {
             document.getElementById('playerInput').style.display = 'none';
             document.getElementById('wheel').style.display = 'block';
-            document.querySelector('.center-arrow1').style.display = 'block'; // 중앙 화살표 보이기
-            document.querySelector('.center-arrow2').style.display = 'block'; // 중앙 화살표 보이기
+            document.querySelector('.center-arrow1').style.display = 'block'; 
+            document.querySelector('.center-arrow2').style.display = 'block'; 
             document.getElementById('spinButton').style.display = 'block';
             document.getElementById('editButton').style.display = 'block';
             createWheel();
         }
     });
 
-    // 플레이어 추가 버튼 클릭 시 새로운 입력 필드 추가
     document.getElementById('addPlayerButton').addEventListener('click', () => {
         const playerInput = document.getElementById('playerInput');
         const newPlayerInput = document.createElement('div');
@@ -225,24 +222,22 @@
         playerInput.insertBefore(newPlayerInput, document.getElementById('addPlayerButton'));
     });
 
-    // Spin 버튼 클릭 시 휠 회전
     document.getElementById('spinButton').addEventListener('click', () => {
         const wheel = document.getElementById('wheel');
-        const randomDegree = Math.random() * 360; // 랜덤 각도
-        totalRotation += randomDegree + 1440; // 누적 회전
+        const randomDegree = Math.random() * 360; 
+        totalRotation += randomDegree + 1440; 
         wheel.style.transition = 'transform 4s ease-out';
-        wheel.style.transform = `rotate(${totalRotation}deg)`; // 총 회전 각도로 설정
+        wheel.style.transform = `rotate(${totalRotation}deg)`;
     });
 
-    // 플레이어 수정하기 버튼 클릭 시 초기 상태로 복귀
     document.getElementById('editButton').addEventListener('click', () => {
         document.getElementById('playerInput').style.display = 'block';
         document.getElementById('wheel').style.display = 'none';
         document.getElementById('spinButton').style.display = 'none';
         document.getElementById('editButton').style.display = 'none';
-        document.querySelector('.center-arrow1').style.display = 'none'; // 중앙 화살표 숨기기
-        document.querySelector('.center-arrow2').style.display = 'none'; // 중앙 화살표 숨기기
-        totalRotation = 0; // 회전 초기화
+        document.querySelector('.center-arrow1').style.display = 'none'; 
+        document.querySelector('.center-arrow2').style.display = 'none'; 
+        totalRotation = 0; 
     });
 
 </script>

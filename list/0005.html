@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#1c1c1c"> <!-- 검정색으로 설정 -->
+    <meta name="theme-color" content="#1c1c1c">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rock Paper Scissors</title>
     <style>
@@ -77,7 +77,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 2px solid #fff; /* 박스 테두리 */
+            border: 2px solid #fff;
             border-radius: 20px;
             padding: 10px;
             margin: 10px;
@@ -136,7 +136,6 @@
             }
         }
 
-        /* 승리한 박스에 빛나면서 떠오르는 애니메이션 */
         @keyframes winnerGlow {
             0% {
                 transform: translateY(0);
@@ -188,21 +187,20 @@
 
     function setupGame(players) {
         currentPlayers = players;
-        document.getElementById('playerSelection').style.display = 'none'; // 플레이어 선택 숨기기
-        document.getElementById('gamePage').style.display = 'block'; // 가위바위보 화면 표시
-        document.getElementById('rpsImages').innerHTML = ''; // 기존 이미지 삭제
+        document.getElementById('playerSelection').style.display = 'none';
+        document.getElementById('gamePage').style.display = 'block';
+        document.getElementById('rpsImages').innerHTML = '';
         document.getElementById('result').innerHTML = '';
         document.getElementById('startButton').style.display = 'block';
-        document.getElementById('startButton').textContent = 'Start'; // 버튼 초기 상태
+        document.getElementById('startButton').textContent = 'Start';
 
-        // 플레이어 번호가 들어갈 박스 생성
         for (let i = 0; i < players; i++) {
             const rpsItem = document.createElement('div');
             rpsItem.classList.add('rpsItem');
             
             const label = document.createElement('div');
             label.classList.add('rpsLabel');
-            label.textContent = i + 1; // 플레이어 번호 표시
+            label.textContent = i + 1;
             
             rpsItem.appendChild(label);
             document.getElementById('rpsImages').appendChild(rpsItem);
@@ -210,55 +208,48 @@
     }
 
     function startGame() {
-        document.getElementById('rpsImages').innerHTML = ''; // 기존 번호 삭제
+        document.getElementById('rpsImages').innerHTML = '';
         document.getElementById('result').innerHTML = '';
         document.getElementById('startButton').style.display = 'none';
 
         let playerChoices = [];
 
-        // 플레이어들의 선택을 생성하고 화면에 표시
         for (let i = 0; i < currentPlayers; i++) {
             const rpsItem = document.createElement('div');
             rpsItem.classList.add('rpsItem');
             
             const img = document.createElement('img');
-            img.src = `../images/QM.png`; // 기본 이미지 설정
+            img.src = `../images/QM.png`;
             img.classList.add('player' + i);
             
             const label = document.createElement('div');
             label.classList.add('rpsLabel');
-            label.textContent = '?'; // 초기에 표시될 텍스트
+            label.textContent = '?';
             
             rpsItem.appendChild(img);
             rpsItem.appendChild(label);
             document.getElementById('rpsImages').appendChild(rpsItem);
 
-            // 플레이어 랜덤 선택 저장
             playerChoices[i] = choices[Math.floor(Math.random() * choices.length)];
         }
 
         setTimeout(() => {
-            // 승자 결정 규칙 구현
             let winners = [];
             let rockCount = playerChoices.filter(choice => choice === 'rock').length;
             let paperCount = playerChoices.filter(choice => choice === 'paper').length;
             let scissorsCount = playerChoices.filter(choice => choice === 'scissors').length;
 
-            // 플레이어 선택을 표시 (비기든 이기든 모두 표시)
             for (let i = 0; i < currentPlayers; i++) {
                 document.querySelector(`.player${i}`).src = `../images/${playerChoices[i]}.png`;
                 document.querySelector(`.player${i}`).nextElementSibling.textContent = playerChoices[i].charAt(0).toUpperCase() + playerChoices[i].slice(1);
             }
 
-            // 플레이어가 1명일 경우 메시지 없이 승자 애니메이션만
             if (currentPlayers === 1) {
                 document.querySelector(`.player0`).parentElement.classList.add('winner');
             } else {
-                // 승자가 없는 비긴 경우 처리
                 if ((rockCount > 0 && paperCount > 0 && scissorsCount > 0) || (rockCount === currentPlayers || paperCount === currentPlayers || scissorsCount === currentPlayers)) {
                     document.getElementById('result').textContent = 'It\'s a tie!';
                 } else {
-                    // 승자 결정 (가위-바위-보의 규칙에 맞게 처리)
                     let winningChoice = '';
                     if (rockCount > 0 && scissorsCount > 0 && paperCount === 0) {
                         winningChoice = 'rock';
@@ -268,7 +259,6 @@
                         winningChoice = 'scissors';
                     }
 
-                    // 승자 표시
                     for (let i = 0; i < currentPlayers; i++) {
                         if (playerChoices[i] === winningChoice) {
                             winners.push(i);
@@ -280,8 +270,8 @@
             }
 
             document.getElementById('startButton').style.display = 'block';
-            document.getElementById('startButton').textContent = 'Retry'; // 버튼이 Retry로 변경
-            document.getElementById('choosePlayerButton').style.display = 'block'; // 플레이어 선택 버튼 표시
+            document.getElementById('startButton').textContent = 'Retry';
+            document.getElementById('choosePlayerButton').style.display = 'block';
         }, 1000);
     }
 

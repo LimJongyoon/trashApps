@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000"> <!-- 메타 태그에 색상 설정 -->
+    <meta name="theme-color" content="#000">
     <title>Lunch Slot Machine</title>
     <style>
         body, html {
@@ -14,13 +14,13 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #000; /* 어두운 슬롯머신 배경 */
+            background-color: #000;
             font-family: 'Courier New', Courier, monospace;
             color: white;
         }
 
         h1 {
-            font-size: 6vw; /* 모바일에 맞게 반응형 폰트 크기 */
+            font-size: 6vw;
             color: #ffdf00;
             margin-bottom: 2vh;
             text-shadow: 0 0 10px #ffdf00, 0 0 20px #ff6347, 0 0 30px #ff4500;
@@ -34,14 +34,14 @@
         }
 
         #slotMachine {
-            font-size: 8vw; /* 반응형 크기 */
+            font-size: 8vw;
             font-weight: bold;
             color: #fff;
             background: linear-gradient(145deg, #ff4500, #ff6347);
-            border: 5px solid #4CAF50; /* 시그니처 컬러로 슬롯 테두리 추가 */
+            border: 5px solid #4CAF50;
             border-radius: 25px;
-            width: 80vw; /* 화면 너비에 맞게 조정 */
-            height: 15vh; /* 화면 높이에 맞게 */
+            width: 80vw;
+            height: 15vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -57,9 +57,9 @@
         }
 
         #result {
-            font-size: 5vw; /* 반응형 폰트 */
+            font-size: 5vw;
             font-weight: bold;
-            color: #4CAF50; /* 시그니처 컬러로 결과 텍스트 강조 */
+            color: #4CAF50;
             margin-top: 3vh;
             text-shadow: 0px 0px 10px #ff6347;
         }
@@ -68,7 +68,7 @@
             padding: 10px 30px;
             font-size: 5vw;
             color: white;
-            background: #4CAF50; /* 시그니처 컬러로 버튼 디자인 */
+            background: #4CAF50;
             border: none;
             border-radius: 15px;
             cursor: pointer;
@@ -78,7 +78,7 @@
 
         #spinButton:active {
             background-color: #45a049;
-            transform: translateY(3px); /* 클릭 시 살짝 눌리는 효과 */
+            transform: translateY(3px);
         }
 
         #spinButton:hover {
@@ -89,7 +89,7 @@
             background-color: #000;
             padding: 20px 5vw;
             border-radius: 40px;
-            box-shadow: 0px 10px 30px rgba(76, 175, 80, 0.5); /* 시그니처 컬러로 박스 그림자 */
+            box-shadow: 0px 10px 30px rgba(76, 175, 80, 0.5);
         }
 
         @keyframes flash {
@@ -167,22 +167,20 @@
     const result = document.getElementById('result');
 
     spinButton.addEventListener('click', () => {
-        // 버튼 비활성화
         spinButton.disabled = true;
         let i = 0;
         const randomIndex = Math.floor(Math.random() * menuItems.length);
         
-        // 슬롯머신 애니메이션
         const spinInterval = setInterval(() => {
             slotMachine.textContent = menuItems[Math.floor(Math.random() * menuItems.length)];
             i++;
-            if (i > 30) { // 30번 애니메이션 후 결과 고정
+            if (i > 30) {
                 clearInterval(spinInterval);
                 result.textContent = `Or, how about this?: ${menuItems[randomIndex]}`;
                 result.style.animation = 'flash 1s ease-in-out infinite';
-                spinButton.disabled = false; // 버튼 다시 활성화
+                spinButton.disabled = false;
             }
-        }, 100); // 100ms 간격으로 변경
+        }, 100);
     });
 </script>
 
