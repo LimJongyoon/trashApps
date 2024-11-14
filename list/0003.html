@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Horn App</title>
     <style>
+        /* 확대 방지를 위해 모든 요소에 적용 */
+        * {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
         body {
             text-align: center;
             margin-top: 50px;
@@ -26,13 +32,13 @@
             border: none;
             background-size: contain;
             user-select: none;
-            touch-action: manipulation; /* 확대 방지 */
         }
         #hornButton:active {
             transform: scale(0.95);
         }
         h1 {
             font-size: 24px;
+            user-select: none;
         }
         h3 {
             user-select: none;
@@ -51,7 +57,7 @@
         const playSound = () => {
             hornSound.play();
             if (navigator.vibrate) {
-                navigator.vibrate(50); // 50밀리초 동안 진동 발생
+                navigator.vibrate(50); // 진동 50ms
             }
         };
 
