@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,8 @@
             height: 350px;
             border: none;
             background-size: contain;
-            user-select: none; 
+            user-select: none;
+            touch-action: manipulation; /* 확대 방지 */
         }
         #hornButton:active {
             transform: scale(0.95);
@@ -34,7 +35,7 @@
             font-size: 24px;
         }
         h3 {
-            user-select: none; 
+            user-select: none;
         }
     </style>
 </head>
@@ -49,10 +50,14 @@
 
         const playSound = () => {
             hornSound.play();
+            if (navigator.vibrate) {
+                navigator.vibrate(50); // 50밀리초 동안 진동 발생
+            }
         };
 
         const stopSound = () => {
             hornSound.pause();
+            hornSound.currentTime = 0; // 오디오 재생을 처음으로 되돌림
         };
 
         hornButton.addEventListener('mousedown', playSound);
