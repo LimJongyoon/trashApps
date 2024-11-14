@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Horn App</title>
     <style>
-        /* 확대 방지를 위해 모든 요소에 적용 */
         * {
             touch-action: manipulation;
             user-select: none;
@@ -41,6 +40,9 @@
             user-select: none;
         }
         h3 {
+            font-size: 2.0rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
             user-select: none;
         }
     </style>
@@ -55,23 +57,25 @@
         const hornSound = document.getElementById('hornSound');
 
         const playSound = () => {
-            hornSound.play();
-            if (navigator.vibrate) {
-                navigator.vibrate(50); // 진동 50ms
-            }
+            hornSound.play().catch(error => {
+                console.error("Audio play was prevented:", error);
+            });
         };
 
         const stopSound = () => {
             hornSound.pause();
-            hornSound.currentTime = 0; // 오디오 재생을 처음으로 되돌림
+            hornSound.currentTime = 0;
         };
 
-        hornButton.addEventListener('mousedown', playSound);
-        hornButton.addEventListener('mouseup', stopSound);
-        hornButton.addEventListener('mouseleave', stopSound);
-
-        hornButton.addEventListener('touchstart', playSound);
-        hornButton.addEventListener('touchend', stopSound);
+        hornButton.addEventListener('mousedown', function firstInteraction() {
+            playSound();
+            hornButton.addEventListener('mousedown', playSound);
+            hornButton.addEventListener('mouseup', stopSound);
+            hornButton.addEventListener('mouseleave', stopSound);
+            hornButton.addEventListener('touchstart', playSound);
+            hornButton.addEventListener('touchend', stopSound);
+            hornButton.removeEventListener('mousedown', firstInteraction);
+        });
     </script>
 </body>
 </html>
