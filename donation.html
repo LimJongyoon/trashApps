@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate to TrashApps</title>
+    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 80%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px 0; /* 위아래 여백 추가 */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #4CAF50;
+        }
+        h2 {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        .donation-method {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .donation-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .donate-button {
+            cursor: pointer;
+            border: none;
+            background: none;
+            outline: none;
+            position: relative;
+        }
+        .donate-button img {
+            width: 150px;
+            height: auto;
+            border-radius: 10px;
+        }
+        .donate-button.kakao .krw-label {
+            position: absolute;
+            bottom: 4px;
+            right: 6px;
+            font-size: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .qr-container {
+            margin-top: 30px;
+        }
+        #qr-code {
+            margin-top: 10px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Support TrashApps</h1>
+
+    <h2>Donation Methods</h2>
+    <div class="donation-method">
+        <p>Choose your preferred donation method:</p>
+        <div class="donation-row">
+            <!-- Buy Me a Coffee Button -->
+            <button class="donate-button" onclick="window.open('https://buymeacoffee.com/trashapps', '_blank')">
+                <img src="images/bmc-button.png" alt="Donate with Buy Me a Coffee">
+            </button>
+
+            <!-- KakaoPay Button -->
+            <button class="donate-button kakao" onclick="window.open('https://qr.kakaopay.com/Ej9CgUTYK/', '_blank')">
+                <img src="images/kakaopay_logo.png" alt="Donate with KakaoPay">
+                <span class="krw-label">Only KRW</span>
+            </button>
+        </div>
+    </div>
+    
+    <h2>About the Creator</h2>
+    <p>Hello! Thank you for considering a donation to support TrashApps.<br>
+       I'm Jongyoon Lim, an unemployed developer who can build both hardware and software!<br>
+       This app is created together with my AI assistant. To learn more about me, visit <a href="https://limjongyoon.github.io/#/" target="_blank">here</a>.
+    </p>
+
+    <h2>Purpose of Donations</h2>
+    <ul>
+        <li>Covering server and hosting costs</li>
+        <li>Developing new apps and features based on your requests</li>
+        <li>Improving user experience through your feedback</li>
+        <li>Buying coffee for a developer working from cafés without an office</li>
+    </ul>
+    <div class="qr-container">
+        <h2>Share with a Friend</h2>
+        <canvas id="qr-code"></canvas>
+        <p>Scan this QR code to easily share TrashApps with a friend! Our goal is to eventually grow TrashApps to 9,999 apps.</p>
+    </div>
+    <div class="button-container">
+        <a href="index.html" class="button">Go to the Web Page</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const qr = new QRious({
+            element: document.getElementById('qr-code'),
+            value: 'https://limjongyoon.github.io/trashApps/',
+            size: 200
+        });
+    });
+</script>
+</body>
+</html>
