@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
     <title>Internet Speed Test</title>
     <style>
-        * {
-            box-sizing: border-box;
+        * { 
+            box-sizing: border-box; 
             touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
@@ -19,8 +19,9 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            background-color: #ffffff;
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            color: #333;
         }
         @media (min-width: 600px) {
             body {
@@ -32,59 +33,88 @@
                 box-sizing: border-box;
             }
         }
-        h1 {
-            color: #4CAF50;
-            margin-bottom: 20px;
+        .container-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        button {
+        h1 {
+            font-size: 1.44rem;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .result {
+            font-size: 1.2rem;
+            color: #4CAF50;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .start-button {
             padding: 10px 20px;
             font-size: 1rem;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #abf0ad;
+            color: black;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
         }
-        button:hover {
-            background-color: #45a049;
+        .start-button:active {
+            background-color: #388e3c;
         }
-        .result {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            color: #333;
-            font-weight: bold;
+        .error {
+            color: red;
         }
     </style>
 </head>
 <body>
 
-<h1>Internet Speed Test</h1>
-<button onclick="startSpeedTest()">Start Test</button>
-<div class="result" id="result">Click "Start Test" to measure your speed.</div>
+<div class="container-wrapper">
+    <h1>Internet Speed Test</h1>
+    <button class="start-button" onclick="startSpeedTest()">Start Test</button>
+    <div class="result" id="result">Click "Start Test" to measure your speed.</div>
+</div>
 
 <script>
     async function startSpeedTest() {
-        const testFileUrl = "https://proof.ovh.net/files/10Mb.dat"; // New public 10MB file
         const resultDiv = document.getElementById("result");
-        resultDiv.textContent = "Testing download speed...";
-
-        const startTime = performance.now();
+        resultDiv.textContent = "Testing download and upload speed...";
+        resultDiv.classList.remove("error");
 
         try {
-            const response = await fetch(testFileUrl, { method: "GET", cache: "no-cache" });
-            const endTime = performance.now();
+            // Download Test
+            const downloadUrl = "https://speed.hetzner.de/1MB.bin"; // Test file for download
+            const downloadStart = performance.now();
+            const downloadResponse = await fetch(downloadUrl, { method: "GET", cache: "no-cache" });
+            const downloadEnd = performance.now();
+            if (!downloadResponse.ok) throw new Error("Download test failed");
 
-            if (response.ok) {
-                const durationInSeconds = (endTime - startTime) / 1000; // Time in seconds
-                const fileSizeInBits = 10 * 1024 * 1024 * 8; // 10MB in bits
-                const speedMbps = (fileSizeInBits / durationInSeconds) / 1e6; // Speed in Mbps
+            const downloadFileSize = 1 * 1024 * 1024; // 1MB in bytes
+            const downloadDuration = (downloadEnd - downloadStart) / 1000; // in seconds
+            const downloadSpeedMbps = ((downloadFileSize * 8) / downloadDuration / 1e6).toFixed(2);
 
-                resultDiv.textContent = `Download Speed: ${speedMbps.toFixed(2)} Mbps`;
-            } else {
-                resultDiv.textContent = "Error: Unable to fetch the test file.";
-            }
+            // Upload Test
+            const uploadData = new Uint8Array(1 * 1024 * 1024); // 1MB random data
+            const uploadStart = performance.now();
+            const uploadResponse = await fetch("https://jsonplaceholder.typicode.com/posts", {
+                method: "POST",
+                body: uploadData,
+            });
+            const uploadEnd = performance.now();
+            if (!uploadResponse.ok) throw new Error("Upload test failed");
+
+            const uploadDuration = (uploadEnd - uploadStart) / 1000; // in seconds
+            const uploadSpeedMbps = ((uploadData.length * 8) / uploadDuration / 1e6).toFixed(2);
+
+            // Display Results
+            resultDiv.innerHTML = `
+                Download Speed: ${downloadSpeedMbps} Mbps<br>
+                Upload Speed: ${uploadSpeedMbps} Mbps
+            `;
         } catch (error) {
-            resultDiv.textContent = "Error: Unable to connect to the test server.";
+            resultDiv.textContent = "Error: Unable to complete the speed test.";
+            resultDiv.classList.add("error");
         }
     }
 </script>
