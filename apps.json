@@ -182,8 +182,15 @@
         "link": "list/0001.html"
     },
     {
+        "id": "test2",
+        "title": "Internet Speed Test",
+        "description": "internet speed instantly download upload speeds Mbps. Simple, accurate",
+        "icon": "icons/test2.webp",
+        "link": "list/test2.html"
+    },
+    {
         "id": "test",
-        "title": "Test App",
+        "title": "Test popup",
         "description": "This app is currently in testing demo preview testing",
         "icon": "icons/test.webp",
         "link": "list/test.html"
