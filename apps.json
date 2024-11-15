@@ -1,12 +1,5 @@
 [
     {
-        "id": "0025",
-        "title": "Internet Speed Test",
-        "description": "internet speed instantly download upload speeds Mbps. Simple, accurate",
-        "icon": "icons/0025.webp",
-        "link": "list/0025.html"
-    },
-    {
         "id": "0024",
         "title": "Currency Converter",
         "description": "Currency Converter major currencies in real-time with a simple and intuitive interface. Perfect for travel, shopping, and global business USD United States Dollar EUR Euro KRW South Korean Won JPY Japanese Yen CNY Chinese Yuan GBP British Pound AUD Australian Dollar CAD Canadian Dollar CHF Swiss Franc INR Indian Rupee SGD Singapore Dollar HKD Hong Kong Dollar NZD New Zealand Dollar THB Thai Baht PHP Philippine Peso BRL Brazilian Real MXN Mexican Peso ARS Argentine Peso CLP Chilean Peso",
