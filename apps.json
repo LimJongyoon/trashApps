@@ -1,5 +1,19 @@
 [
     {
+        "id": "0024",
+        "title": "Currency Converter",
+        "description": "Currency Converter major currencies in real-time with a simple and intuitive interface. Perfect for travel, shopping, and global business USD United States Dollar EUR Euro KRW South Korean Won JPY Japanese Yen CNY Chinese Yuan GBP British Pound AUD Australian Dollar CAD Canadian Dollar CHF Swiss Franc INR Indian Rupee SGD Singapore Dollar HKD Hong Kong Dollar NZD New Zealand Dollar THB Thai Baht PHP Philippine Peso BRL Brazilian Real MXN Mexican Peso ARS Argentine Peso CLP Chilean Peso",
+        "icon": "icons/0024.webp",
+        "link": "list/0024.html"
+    },
+    {
+        "id": "0023",
+        "title": "Unit Converter",
+        "description": "Unit Converter Convert weight length temperature area volume speed time units easily Simple accurate Ideal professionals",
+        "icon": "icons/0023.webp",
+        "link": "list/0023.html"
+    },
+    {
         "id": "0022",
         "title": "Snake Game",
         "description": " Snake Game controls interactive adventure challenge nake food avoid obstacles increasing difficulty classic snake game joystick control touch screen easy medium hard difficulty",

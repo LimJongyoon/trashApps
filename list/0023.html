@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Unit Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        .converter {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #result {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #000;
+            font-weight: bold;
+        }
+        .switch-btn {
+            background-color: #2196F3;
+            color: white;
+            font-size: 0.9rem;
+            margin: 10px auto;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            display: block;
+            width: 35%;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Unit Converter</h1>
+<div class="converter">
+    <label for="category">Select Category:</label>
+    <select id="category" onchange="updateUnits()">
+        <option value="weight">Weight</option>
+        <option value="length">Length</option>
+        <option value="temperature">Temperature</option>
+        <option value="area">Area</option>
+        <option value="volume">Volume</option>
+        <option value="speed">Speed</option>
+        <option value="time">Time</option>
+    </select>
+
+    <label for="inputValue">Enter Value:</label>
+    <input type="number" id="inputValue" value="1" placeholder="Enter value to convert" oninput="convert()">
+
+    <label for="fromUnit">From:</label>
+    <select id="fromUnit" onchange="convert()"></select>
+
+    <button class="switch-btn" onclick="switchUnits()">↔ Switch</button>
+
+    <label for="toUnit">To:</label>
+    <select id="toUnit" onchange="convert()"></select>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    const units = {
+        weight: ["kg", "lb", "oz", "g", "t"],
+        length: ["m", "km", "mi", "ft", "in", "cm"],
+        temperature: ["°C", "°F", "K"],
+        area: ["m²", "km²", "ac", "ha", "ft²"],
+        volume: ["L", "mL", "US gal", "oil bbl", "m³"],
+        speed: ["m/s", "km/h", "mph", "kn"],
+        time: ["sec", "min", "hr", "day", "week"]
+    };
+
+    const conversions = {
+        weight: { kg: 1, lb: 2.20462, oz: 35.274, g: 1000, t: 0.001 },
+        length: { m: 1, km: 0.001, mi: 0.000621371, ft: 3.28084, in: 39.3701, cm: 100 },
+        temperature: {
+            "°C->°F": val => (val * 9/5) + 32,
+            "°F->°C": val => (val - 32) * 5/9,
+            "°C->K": val => val + 273.15,
+            "K->°C": val => val - 273.15,
+            "°F->K": val => (val - 32) * 5/9 + 273.15,
+            "K->°F": val => (val - 273.15) * 9/5 + 32
+        },
+        area: { "m²": 1, "km²": 0.000001, ac: 0.000247105, ha: 0.0001, "ft²": 10.7639 },
+        volume: { L: 1, mL: 1000, "US gal": 0.264172, "oil bbl": 0.00628981, "m³": 0.001 },
+        speed: { "m/s": 1, "km/h": 3.6, mph: 2.23694, kn: 1.94384 },
+        time: { sec: 1, min: 1/60, hr: 1/3600, day: 1/86400, week: 1/604800 }
+    };
+
+    function updateUnits() {
+        const category = document.getElementById("category").value;
+        const fromUnit = document.getElementById("fromUnit");
+        const toUnit = document.getElementById("toUnit");
+        const inputValue = document.getElementById("inputValue");
+        inputValue.value = 1;
+        fromUnit.innerHTML = "";
+        toUnit.innerHTML = "";
+        units[category].forEach((unit, index) => {
+            const option1 = document.createElement("option");
+            option1.value = unit;
+            option1.textContent = unit;
+            const option2 = option1.cloneNode(true);
+            fromUnit.appendChild(option1);
+            toUnit.appendChild(option2);
+        });
+        fromUnit.selectedIndex = 0;
+        toUnit.selectedIndex = 1;
+        convert();
+    }
+
+    function convert() {
+        const category = document.getElementById("category").value;
+        const from = document.getElementById("fromUnit").value;
+        const to = document.getElementById("toUnit").value;
+        const value = parseFloat(document.getElementById("inputValue").value);
+        const resultDiv = document.getElementById("result");
+
+        if (category === "temperature" && from !== to) {
+            const conversionKey = `${from}->${to}`;
+            const result = conversions.temperature[conversionKey](value);
+            resultDiv.textContent = `Result: ${result.toFixed(2)} ${to}`;
+        } else if (conversions[category] && conversions[category][from] && conversions[category][to]) {
+            const result = (value / conversions[category][from]) * conversions[category][to];
+            resultDiv.textContent = `Result: ${result.toFixed(2)} ${to}`;
+        } else {
+            resultDiv.textContent = "Invalid conversion!";
+        }
+    }
+
+    function switchUnits() {
+        const fromUnit = document.getElementById("fromUnit");
+        const toUnit = document.getElementById("toUnit");
+
+        const temp = fromUnit.value;
+        fromUnit.value = toUnit.value;
+        toUnit.value = temp;
+
+        convert();
+    }
+
+    updateUnits();
+</script>
+
+</body>
+</html>

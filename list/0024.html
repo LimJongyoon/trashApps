@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Currency Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 18px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .switch-btn {
+            background-color: #2196F3;
+            color: white;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            width: auto;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: bold;
+        }
+        .api-note {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Currency Converter</h1>
+    <label for="fromCurrency">From:</label>
+    <select id="fromCurrency" onchange="convertCurrency()">
+        <option value="USD">USD - United States Dollar</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="KRW">KRW - South Korean Won</option>
+        <option value="JPY">JPY - Japanese Yen</option>
+        <option value="CNY">CNY - Chinese Yuan</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="CHF">CHF - Swiss Franc</option>
+        <option value="INR">INR - Indian Rupee</option>
+        <option value="SGD">SGD - Singapore Dollar</option>
+        <option value="HKD">HKD - Hong Kong Dollar</option>
+        <option value="NZD">NZD - New Zealand Dollar</option>
+        <option value="THB">THB - Thai Baht</option>
+        <option value="PHP">PHP - Philippine Peso</option>
+        <option value="BRL">BRL - Brazilian Real</option>
+        <option value="MXN">MXN - Mexican Peso</option>
+        <option value="ARS">ARS - Argentine Peso</option>
+        <option value="CLP">CLP - Chilean Peso</option>
+    </select>
+
+    <button class="switch-btn" onclick="switchCurrencies()">↔ Switch</button>
+
+    <label for="toCurrency">To:</label>
+    <select id="toCurrency" onchange="convertCurrency()">
+        <option value="USD">USD - United States Dollar</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="KRW">KRW - South Korean Won</option>
+        <option value="JPY" selected>JPY - Japanese Yen</option>
+        <option value="CNY">CNY - Chinese Yuan</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="CHF">CHF - Swiss Franc</option>
+        <option value="INR">INR - Indian Rupee</option>
+        <option value="SGD">SGD - Singapore Dollar</option>
+        <option value="HKD">HKD - Hong Kong Dollar</option>
+        <option value="NZD">NZD - New Zealand Dollar</option>
+        <option value="THB">THB - Thai Baht</option>
+        <option value="PHP">PHP - Philippine Peso</option>
+        <option value="BRL">BRL - Brazilian Real</option>
+        <option value="MXN">MXN - Mexican Peso</option>
+        <option value="ARS">ARS - Argentine Peso</option>
+        <option value="CLP">CLP - Chilean Peso</option>
+    </select>
+
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount" value="1" oninput="convertCurrency()">
+
+    <div class="result" id="result">Result: -</div>
+    <div class="api-note">Powered by Exchangerate API</div>
+</div>
+
+<script>
+    const apiKey = "75add5ccad61420a2ec7be63";
+
+    async function convertCurrency() {
+        const fromCurrency = document.getElementById("fromCurrency").value;
+        const toCurrency = document.getElementById("toCurrency").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+
+        if (isNaN(amount) || amount <= 0) {
+            document.getElementById("result").textContent = "Please enter a valid amount.";
+            return;
+        }
+
+        const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/pair/${fromCurrency}/${toCurrency}/${amount}`;
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            if (data.conversion_result) {
+                document.getElementById("result").textContent =
+                    `Result: ${amount} ${fromCurrency} = ${data.conversion_result.toFixed(2)} ${toCurrency}`;
+            } else {
+                document.getElementById("result").textContent = "Error: Unable to fetch exchange rates.";
+            }
+        } catch (error) {
+            document.getElementById("result").textContent = "Error: Unable to connect to the API.";
+        }
+    }
+
+    function switchCurrencies() {
+        const fromCurrency = document.getElementById("fromCurrency");
+        const toCurrency = document.getElementById("toCurrency");
+
+        const temp = fromCurrency.value;
+        fromCurrency.value = toCurrency.value;
+        toCurrency.value = temp;
+
+        convertCurrency();
+    }
+</script>
+
+</body>
+</html>
