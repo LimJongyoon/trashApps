@@ -1,8 +1,15 @@
 [
     {
+        "id": "0022",
+        "title": "Snake Game",
+        "description": " Snake Game controls interactive adventure challenge nake food avoid obstacles increasing difficulty classic snake game joystick control touch screen easy medium hard difficulty",
+        "icon": "icons/0022.webp",
+        "link": "list/0022.html"
+    },
+    {
         "id": "0021",
         "title": "Maze Escape Game",
-        "description": "puzzle, escape, maze solver, brain teaser, adventure, challenge, navigation, fun game, success, puzzle lovers, controls, interactive",
+        "description": "puzzle, escape maze solver brain teaser adventure challenge navigation fun game success puzzle lovers controls interactive",
         "icon": "icons/0021.webp",
         "link": "list/0021.html"
     },
