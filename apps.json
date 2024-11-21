@@ -4,195 +4,223 @@
         "title": "3D Maze Escape Game",
         "description": "Polygon Mesh Texture 3D Three dimensional Perspective puzzle, escape maze solver brain teaser adventure challenge navigation fun game success puzzle lovers controls interactive",
         "icon": "icons/0025.webp",
-        "link": "list/0025.html"
+        "link": "list/0025.html",
+        "category": "Games"
     },
     {
         "id": "0024",
         "title": "Currency Converter",
         "description": "Currency Converter major currencies in real-time with a simple and intuitive interface. Perfect for travel, shopping, and global business USD United States Dollar EUR Euro KRW South Korean Won JPY Japanese Yen CNY Chinese Yuan GBP British Pound AUD Australian Dollar CAD Canadian Dollar CHF Swiss Franc INR Indian Rupee SGD Singapore Dollar HKD Hong Kong Dollar NZD New Zealand Dollar THB Thai Baht PHP Philippine Peso BRL Brazilian Real MXN Mexican Peso ARS Argentine Peso CLP Chilean Peso",
         "icon": "icons/0024.webp",
-        "link": "list/0024.html"
+        "link": "list/0024.html",
+        "category": "Utilities"
     },
     {
         "id": "0023",
         "title": "Unit Converter",
         "description": "Unit Converter Convert weight length temperature area volume speed time units easily Simple accurate Ideal professionals",
         "icon": "icons/0023.webp",
-        "link": "list/0023.html"
+        "link": "list/0023.html",
+        "category": "Utilities"
     },
     {
         "id": "0022",
         "title": "Snake Game",
         "description": " Snake Game controls interactive adventure challenge nake food avoid obstacles increasing difficulty classic snake game joystick control touch screen easy medium hard difficulty",
         "icon": "icons/0022.webp",
-        "link": "list/0022.html"
+        "link": "list/0022.html",
+        "category": "Games"
     },
     {
         "id": "0021",
         "title": "Maze Escape Game",
         "description": "puzzle, escape maze solver brain teaser adventure challenge navigation fun game success puzzle lovers controls interactive",
         "icon": "icons/0021.webp",
-        "link": "list/0021.html"
+        "link": "list/0021.html",
+        "category": "Games"
     },
     {
         "id": "0020",
         "title": "Powerball Number Generator",
         "description": "Powerball Number Generator quickly generate random Powerball numbers for lottery enthusiasts Simulator Lucky lotto",
         "icon": "icons/0020.webp",
-        "link": "list/0020.html"
+        "link": "list/0020.html",
+        "category": "Utilities"
     },
     {
         "id": "0019",
         "title": "Video to Photos",
         "description": "Video to Photos Video Frame rates Extractor video to images Upload FPS download",
         "icon": "icons/0019.webp",
-        "link": "list/0019.html"
+        "link": "list/0019.html",
+        "category": "Utilities"
     },
     {
         "id": "0018",
         "title": "Mobile Image Resizer",
         "description": "Mobile Image Resizer photo resize optimizer compress image photo scaler image fit png jpg jpeg",
         "icon": "icons/0018.webp",
-        "link": "list/0018.html"
+        "link": "list/0018.html",
+        "category": "Utilities"
     },
     {
         "id": "0017",
         "title": "Digital Dice Roller",
         "description": "Digital Dice Roller virtual dice random number game fun generator roll dice luck tester",
         "icon": "icons/0017.webp",
-        "link": "list/0017.html"
+        "link": "list/0017.html",
+        "category": "Utilities"
     },
     {
         "id": "0016",
         "title": "QR Code Generator",
         "description": "QR Code Generator qr maker code creator barcode custom qr for URL",
         "icon": "icons/0016.webp",
-        "link": "list/0016.html"
+        "link": "list/0016.html",
+        "category": "Utilities"
     },
     {
         "id": "0015",
         "title": "Tic Tac Toe",
         "description": "Tic Tac Toe classic game puzzle strategy fun multiplayer",
         "icon": "icons/0015.webp",
-        "link": "list/0015.html"
+        "link": "list/0015.html",
+        "category": "Games"
     },
     {
         "id": "0014",
         "title": "Weather Forecast",
         "description": "Current Location Weather Forecast real-time temperature weather updates local forecast",
         "icon": "icons/0014.webp",
-        "link": "list/0014.html"
+        "link": "list/0014.html",
+        "category": "Lifestyle"
     },
     {
         "id": "0013",
         "title": "Find Nearby Cafes",
         "description": "Find Nearby Cafes coffee shop locator cafe finder local search",
         "icon": "icons/0013.webp",
-        "link": "list/0013.html"
+        "link": "list/0013.html",
+        "category": "Lifestyle"
     },
     {
         "id": "0012",
         "title": "Color Picker HEX/RGB",
         "description": "Color Picker HEX RGB color code tool visual selector palette",
         "icon": "icons/0012.webp",
-        "link": "list/0012.html"
+        "link": "list/0012.html",
+        "category": "Utilities"
     },
     {
         "id": "0011",
         "title": "Save Autograph to Album",
         "description": "Save Autograph to Album Signature Download Maker signature storage autograph saver png jpg jpeg",
         "icon": "icons/0011.webp",
-        "link": "list/0011.html"
+        "link": "list/0011.html",
+        "category": "Utilities"
     },
     {
         "id": "0010",
         "title": "35 Number Sliding Puzzle",
         "description": "35 36 Number Sliding Puzzle brain teaser tile game mental challenge puzzle",
         "icon": "icons/0010.webp",
-        "link": "list/0010.html"
+        "link": "list/0010.html",
+        "category": "Games"
     },
     {
         "id": "0009",
         "title": "15 Number Sliding Puzzle",
         "description": "15 16 Number Sliding Puzzle brain teaser tile game mental challenge puzzle",
         "icon": "icons/0009.webp",
-        "link": "list/0009.html"
+        "link": "list/0009.html",
+        "category": "Games"
     },
     {
         "id": "0008",
         "title": "Monitor Layout Simulator",
         "description": "Monitor Size Layout Comparison Simulator screen size layout tester monitor comparison",
         "icon": "icons/0008.webp",
-        "link": "list/0008.html"
+        "link": "list/0008.html",
+        "category": "Utilities"
     },
     {
         "id": "0007",
-        "title": "Mole Catcher Gamep",
+        "title": "Mole Catcher Game",
         "description": "Mole Catcher Whack Mole Hit Game Fun Tap Reaction Smashing Animal Game Children Kid Hammer Quick",
         "icon": "icons/0007.webp",
-        "link": "list/0007.html"
+        "link": "list/0007.html",
+        "category": "Games"
     },
     {
         "id": "0006",
         "title": "Spin Wheel of Decision",
         "description": "Spin Wheel of Decision luck wheel choice maker random decision spinner",
         "icon": "icons/0006.webp",
-        "link": "list/0006.html"
+        "link": "list/0006.html",
+        "category": "Games"
     },
     {
         "id": "0005",
         "title": "Rock Paper Scissors",
         "description": "Rock Paper Scissors classic game choice decision maker fun challenge",
         "icon": "icons/0005.webp",
-        "link": "list/0005.html"
+        "link": "list/0005.html",
+        "category": "Games"
     },
     {
         "id": "0004",
         "title": "Lunch Decide Slot Machine",
         "description": "Lunch decide slot machine meal picker random choice food roulette",
         "icon": "icons/0004.webp",
-        "link": "list/0004.html"
+        "link": "list/0004.html",
+        "category": "Lifestyle"
     },
     {
         "id": "0003",
         "title": "Horn for Crowded Place",
         "description": "Horn for crowded place situations sound alert attention grabber loud horn car",
         "icon": "icons/0003.webp",
-        "link": "list/0003.html"
+        "link": "list/0003.html",
+        "category": "Lifestyle"
     },
     {
         "id": "0002",
         "title": "Webtoon Viewer",
         "description": "Webtoon viewer comic reader comics manga portrait",
         "icon": "icons/0002.webp",
-        "link": "list/0002.html"
+        "link": "list/0002.html",
+        "category": "Lifestyle"
     },
     {
         "id": "0002 PC",
         "title": "Webtoon Viewer for PC",
         "description": "Webtoon viewer for PC comic reader comics manga portrait",
         "icon": "icons/0002PC.webp",
-        "link": "list/0002pc.html"
+        "link": "list/0002pc.html",
+        "category": "Lifestyle"
     },
     {
         "id": "0001",
         "title": "Camera People=Shit",
         "description": "Camera people = shit anti-paparazzi image recognition picture",
         "icon": "icons/0001.webp",
-        "link": "list/0001.html"
+        "link": "list/0001.html",
+        "category": "Lifestyle"
     },
     {
         "id": "test2",
         "title": "Internet Speed Test",
         "description": "internet speed instantly download upload speeds Mbps. Simple, accurate",
         "icon": "icons/test2.webp",
-        "link": "list/test2.html"
+        "link": "list/test2.html",
+        "category": ""
     },
     {
         "id": "test",
         "title": "Test popup",
         "description": "This app is currently in testing demo preview testing",
         "icon": "icons/test.webp",
-        "link": "list/test.html"
+        "link": "list/test.html",
+        "category": ""
     }
 ]
