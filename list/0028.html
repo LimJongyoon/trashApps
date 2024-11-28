@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-    <title>Wi-Fi Speed Test</title>
+    <title>Wi-Fi Speed Meter</title>
     <style>
         * {
             box-sizing: border-box;
@@ -34,12 +34,12 @@
             color: #4CAF50;
             margin-bottom: 20px;
         }
-        .status {
-            margin-top: 10px;
+        .stats {
+            text-align: left;
             font-size: 1rem;
+            margin: 20px 0;
         }
         .control-button {
-            margin-top: 20px;
             padding: 10px 20px;
             font-size: 1rem;
             color: #ffffff;
@@ -56,40 +56,85 @@
 <body>
     <div class="meter-container">
         <div class="speed">0 Mbps</div>
-        <div class="status">Click "Start" to test Wi-Fi speed</div>
+        <div class="stats">
+            <p>Max Speed: <span id="maxSpeed">0 Mbps</span></p>
+            <p>Min Speed: <span id="minSpeed">0 Mbps</span></p>
+            <p>Average Speed: <span id="avgSpeed">0 Mbps</span></p>
+            <p>Elapsed Time: <span id="elapsedTime">0s</span></p>
+        </div>
         <button class="control-button" onclick="startSpeedTest()">Start</button>
     </div>
 
     <script>
+        let maxSpeed = 0;
+        let minSpeed = Infinity;
+        let totalSpeed = 0;
+        let count = 0;
+        let startTime = 0;
+
         const speedEl = document.querySelector('.speed');
-        const statusEl = document.querySelector('.status');
+        const maxSpeedEl = document.getElementById('maxSpeed');
+        const minSpeedEl = document.getElementById('minSpeed');
+        const avgSpeedEl = document.getElementById('avgSpeed');
+        const elapsedTimeEl = document.getElementById('elapsedTime');
+        const testFileUrl = './1MB_dummy_file.bin'; 
+        const fileSizeInBits = 1 * 8 * 1024 * 1024;
 
-        function startSpeedTest() {
-            const testFileUrl = 'https://speed.hetzner.de/100MB.bin'; // Test file URL
-            const fileSizeInBits = 100 * 8 * 1024 * 1024; // 100 MB in bits
-            const startTime = Date.now();
+        async function startSpeedTest() {
+            resetStats();
+            startTime = Date.now();
 
-            statusEl.textContent = 'Testing...';
+            try {
+                for (let i = 0; i < 5; i++) { 
+                    const speed = await testDownloadSpeed();
+                    updateStats(speed);
+                }
+            } catch (error) {
+                speedEl.textContent = '0 Mbps';
+                console.error('Test failed:', error);
+            }
+        }
 
-            fetch(testFileUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.blob();
-                })
-                .then(() => {
-                    const endTime = Date.now();
-                    const durationInSeconds = (endTime - startTime) / 1000;
-                    const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
+        async function testDownloadSpeed() {
+            const start = Date.now();
 
-                    speedEl.textContent = `${speedMbps.toFixed(2)} Mbps`;
-                    statusEl.textContent = 'Test completed';
-                })
-                .catch(error => {
-                    console.error('Error during speed test:', error);
-                    statusEl.textContent = 'Test failed';
-                });
+            const response = await fetch(testFileUrl);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            await response.blob(); 
+
+            const end = Date.now();
+            const durationInSeconds = (end - start) / 1000;
+            const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
+
+            speedEl.textContent = `${speedMbps.toFixed(2)} Mbps`;
+            return speedMbps;
+        }
+
+        function updateStats(speed) {
+            maxSpeed = Math.max(maxSpeed, speed);
+            minSpeed = Math.min(minSpeed, speed);
+            totalSpeed += speed;
+            count++;
+
+            const elapsedTime = Math.round((Date.now() - startTime) / 1000);
+
+            maxSpeedEl.textContent = `${maxSpeed.toFixed(2)} Mbps`;
+            minSpeedEl.textContent = `${minSpeed.toFixed(2)} Mbps`;
+            avgSpeedEl.textContent = `${(totalSpeed / count).toFixed(2)} Mbps`;
+            elapsedTimeEl.textContent = `${elapsedTime}s`;
+        }
+
+        function resetStats() {
+            maxSpeed = 0;
+            minSpeed = Infinity;
+            totalSpeed = 0;
+            count = 0;
+            speedEl.textContent = '0 Mbps';
+            maxSpeedEl.textContent = '0 Mbps';
+            minSpeedEl.textContent = '0 Mbps';
+            avgSpeedEl.textContent = '0 Mbps';
+            elapsedTimeEl.textContent = '0s';
         }
     </script>
 </body>
