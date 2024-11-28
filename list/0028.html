@@ -41,12 +41,13 @@
             margin-bottom: 20px;
         }
         .video-preview {
-            width: 100px;
-            height: auto;
+            width: 100%;
+            height: 200px;
             margin: 10px auto;
             border: 1px solid #ccc;
             border-radius: 5px;
             display: block;
+            object-fit: cover;
         }
         .control-button {
             margin-top: 20px;
@@ -147,7 +148,7 @@
 
         async function startTimer() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 video.srcObject = stream;
                 await video.play();
 
@@ -156,7 +157,7 @@
                 startTimerInterval();
                 measureBrightness();
             } catch (error) {
-                alert('Unable to access the camera. Please check permissions or ensure the device has a rear camera.');
+                alert('Unable to access the camera. Please check permissions or ensure the device has a front camera.');
                 console.error('Camera error:', error);
             }
         }
@@ -187,8 +188,8 @@
             const minutes = Math.floor(milliseconds / 60000);
             const seconds = Math.floor((milliseconds % 60000) / 1000);
             const ms = milliseconds % 1000;
-            timerDisplay.textContent = `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}:${ms < 100 ? '0' + (ms < 10 ? '0' + ms : ms) : ms}`;
-            return `${minutes}:${seconds}:${ms}`;
+            timerDisplay.textContent = `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}:${Math.floor(ms / 10)}`;
+            return `${minutes}:${seconds}:${Math.floor(ms / 10)}`;
         }
 
         function addToResetHistory(time) {
@@ -204,7 +205,7 @@
                 resetHistoryContainer.innerHTML = '';
                 resetHistory.forEach((time, index) => {
                     const p = document.createElement('p');
-                    p.textContent = `${time}`;
+                    p.textContent = `${time.split(':').map((v, i) => i === 2 ? Math.floor(v / 10) : v).join(':')}`;
                     resetHistoryContainer.appendChild(p);
                 });
 

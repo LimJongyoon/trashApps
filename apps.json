@@ -9,10 +9,10 @@
     },
     {
         "id": "0028",
-        "title": "Hands Free Timer",
+        "title": "HandsFree Timer",
         "description": "Track time hands-free with this interactive timer. The timer resets when a hand is detected in front of the camera, allowing you to manage time without touching your device. Features include adjustable sensitivity, real-time timer display, and visual feedback.",
-        "icon": "icons/0030.webp",
-        "link": "list/0030.html",
+        "icon": "icons/0028.webp",
+        "link": "list/0028.html",
         "category": "Utilities"
     },    
     {
