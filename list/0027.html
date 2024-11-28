@@ -47,6 +47,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             display: block;
+            object-fit: cover;
         }
         .stats {
             text-align: left;
@@ -72,7 +73,7 @@
     <div class="meter-container">
         <div class="app-title">Light Level Meter</div>
         <div class="light-level">0 Lux</div>
-        <video class="video-preview" autoplay muted></video>
+        <video class="video-preview" autoplay muted playsinline></video>
         <button class="control-button" onclick="toggleMeasurement()">Start</button>
         <div class="stats">
             <p>Max Level: <span id="maxLevel">0 Lux</span></p>
@@ -112,19 +113,11 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
 
-                // Play the video and wait until it's ready
-                await video.play();
+                // Prevent full screen
+                video.setAttribute('playsinline', 'true');
 
-                // Ensure video metadata is loaded before starting measurement
-                if (video.videoWidth === 0 || video.videoHeight === 0) {
-                    video.addEventListener('loadedmetadata', () => {
-                        console.log('Video metadata loaded.');
-                        startBrightnessMeasurement();
-                    });
-                } else {
-                    console.log('Video metadata already loaded.');
-                    startBrightnessMeasurement();
-                }
+                await video.play();
+                startBrightnessMeasurement();
             } catch (error) {
                 alert('Unable to access the camera. Please check permissions or ensure the device has a rear camera.');
                 console.error('Camera error:', error);
@@ -171,22 +164,17 @@
 
             let totalBrightness = 0;
 
-            // Calculate average RGB brightness
             for (let i = 0; i < pixels.length; i += 4) {
                 const r = pixels[i];
                 const g = pixels[i + 1];
                 const b = pixels[i + 2];
-                const brightness = (r + g + b) / 3; // Average RGB value
+                const brightness = (r + g + b) / 3;
                 totalBrightness += brightness;
             }
 
-            // Average brightness
             const avgBrightness = totalBrightness / (pixels.length / 4);
+            const estimatedLux = avgBrightness * 2;
 
-            // Estimate Lux value (arbitrary scale, can be calibrated)
-            const estimatedLux = avgBrightness * 2; // Example: Scaling factor for Lux approximation
-
-            // Update stats
             lightLevelEl.textContent = `${estimatedLux.toFixed(0)} Lux`;
             maxLevel = Math.max(maxLevel, estimatedLux);
             minLevel = Math.min(minLevel, estimatedLux);

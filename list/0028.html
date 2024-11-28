@@ -77,8 +77,8 @@
         const minSpeedEl = document.getElementById('minSpeed');
         const avgSpeedEl = document.getElementById('avgSpeed');
         const elapsedTimeEl = document.getElementById('elapsedTime');
-        const testFileUrl = './10MB_dummy_file.bin'; 
-        const fileSizeInBits = 1 * 8 * 1024 * 1024; 
+        const testFileUrl = 'https://drive.google.com/uc?export=download&id=1dkrtRc01DJndbAEvqmEIcCKjYa96U4wP';
+        const fileSizeInBits = 1 * 8 * 1024 * 1024;
 
         async function startSpeedTest() {
             resetStats();
@@ -101,7 +101,7 @@
             const response = await fetch(testFileUrl);
             if (!response.ok) throw new Error('Network response was not ok');
 
-            await response.blob(); 
+            await response.blob();
             const end = Date.now();
             const durationInSeconds = (end - start) / 1000;
             const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);

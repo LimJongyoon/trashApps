@@ -1,16 +1,8 @@
 [
     {
-        "id": "0030",
+        "id": "0029",
         "title": "PDF Splitter",
         "description": "Split your PDF into individual pages with ease. Features include page previews, single-page download options, and a user-friendly interface. Ideal for managing documents efficiently and extracting specific pages as needed.",
-        "icon": "icons/0030.webp",
-        "link": "list/0030.html",
-        "category": "Utilities"
-    },
-    {
-        "id": "0029",
-        "title": "Bluetooth Distance Scanner",
-        "description": "Scan nearby Bluetooth devices and estimate their distance based on signal strength. Features include real-time RSSI-based distance estimation, device discovery, and a user-friendly interface. Perfect for locating devices or monitoring proximity.",
         "icon": "icons/0029.webp",
         "link": "list/0029.html",
         "category": "Utilities"
