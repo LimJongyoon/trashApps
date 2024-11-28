@@ -2,94 +2,245 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-    <title>Wi-Fi Speed Meter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Interactive Timer with Hand Detection</title>
     <style>
-        * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-        body, html { margin: 0; padding: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f5f5f5; font-family: Arial, sans-serif; }
-        .meter-container { text-align: center; padding: 20px; background-color: #ffffff; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5); border-radius: 10px; width: 300px; }
-        .speed { font-size: 2rem; color: #4CAF50; margin-bottom: 20px; }
-        .stats { text-align: left; font-size: 1rem; margin: 20px 0; }
-        .control-button { padding: 10px 20px; font-size: 1rem; color: #ffffff; background-color: #007BFF; border: none; border-radius: 5px; cursor: pointer; }
-        .control-button:active { background-color: #0056b3; }
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        .app-title {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .timer-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            width: 300px;
+        }
+        .timer-display {
+            font-size: 2.5rem;
+            color: #FF5722;
+            margin-bottom: 20px;
+        }
+        .video-preview {
+            width: 100px;
+            height: auto;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+        }
+        .control-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .control-button:active {
+            background-color: #0056b3;
+        }
+        .info-text {
+            width: 80vw;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .sensitivity {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #555;
+        }
+        .reset-history {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            max-height: 50px;
+            overflow-y: auto;
+            font-size: 1rem;
+            color: #333;
+            background-color: #e0e0e0; /* Grey background */
+        }
+        .reset-history p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="meter-container">
-        <div class="speed">0 Mbps</div>
-        <div class="stats">
-            <p>Max Speed: <span id="maxSpeed">0 Mbps</span></p>
-            <p>Min Speed: <span id="minSpeed">0 Mbps</span></p>
-            <p>Average Speed: <span id="avgSpeed">0 Mbps</span></p>
-            <p>Elapsed Time: <span id="elapsedTime">0s</span></p>
+    <div class="app-title">Hands-Free Timer</div>
+    <div class="timer-container">
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <video class="video-preview" autoplay muted></video>
+
+        <div class="sensitivity">
+            <p><strong>Set Sensitivity:</strong></p>
+            <label><input type="radio" name="sensitivity" value="5" > Low</label>
+            <label><input type="radio" name="sensitivity" value="30" checked> Medium</label>
+            <label><input type="radio" name="sensitivity" value="60"> High</label>
         </div>
-        <button class="control-button" onclick="startSpeedTest()">Start</button>
+
+        <button class="control-button" onclick="toggleTimer()">Start Timer</button>
+
+        <div class="reset-history" id="resetHistory"></div>
+    </div>
+
+    <div class="info-text">
+        <p><strong>How to Use:</strong></p>
+        <p>
+            1. Press "Start Timer" to begin the timer.<br>
+            2. The timer will start counting from 0.<br>
+            3. If you wave your hand in front of the camera, the timer will reset to 0.<br>
+            4. You can use this feature to track time in a hands-free way.
+        </p>
     </div>
 
     <script>
-        let maxSpeed = 0, minSpeed = Infinity, totalSpeed = 0, count = 0, startTime = 0;
+        let isRunning = false;
+        let timerInterval;
+        let milliseconds = 0;
+        let sensitivity = 30;  // Default sensitivity
+        let resetHistory = [];
+        let lastUpdate = Date.now();
+        const timerDisplay = document.getElementById('timerDisplay');
+        const video = document.querySelector('.video-preview');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        let lastAvgBrightness = 0;
 
-        const speedEl = document.querySelector('.speed');
-        const maxSpeedEl = document.getElementById('maxSpeed');
-        const minSpeedEl = document.getElementById('minSpeed');
-        const avgSpeedEl = document.getElementById('avgSpeed');
-        const elapsedTimeEl = document.getElementById('elapsedTime');
-        const testFileUrl = 'https://limjongyoon.github.io/trashApps/list/10MB_dummy_file.bin'; 
-        const fileSizeInBits = 10 * 8 * 1024 * 1024;
+        // Update sensitivity based on user selection
+        document.querySelectorAll('input[name="sensitivity"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                sensitivity = parseInt(e.target.value);
+            });
+        });
 
-        async function startSpeedTest() {
-            resetStats();
-            startTime = Date.now();
-
-            try {
-                for (let i = 0; i < 3; i++) {
-                    const speed = await testDownloadSpeed();
-                    updateStats(speed);
-                }
-            } catch (error) {
-                speedEl.textContent = '0 Mbps';
-                console.error('Test failed:', error);
+        async function toggleTimer() {
+            if (isRunning) {
+                stopTimer();
+            } else {
+                await startTimer();
             }
         }
 
-        async function testDownloadSpeed() {
-            const start = Date.now();
-            const response = await fetch(testFileUrl);
-            if (!response.ok) throw new Error('Network response was not ok');
-            await response.blob(); 
-            const end = Date.now();
-            const durationInSeconds = (end - start) / 1000;
-            if (durationInSeconds <= 0) throw new Error('Invalid duration');
+        async function startTimer() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                await video.play();
 
-            const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
-            speedEl.textContent = `${speedMbps.toFixed(2)} Mbps`;
-            console.log(`Duration: ${durationInSeconds}s, Speed: ${speedMbps.toFixed(2)} Mbps`);
-            return speedMbps;
+                isRunning = true;
+                resetTimer();
+                startTimerInterval();
+                measureBrightness();
+            } catch (error) {
+                alert('Unable to access the camera. Please check permissions or ensure the device has a rear camera.');
+                console.error('Camera error:', error);
+            }
         }
 
-        function updateStats(speed) {
-            maxSpeed = Math.max(maxSpeed, speed);
-            minSpeed = Math.min(minSpeed, speed);
-            totalSpeed += speed;
-            count++;
-            const elapsedTime = Math.round((Date.now() - startTime) / 1000);
-
-            maxSpeedEl.textContent = `${maxSpeed.toFixed(2)} Mbps`;
-            minSpeedEl.textContent = `${minSpeed.toFixed(2)} Mbps`;
-            avgSpeedEl.textContent = `${(totalSpeed / count).toFixed(2)} Mbps`;
-            elapsedTimeEl.textContent = `${elapsedTime}s`;
+        function stopTimer() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach((track) => track.stop());
+            }
+            isRunning = false;
+            clearInterval(timerInterval);
         }
 
-        function resetStats() {
-            maxSpeed = 0;
-            minSpeed = Infinity;
-            totalSpeed = 0;
-            count = 0;
-            speedEl.textContent = '0 Mbps';
-            maxSpeedEl.textContent = '0 Mbps';
-            minSpeedEl.textContent = '0 Mbps';
-            avgSpeedEl.textContent = '0 Mbps';
-            elapsedTimeEl.textContent = '0s';
+        function resetTimer() {
+            const resetTime = updateTimerDisplay();
+            addToResetHistory(resetTime);
+            milliseconds = 0;
+            updateTimerDisplay();
+        }
+
+        function startTimerInterval() {
+            timerInterval = setInterval(() => {
+                milliseconds += 10;
+                updateTimerDisplay();
+            }, 10);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(milliseconds / 60000);
+            const seconds = Math.floor((milliseconds % 60000) / 1000);
+            const ms = milliseconds % 1000;
+            timerDisplay.textContent = `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}:${ms < 100 ? '0' + (ms < 10 ? '0' + ms : ms) : ms}`;
+            return `${minutes}:${seconds}:${ms}`;
+        }
+
+        function addToResetHistory(time) {
+            const currentTime = Date.now();
+            // Only update every 2 seconds
+            if (currentTime - lastUpdate > 1500) {
+                resetHistory.unshift(time);
+                if (resetHistory.length > 4) {
+                    resetHistory.pop();
+                }
+
+                const resetHistoryContainer = document.getElementById('resetHistory');
+                resetHistoryContainer.innerHTML = '';
+                resetHistory.forEach((time, index) => {
+                    const p = document.createElement('p');
+                    p.textContent = `${time}`;
+                    resetHistoryContainer.appendChild(p);
+                });
+
+                lastUpdate = currentTime;
+            }
+        }
+
+        function measureBrightness() {
+            if (!isRunning) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+
+            let totalBrightness = 0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+                const brightness = (r + g + b) / 3;
+                totalBrightness += brightness;
+            }
+
+            const avgBrightness = totalBrightness / (pixels.length / 4);
+
+            // If brightness changes significantly based on sensitivity, reset the timer
+            if (Math.abs(avgBrightness - lastAvgBrightness) > sensitivity) {
+                resetTimer();
+            }
+
+            lastAvgBrightness = avgBrightness;
+
+            requestAnimationFrame(measureBrightness);
         }
     </script>
 </body>

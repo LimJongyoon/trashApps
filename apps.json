@@ -9,12 +9,12 @@
     },
     {
         "id": "0028",
-        "title": "Wi-Fi Signal Meter",
-        "description": "Monitor Wi-Fi signal strength with dynamic visual feedback. Features include real-time signal strength display, color-coded bars for clarity, and connectivity monitoring. Perfect for optimizing your network setup or checking signal quality.",
-        "icon": "icons/0028.webp",
-        "link": "list/0028.html",
+        "title": "Hands Free Timer",
+        "description": "Track time hands-free with this interactive timer. The timer resets when a hand is detected in front of the camera, allowing you to manage time without touching your device. Features include adjustable sensitivity, real-time timer display, and visual feedback.",
+        "icon": "icons/0030.webp",
+        "link": "list/0030.html",
         "category": "Utilities"
-    },
+    },    
     {
         "id": "0027",
         "title": "Light Level Meter",
