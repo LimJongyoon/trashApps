@@ -5,52 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
     <title>Wi-Fi Speed Meter</title>
     <style>
-        * {
-            box-sizing: border-box;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
-        }
-        .meter-container {
-            text-align: center;
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            width: 300px;
-        }
-        .speed {
-            font-size: 2rem;
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-        .stats {
-            text-align: left;
-            font-size: 1rem;
-            margin: 20px 0;
-        }
-        .control-button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: #ffffff;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .control-button:active {
-            background-color: #0056b3;
-        }
+        * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+        body, html { margin: 0; padding: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f5f5f5; font-family: Arial, sans-serif; }
+        .meter-container { text-align: center; padding: 20px; background-color: #ffffff; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5); border-radius: 10px; width: 300px; }
+        .speed { font-size: 2rem; color: #4CAF50; margin-bottom: 20px; }
+        .stats { text-align: left; font-size: 1rem; margin: 20px 0; }
+        .control-button { padding: 10px 20px; font-size: 1rem; color: #ffffff; background-color: #007BFF; border: none; border-radius: 5px; cursor: pointer; }
+        .control-button:active { background-color: #0056b3; }
     </style>
 </head>
 <body>
@@ -66,19 +27,15 @@
     </div>
 
     <script>
-        let maxSpeed = 0;
-        let minSpeed = Infinity;
-        let totalSpeed = 0;
-        let count = 0;
-        let startTime = 0;
+        let maxSpeed = 0, minSpeed = Infinity, totalSpeed = 0, count = 0, startTime = 0;
 
         const speedEl = document.querySelector('.speed');
         const maxSpeedEl = document.getElementById('maxSpeed');
         const minSpeedEl = document.getElementById('minSpeed');
         const avgSpeedEl = document.getElementById('avgSpeed');
         const elapsedTimeEl = document.getElementById('elapsedTime');
-        const testFileUrl = 'https://drive.google.com/uc?export=download&id=1dkrtRc01DJndbAEvqmEIcCKjYa96U4wP';
-        const fileSizeInBits = 1 * 8 * 1024 * 1024;
+        const testFileUrl = 'https://limjongyoon.github.io/trashApps/list/10MB_dummy_file.bin'; 
+        const fileSizeInBits = 10 * 8 * 1024 * 1024;
 
         async function startSpeedTest() {
             resetStats();
@@ -97,16 +54,16 @@
 
         async function testDownloadSpeed() {
             const start = Date.now();
-
             const response = await fetch(testFileUrl);
             if (!response.ok) throw new Error('Network response was not ok');
-
-            await response.blob();
+            await response.blob(); 
             const end = Date.now();
             const durationInSeconds = (end - start) / 1000;
-            const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
+            if (durationInSeconds <= 0) throw new Error('Invalid duration');
 
+            const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
             speedEl.textContent = `${speedMbps.toFixed(2)} Mbps`;
+            console.log(`Duration: ${durationInSeconds}s, Speed: ${speedMbps.toFixed(2)} Mbps`);
             return speedMbps;
         }
 
@@ -115,7 +72,6 @@
             minSpeed = Math.min(minSpeed, speed);
             totalSpeed += speed;
             count++;
-
             const elapsedTime = Math.round((Date.now() - startTime) / 1000);
 
             maxSpeedEl.textContent = `${maxSpeed.toFixed(2)} Mbps`;
