@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-    <title>Light Level Meter</title>
+    <title>Wi-Fi Signal Meter</title>
     <style>
         * {
             box-sizing: border-box;
@@ -29,9 +29,9 @@
             border-radius: 10px;
             width: 300px;
         }
-        .light-level {
+        .signal-strength {
             font-size: 2rem;
-            color: #FFA500;
+            color: #4CAF50;
             margin-bottom: 20px;
         }
         .bar-container {
@@ -44,7 +44,7 @@
         }
         .bar {
             height: 100%;
-            background-color: #FFA500;
+            background-color: #4CAF50;
             width: 0;
             transition: width 0.2s;
         }
@@ -73,32 +73,19 @@
 </head>
 <body>
     <div class="meter-container">
-        <div class="light-level">0 Lux</div>
+        <div class="signal-strength">0%</div>
         <div class="bar-container">
             <div class="bar"></div>
         </div>
         <div class="status">Click "Start" to begin</div>
         <button class="control-button" onclick="toggleMeasurement()">Start</button>
-        <div class="stats">
-            <p>Max Level: <span id="maxLevel">0 Lux</span></p>
-            <p>Average Level: <span id="avgLevel">0 Lux</span></p>
-            <p>Elapsed Time: <span id="elapsedTime">0s</span></p>
-        </div>
     </div>
 
     <script>
         let isMeasuring = false;
-        let maxLevel = 0;
-        let totalLevel = 0;
-        let count = 0;
-        let startTime = 0;
-        let interval;
-        const lightLevelEl = document.querySelector('.light-level');
+        const signalStrengthEl = document.querySelector('.signal-strength');
         const barEl = document.querySelector('.bar');
         const statusEl = document.querySelector('.status');
-        const maxLevelEl = document.getElementById('maxLevel');
-        const avgLevelEl = document.getElementById('avgLevel');
-        const elapsedTimeEl = document.getElementById('elapsedTime');
         const controlButton = document.querySelector('.control-button');
 
         function toggleMeasurement() {
@@ -110,65 +97,45 @@
         }
 
         function startMeasurement() {
-            if (!('AmbientLightSensor' in window)) {
-                statusEl.textContent = 'Ambient Light Sensor not supported';
+            if (!navigator.connection) {
+                statusEl.textContent = 'Network Information API not supported';
                 return;
             }
 
-            resetStats();
             isMeasuring = true;
-            startTime = Date.now();
             controlButton.textContent = 'Stop';
             statusEl.textContent = 'Measuring...';
 
-            try {
-                const sensor = new AmbientLightSensor();
-                sensor.addEventListener('reading', () => {
-                    const lux = sensor.illuminance;
-
-                    // Update light level
-                    lightLevelEl.textContent = `${lux.toFixed(1)} Lux`;
-                    barEl.style.width = `${Math.min((lux / 1000) * 100, 100)}%`;
-
-                    if (lux < 100) {
-                        barEl.style.backgroundColor = '#4CAF50'; // Green
-                    } else if (lux < 500) {
-                        barEl.style.backgroundColor = '#FFC107'; // Yellow
-                    } else {
-                        barEl.style.backgroundColor = '#F44336'; // Red
-                    }
-
-                    // Update stats
-                    maxLevel = Math.max(maxLevel, lux);
-                    totalLevel += lux;
-                    count++;
-
-                    maxLevelEl.textContent = `${maxLevel.toFixed(1)} Lux`;
-                    avgLevelEl.textContent = `${(totalLevel / count).toFixed(1)} Lux`;
-                    elapsedTimeEl.textContent = `${Math.round((Date.now() - startTime) / 1000)}s`;
-                });
-
-                sensor.start();
-            } catch (error) {
-                statusEl.textContent = 'Failed to access light sensor';
-                console.error(error);
-            }
+            updateSignalStrength();
+            navigator.connection.addEventListener('change', updateSignalStrength);
         }
 
         function stopMeasurement() {
+            if (navigator.connection) {
+                navigator.connection.removeEventListener('change', updateSignalStrength);
+            }
+
             isMeasuring = false;
-            clearInterval(interval);
-            statusEl.textContent = 'Measurement stopped';
             controlButton.textContent = 'Start';
+            statusEl.textContent = 'Measurement stopped';
         }
 
-        function resetStats() {
-            maxLevel = 0;
-            totalLevel = 0;
-            count = 0;
-            maxLevelEl.textContent = '0 Lux';
-            avgLevelEl.textContent = '0 Lux';
-            elapsedTimeEl.textContent = '0s';
+        function updateSignalStrength() {
+            const signalStrength = Math.min(
+                Math.round((navigator.connection.downlink / 10) * 100),
+                100
+            );
+
+            signalStrengthEl.textContent = `${signalStrength}%`;
+            barEl.style.width = `${signalStrength}%`;
+
+            if (signalStrength > 75) {
+                barEl.style.backgroundColor = '#4CAF50'; // Green
+            } else if (signalStrength > 50) {
+                barEl.style.backgroundColor = '#FFC107'; // Yellow
+            } else {
+                barEl.style.backgroundColor = '#F44336'; // Red
+            }
         }
     </script>
 </body>

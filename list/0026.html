@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-    <title>PDF Merger</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <title>Noise Level Meter</title>
     <style>
         * {
             box-sizing: border-box;
@@ -15,274 +14,171 @@
         body, html {
             margin: 0;
             padding: 0;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             background-color: #f5f5f5;
             font-family: Arial, sans-serif;
         }
-        h1 {
-            color: #4CAF50;
-            margin: 20px 0;
-        }
-        .box {
-            width: 90%;
-            min-width: 350px;
-            height: 200px;
-            margin: 10px 0;
-            padding: 10px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .gray-area {
-            width: 95%;
-            height: 70%;
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            border: 2px solid #d3d3d326;
-            overflow-x: auto;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
-            padding: 10px;
-        }
-        .file-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #e6e6fa;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            min-width: 80px;
-            width: 100px;
-            height: 120px;
+        .meter-container {
             text-align: center;
-            cursor: grab;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            width: 300px;
+        }
+        .noise-level {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #d0d0d0;
+            border-radius: 10px;
+            overflow: hidden;
             position: relative;
         }
-        .file-item.dragging {
-            opacity: 0.5;
-        }
-        .file-item span {
-            font-size: 0.6rem;
-            margin-top: 5px;
-            word-wrap: break-word;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .file-preview {
-            width: 100%;
-            height: 60px;
-            background-color: #ccc;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            background-size: cover;
-            background-position: center;
-        }
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            font-size: 0.8rem;
-            border: none;
-            border-radius: 5px;
-            padding: 5px;
-            cursor: pointer;
-            position: absolute;
-            bottom: 5px;
-        }
-        .upload-btn {
-            font-size: 0.9rem;
-            padding: 5px 10px;
-            background-color: #2196F3;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-        }
-        .upload-btn:hover {
-            background-color: #1e88e5;
-        }
-        .merge-btn, .download-btn {
+        .bar {
+            height: 100%;
             background-color: #4CAF50;
-            color: white;
-            font-size: 1rem;
-            margin: 10px 0;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            width: 0;
+            transition: width 0.2s;
         }
-        .merge-btn:hover, .download-btn:hover {
-            background-color: #45a049;
+        .status, .stats {
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        .stats {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .control-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .control-button:active {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-
-<h1>PDF Merger</h1>
-
-<div class="box">
-    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Upload Files</button>
-    <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;" onchange="handleFileUpload(event)">
-    <div class="gray-area" id="uploadedFilesBox"></div>
-</div>
-
-<button class="merge-btn" onclick="mergePDFs()">↓ Merge ↓</button>
-
-<div class="box">
-    <div class="gray-area" id="mergedFileBox">
-        <p style="text-align: center; width: 100%;">No merged file yet...</p>
+    <div class="meter-container">
+        <div class="noise-level">0 dB</div>
+        <div class="bar-container">
+            <div class="bar"></div>
+        </div>
+        <div class="status">Click "Start" to begin</div>
+        <button class="control-button" onclick="toggleMeasurement()">Start</button>
+        <div class="stats">
+            <p>Max Level: <span id="maxLevel">0 dB</span></p>
+            <p>Average Level: <span id="avgLevel">0 dB</span></p>
+            <p>Elapsed Time: <span id="elapsedTime">0s</span></p>
+        </div>
     </div>
-    <button class="download-btn" id="downloadBtn" style="display: none;" onclick="downloadMergedPDF()">Download PDF</button>
-</div>
 
-<script>
-    let uploadedFiles = [];
-    let mergedPdfBytes = null;
+    <script>
+        let isMeasuring = false;
+        let maxLevel = 0;
+        let totalLevel = 0;
+        let count = 0;
+        let startTime = 0;
+        let interval;
+        let analyser, microphone, dataArray;
+        const noiseLevelEl = document.querySelector('.noise-level');
+        const barEl = document.querySelector('.bar');
+        const statusEl = document.querySelector('.status');
+        const maxLevelEl = document.getElementById('maxLevel');
+        const avgLevelEl = document.getElementById('avgLevel');
+        const elapsedTimeEl = document.getElementById('elapsedTime');
+        const controlButton = document.querySelector('.control-button');
 
-    const uploadedFilesBox = document.getElementById("uploadedFilesBox");
-    const mergedFileBox = document.getElementById("mergedFileBox");
-
-    async function handleFileUpload(event) {
-        const files = Array.from(event.target.files);
-        for (const file of files) {
-            const fileData = {
-                file,
-                previewUrl: await generatePdfPreview(file)
-            };
-            uploadedFiles.push(fileData);
-        }
-        renderUploadedFiles();
-    }
-
-    async function generatePdfPreview(file) {
-        const pdf = await file.arrayBuffer();
-        const pdfDoc = await pdfjsLib.getDocument({ data: pdf }).promise;
-        const page = await pdfDoc.getPage(1);
-
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        const viewport = page.getViewport({ scale: 1 });
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        await page.render({ canvasContext: context, viewport }).promise;
-        return canvas.toDataURL();
-    }
-
-    function renderUploadedFiles() {
-        uploadedFilesBox.innerHTML = "";
-        uploadedFiles.forEach((data, index) => {
-            const fileItem = document.createElement("div");
-            fileItem.className = "file-item";
-            fileItem.draggable = true;
-
-            fileItem.innerHTML = `
-                <div class="file-preview" style="background-image: url('${data.previewUrl}');"></div>
-                <span>${index + 1}: ${data.file.name}</span>
-                <button class="delete-btn" onclick="deleteFile(${index})">Delete</button>
-            `;
-            uploadedFilesBox.appendChild(fileItem);
-        });
-
-        setupDragAndDrop();
-    }
-
-    function deleteFile(index) {
-        uploadedFiles.splice(index, 1);
-        renderUploadedFiles();
-    }
-
-    function setupDragAndDrop() {
-        const fileItems = uploadedFilesBox.querySelectorAll(".file-item");
-        fileItems.forEach((item, index) => {
-            item.addEventListener("dragstart", () => {
-                item.classList.add("dragging");
-                item.setAttribute("data-index", index);
-            });
-
-            item.addEventListener("dragend", () => {
-                item.classList.remove("dragging");
-            });
-        });
-
-        uploadedFilesBox.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            const draggingItem = document.querySelector(".dragging");
-            const afterElement = getDragAfterElement(uploadedFilesBox, e.clientX);
-            if (afterElement) {
-                uploadedFilesBox.insertBefore(draggingItem, afterElement);
+        async function toggleMeasurement() {
+            if (isMeasuring) {
+                stopMeasurement();
             } else {
-                uploadedFilesBox.appendChild(draggingItem);
+                await startMeasurement();
             }
-            const newOrder = Array.from(uploadedFilesBox.children).map(
-                (item) => uploadedFiles[item.getAttribute("data-index")]
-            );
-            uploadedFiles = newOrder;
-        });
-    }
-
-    function getDragAfterElement(container, x) {
-        const draggableElements = [
-            ...container.querySelectorAll(".file-item:not(.dragging)")
-        ];
-
-        return draggableElements.reduce(
-            (closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = x - box.left - box.width / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            },
-            { offset: Number.NEGATIVE_INFINITY }
-        ).element;
-    }
-
-    async function mergePDFs() {
-        if (uploadedFiles.length < 2) {
-            alert("Please upload at least 2 PDF files to merge.");
-            return;
         }
 
-        const { PDFDocument } = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js");
-        const mergedPdf = await PDFDocument.create();
+        async function startMeasurement() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                statusEl.textContent = 'Microphone not supported';
+                return;
+            }
 
-        for (const data of uploadedFiles) {
-            const arrayBuffer = await data.file.arrayBuffer();
-            const pdf = await PDFDocument.load(arrayBuffer);
-            const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-            copiedPages.forEach((page) => mergedPdf.addPage(page));
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new AudioContext();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                microphone.connect(analyser);
+
+                resetStats();
+                isMeasuring = true;
+                startTime = Date.now();
+                controlButton.textContent = 'Stop';
+                statusEl.textContent = 'Measuring...';
+
+                interval = setInterval(updateMeter, 50);
+            } catch (error) {
+                statusEl.textContent = 'Microphone access denied';
+                console.error(error);
+            }
         }
 
-        mergedPdfBytes = await mergedPdf.save();
-        renderMergedFile();
-    }
+        function stopMeasurement() {
+            isMeasuring = false;
+            clearInterval(interval);
+            statusEl.textContent = 'Measurement stopped';
+            controlButton.textContent = 'Start';
+        }
 
-    function renderMergedFile() {
-        mergedFileBox.innerHTML = "<p>Merged PDF ready!</p>";
-        document.getElementById("downloadBtn").style.display = "block";
-    }
+        function resetStats() {
+            maxLevel = 0;
+            totalLevel = 0;
+            count = 0;
+            maxLevelEl.textContent = '0 dB';
+            avgLevelEl.textContent = '0 dB';
+            elapsedTimeEl.textContent = '0s';
+        }
 
-    function downloadMergedPDF() {
-        const blob = new Blob([mergedPdfBytes], { type: "application/pdf" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "merged.pdf";
-        link.click();
-    }
-</script>
+        function updateMeter() {
+            analyser.getByteFrequencyData(dataArray);
+            const avgVolume = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
+            const dB = Math.round((avgVolume / 256) * 100);
 
+            // Update current noise level
+            noiseLevelEl.textContent = `${dB} dB`;
+            barEl.style.width = `${dB}%`;
+
+            if (dB < 20) {
+                barEl.style.backgroundColor = '#4CAF50'; // Green
+            } else if (dB < 40) {
+                barEl.style.backgroundColor = '#FFC107'; // Yellow
+            } else {
+                barEl.style.backgroundColor = '#F44336'; // Red
+            }
+
+            // Update stats
+            maxLevel = Math.max(maxLevel, dB);
+            totalLevel += dB;
+            count++;
+
+            maxLevelEl.textContent = `${maxLevel} dB`;
+            avgLevelEl.textContent = `${Math.round(totalLevel / count)} dB`;
+            elapsedTimeEl.textContent = `${Math.round((Date.now() - startTime) / 1000)}s`;
+        }
+    </script>
 </body>
 </html>

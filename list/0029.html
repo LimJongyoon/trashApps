@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Bluetooth Distance Scanner</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .scanner-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .device-list {
+            margin-top: 20px;
+            padding: 0;
+            list-style: none;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        .device-list li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+        }
+        button {
+            padding: 15px 20px;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:active {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-container">
+        <h1>Bluetooth Distance Scanner</h1>
+        <p>Scan for nearby Bluetooth devices and estimate their distance.</p>
+        <button onclick="startBluetoothScan()">Start Scan</button>
+        <ul class="device-list" id="deviceList"></ul>
+    </div>
+
+    <script>
+        async function startBluetoothScan() {
+            const deviceList = document.getElementById('deviceList');
+            deviceList.innerHTML = '<li>Scanning for devices...</li>';
+
+            try {
+                const options = {
+                    acceptAllDevices: true,
+                    optionalServices: ['battery_service'] // Optional service for extended functionality
+                };
+
+                const device = await navigator.bluetooth.requestDevice(options);
+                const rssi = await getRSSI(device);
+                const distance = calculateDistance(rssi);
+
+                const listItem = document.createElement('li');
+                listItem.textContent = `Device: ${device.name || 'Unknown'}, RSSI: ${rssi}, Estimated Distance: ${distance.toFixed(2)}m`;
+                deviceList.innerHTML = ''; // Clear scanning message
+                deviceList.appendChild(listItem);
+            } catch (error) {
+                console.error(error);
+                deviceList.innerHTML = '<li>Bluetooth scan failed or permission denied.</li>';
+            }
+        }
+
+        async function getRSSI(device) {
+            // Placeholder: Web Bluetooth API does not natively support RSSI.
+            // You'll need to establish a GATT connection or retrieve RSSI via platform-specific APIs.
+            return -70; // Example RSSI value for demonstration
+        }
+
+        function calculateDistance(rssi, measuredPower = -59, n = 2) {
+            return Math.pow(10, (measuredPower - rssi) / (10 * n));
+        }
+    </script>
+</body>
+</html>

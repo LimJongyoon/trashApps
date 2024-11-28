@@ -1,5 +1,37 @@
 [
     {
+        "id": "0029",
+        "title": "Bluetooth Distance Scanner",
+        "description": "Scan nearby Bluetooth devices and estimate their distance based on signal strength. Features include real-time RSSI-based distance estimation, device discovery, and a user-friendly interface. Perfect for locating devices or monitoring proximity.",
+        "icon": "icons/0029.webp",
+        "link": "list/0029.html",
+        "category": "Utilities"
+    },
+    {
+        "id": "0028",
+        "title": "Wi-Fi Signal Meter",
+        "description": "Monitor Wi-Fi signal strength with dynamic visual feedback. Features include real-time signal strength display, color-coded bars for clarity, and connectivity monitoring. Perfect for optimizing your network setup or checking signal quality.",
+        "icon": "icons/0028.webp",
+        "link": "list/0028.html",
+        "category": "Utilities"
+    },
+    {
+        "id": "0027",
+        "title": "Light Level Meter",
+        "description": "Measure real-time light levels in your environment. Features include maximum and average lux tracking, elapsed time display, and a visual light level bar. Ideal for photography, indoor lighting, or ambient monitoring.",
+        "icon": "icons/0027.webp",
+        "link": "list/0027.html",
+        "category": "Utilities"
+    },
+    {
+        "id": "0026",
+        "title": "Noise Level Meter",
+        "description": "Measure real-time noise levels with a dynamic and sleek interface. Features include maximum and average noise tracking, elapsed time display, and a visual sound level bar in vibrant colors. Perfect for environmental monitoring, personal use, or fun noise detection.",
+        "icon": "icons/0026.webp",
+        "link": "list/0026.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0025",
         "title": "3D Maze Escape Game",
         "description": "Polygon Mesh Texture 3D Three dimensional Perspective puzzle, escape maze solver brain teaser adventure challenge navigation fun game success puzzle lovers controls interactive",
