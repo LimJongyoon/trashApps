@@ -40,6 +40,14 @@
             color: #FFA500;
             margin-bottom: 20px;
         }
+        .video-preview {
+            width: 150px;
+            height: auto;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+        }
         .stats {
             text-align: left;
             margin-top: 20px;
@@ -64,6 +72,7 @@
     <div class="meter-container">
         <div class="app-title">Light Level Meter</div>
         <div class="light-level">0 Lux</div>
+        <video class="video-preview" autoplay muted></video>
         <button class="control-button" onclick="toggleMeasurement()">Start</button>
         <div class="stats">
             <p>Max Level: <span id="maxLevel">0 Lux</span></p>
@@ -86,7 +95,7 @@
         const avgLevelEl = document.getElementById('avgLevel');
         const elapsedTimeEl = document.getElementById('elapsedTime');
         const controlButton = document.querySelector('.control-button');
-        const video = document.createElement('video');
+        const video = document.querySelector('.video-preview');
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -100,19 +109,34 @@
 
         async function startMeasurement() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
-                video.play();
 
-                isMeasuring = true;
-                controlButton.textContent = 'Stop';
-                resetStats();
-                startTime = Date.now();
-                measureBrightness();
+                // Play the video and wait until it's ready
+                await video.play();
+
+                // Ensure video metadata is loaded before starting measurement
+                if (video.videoWidth === 0 || video.videoHeight === 0) {
+                    video.addEventListener('loadedmetadata', () => {
+                        console.log('Video metadata loaded.');
+                        startBrightnessMeasurement();
+                    });
+                } else {
+                    console.log('Video metadata already loaded.');
+                    startBrightnessMeasurement();
+                }
             } catch (error) {
-                alert('Unable to access the camera. Please check permissions.');
-                console.error(error);
+                alert('Unable to access the camera. Please check permissions or ensure the device has a rear camera.');
+                console.error('Camera error:', error);
             }
+        }
+
+        function startBrightnessMeasurement() {
+            isMeasuring = true;
+            controlButton.textContent = 'Stop';
+            resetStats();
+            startTime = Date.now();
+            measureBrightness();
         }
 
         function stopMeasurement() {
@@ -140,28 +164,34 @@
 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const pixels = imageData.data;
+
             let totalBrightness = 0;
 
+            // Calculate average RGB brightness
             for (let i = 0; i < pixels.length; i += 4) {
                 const r = pixels[i];
                 const g = pixels[i + 1];
                 const b = pixels[i + 2];
-                totalBrightness += (r + g + b) / 3;
+                const brightness = (r + g + b) / 3; // Average RGB value
+                totalBrightness += brightness;
             }
 
+            // Average brightness
             const avgBrightness = totalBrightness / (pixels.length / 4);
 
-            // Update stats
-            lightLevelEl.textContent = `${avgBrightness.toFixed(0)} Lux`;
-            maxLevel = Math.max(maxLevel, avgBrightness);
-            minLevel = Math.min(minLevel, avgBrightness);
-            totalLevel += avgBrightness;
-            count++;
+            // Estimate Lux value (arbitrary scale, can be calibrated)
+            const estimatedLux = avgBrightness * 2; // Example: Scaling factor for Lux approximation
 
+            // Update stats
+            lightLevelEl.textContent = `${estimatedLux.toFixed(0)} Lux`;
+            maxLevel = Math.max(maxLevel, estimatedLux);
+            minLevel = Math.min(minLevel, estimatedLux);
+            totalLevel += estimatedLux;
+            count++;
             maxLevelEl.textContent = `${maxLevel.toFixed(0)} Lux`;
             minLevelEl.textContent = `${minLevel.toFixed(0)} Lux`;
             avgLevelEl.textContent = `${(totalLevel / count).toFixed(0)} Lux`;
