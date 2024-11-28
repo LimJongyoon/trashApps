@@ -171,6 +171,16 @@
         }
 
         function resetTimer() {
+            // Add flash effect
+            document.body.style.transition = 'background-color 0.1s';
+            document.body.style.backgroundColor = '#4CAF50';
+            setTimeout(() => {
+                document.body.style.backgroundColor = '#f5f5f5';
+            }, 100);
+            
+            // Play beep sound
+            const beepAudio = new Audio('../sounds/beep.mp3');
+            beepAudio.play();
             const resetTime = updateTimerDisplay();
             addToResetHistory(resetTime);
             milliseconds = 0;
@@ -195,7 +205,7 @@
         function addToResetHistory(time) {
             const currentTime = Date.now();
             // Only update every 2 seconds
-            if (currentTime - lastUpdate > 1500) {
+            if (currentTime - lastUpdate > 2000) {
                 resetHistory.unshift(time);
                 if (resetHistory.length > 4) {
                     resetHistory.pop();
