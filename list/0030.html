@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>PDF Splitter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        #pdfBox {
+            width: 85%;
+            height: 70vh;
+            overflow-y: scroll;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+            background-color: #f5f5f5;
+            margin: 10px auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            max-width: 100%;
+        }
+        .button-container {
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        button:active {
+            background-color: #388E3C;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .description {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        #overlay canvas {
+            border: none;
+            max-width: 95%;
+            max-height: 80%;
+        }
+        .overlay-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .overlay-buttons button {
+            padding: 10px 20px;
+            background-color: #FF5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .overlay-buttons button:active {
+            background-color: #E64A19;
+        }
+        .overlay-buttons .download-btn {
+            background-color: #4CAF50;
+        }
+        .overlay-buttons .download-btn:active {
+            background-color: #388E3C;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">PDF Splitter</div>
+        <div class="button-container">
+            <button id="uploadButton">Upload PDF</button>
+            <input type="file" id="pdfInput" accept="application/pdf">
+        </div>
+        <div id="pdfBox">Upload a PDF to preview and download pages</div>
+        <p class="description">Click a page to download or close the preview window.</p>
+    </div>
+
+    <!-- Overlay for enlarged preview -->
+    <div id="overlay">
+        <canvas id="overlayCanvas"></canvas>
+        <div class="overlay-buttons">
+            <button id="downloadButton" class="download-btn">Download</button>
+            <button id="closeOverlay">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+    <script>
+        const uploadButton = document.getElementById('uploadButton');
+        const pdfInput = document.getElementById('pdfInput');
+        const pdfBox = document.getElementById('pdfBox');
+        const overlay = document.getElementById('overlay');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        const closeOverlay = document.getElementById('closeOverlay');
+        const downloadButton = document.getElementById('downloadButton');
+
+        let pdfDoc = null;
+        let currentCanvas = null; // To store the current canvas for downloading
+
+        // Trigger file input when upload button is clicked
+        uploadButton.addEventListener('click', () => {
+            pdfInput.click();
+        });
+
+        // Load PDF and display preview
+        pdfInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                pdfDoc = await pdfjsLib.getDocument(fileURL).promise;
+
+                pdfBox.innerHTML = ''; // Clear previous content
+
+                for (let i = 1; i <= pdfDoc.numPages; i++) {
+                    const canvas = document.createElement('canvas');
+                    canvas.addEventListener('click', () => handlePageClick(canvas, i));
+                    pdfBox.appendChild(canvas);
+
+                    const page = await pdfDoc.getPage(i);
+                    renderPage(page, canvas, 0.3); // Render at 0.3x scale for preview
+                }
+            }
+        });
+
+        // Render a single page to a canvas
+        function renderPage(page, canvas, scale) {
+            const viewport = page.getViewport({ scale });
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const context = canvas.getContext('2d');
+
+            page.render({
+                canvasContext: context,
+                viewport: viewport
+            });
+        }
+
+        // Handle click on a page
+        async function handlePageClick(canvas, pageNumber) {
+            // Render the clicked page in the overlay
+            const page = await pdfDoc.getPage(pageNumber);
+            renderPage(page, overlayCanvas, 1.5); // Render at larger scale
+            overlay.style.display = 'flex';
+
+            // Store the current canvas for download
+            currentCanvas = canvas;
+        }
+
+        // Close overlay
+        closeOverlay.addEventListener('click', () => {
+            overlay.style.display = 'none';
+        });
+
+        // Download the current canvas
+        downloadButton.addEventListener('click', () => {
+            if (currentCanvas) {
+                const image = currentCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = 'Selected-Page.png';
+                link.click();
+            }
+        });
+    </script>
+</body>
+</html>

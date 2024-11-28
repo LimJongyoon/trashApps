@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-    <title>Wi-Fi Signal Meter</title>
+    <title>Wi-Fi Speed Test</title>
     <style>
         * {
             box-sizing: border-box;
@@ -29,32 +29,14 @@
             border-radius: 10px;
             width: 300px;
         }
-        .signal-strength {
+        .speed {
             font-size: 2rem;
             color: #4CAF50;
             margin-bottom: 20px;
         }
-        .bar-container {
-            width: 100%;
-            height: 20px;
-            background-color: #d0d0d0;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        .bar {
-            height: 100%;
-            background-color: #4CAF50;
-            width: 0;
-            transition: width 0.2s;
-        }
-        .status, .stats {
+        .status {
             margin-top: 10px;
             font-size: 1rem;
-        }
-        .stats {
-            margin-top: 20px;
-            text-align: left;
         }
         .control-button {
             margin-top: 20px;
@@ -73,69 +55,41 @@
 </head>
 <body>
     <div class="meter-container">
-        <div class="signal-strength">0%</div>
-        <div class="bar-container">
-            <div class="bar"></div>
-        </div>
-        <div class="status">Click "Start" to begin</div>
-        <button class="control-button" onclick="toggleMeasurement()">Start</button>
+        <div class="speed">0 Mbps</div>
+        <div class="status">Click "Start" to test Wi-Fi speed</div>
+        <button class="control-button" onclick="startSpeedTest()">Start</button>
     </div>
 
     <script>
-        let isMeasuring = false;
-        const signalStrengthEl = document.querySelector('.signal-strength');
-        const barEl = document.querySelector('.bar');
+        const speedEl = document.querySelector('.speed');
         const statusEl = document.querySelector('.status');
-        const controlButton = document.querySelector('.control-button');
 
-        function toggleMeasurement() {
-            if (isMeasuring) {
-                stopMeasurement();
-            } else {
-                startMeasurement();
-            }
-        }
+        function startSpeedTest() {
+            const testFileUrl = 'https://speed.hetzner.de/100MB.bin'; // Test file URL
+            const fileSizeInBits = 100 * 8 * 1024 * 1024; // 100 MB in bits
+            const startTime = Date.now();
 
-        function startMeasurement() {
-            if (!navigator.connection) {
-                statusEl.textContent = 'Network Information API not supported';
-                return;
-            }
+            statusEl.textContent = 'Testing...';
 
-            isMeasuring = true;
-            controlButton.textContent = 'Stop';
-            statusEl.textContent = 'Measuring...';
+            fetch(testFileUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(() => {
+                    const endTime = Date.now();
+                    const durationInSeconds = (endTime - startTime) / 1000;
+                    const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
 
-            updateSignalStrength();
-            navigator.connection.addEventListener('change', updateSignalStrength);
-        }
-
-        function stopMeasurement() {
-            if (navigator.connection) {
-                navigator.connection.removeEventListener('change', updateSignalStrength);
-            }
-
-            isMeasuring = false;
-            controlButton.textContent = 'Start';
-            statusEl.textContent = 'Measurement stopped';
-        }
-
-        function updateSignalStrength() {
-            const signalStrength = Math.min(
-                Math.round((navigator.connection.downlink / 10) * 100),
-                100
-            );
-
-            signalStrengthEl.textContent = `${signalStrength}%`;
-            barEl.style.width = `${signalStrength}%`;
-
-            if (signalStrength > 75) {
-                barEl.style.backgroundColor = '#4CAF50'; // Green
-            } else if (signalStrength > 50) {
-                barEl.style.backgroundColor = '#FFC107'; // Yellow
-            } else {
-                barEl.style.backgroundColor = '#F44336'; // Red
-            }
+                    speedEl.textContent = `${speedMbps.toFixed(2)} Mbps`;
+                    statusEl.textContent = 'Test completed';
+                })
+                .catch(error => {
+                    console.error('Error during speed test:', error);
+                    statusEl.textContent = 'Test failed';
+                });
         }
     </script>
 </body>

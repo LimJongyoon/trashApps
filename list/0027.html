@@ -29,32 +29,21 @@
             border-radius: 10px;
             width: 300px;
         }
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
         .light-level {
             font-size: 2rem;
             color: #FFA500;
             margin-bottom: 20px;
         }
-        .bar-container {
-            width: 100%;
-            height: 20px;
-            background-color: #d0d0d0;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        .bar {
-            height: 100%;
-            background-color: #FFA500;
-            width: 0;
-            transition: width 0.2s;
-        }
-        .status, .stats {
-            margin-top: 10px;
-            font-size: 1rem;
-        }
         .stats {
-            margin-top: 20px;
             text-align: left;
+            margin-top: 20px;
+            font-size: 1rem;
         }
         .control-button {
             margin-top: 20px;
@@ -73,14 +62,12 @@
 </head>
 <body>
     <div class="meter-container">
+        <div class="app-title">Light Level Meter</div>
         <div class="light-level">0 Lux</div>
-        <div class="bar-container">
-            <div class="bar"></div>
-        </div>
-        <div class="status">Click "Start" to begin</div>
         <button class="control-button" onclick="toggleMeasurement()">Start</button>
         <div class="stats">
             <p>Max Level: <span id="maxLevel">0 Lux</span></p>
+            <p>Min Level: <span id="minLevel">0 Lux</span></p>
             <p>Average Level: <span id="avgLevel">0 Lux</span></p>
             <p>Elapsed Time: <span id="elapsedTime">0s</span></p>
         </div>
@@ -89,86 +76,98 @@
     <script>
         let isMeasuring = false;
         let maxLevel = 0;
+        let minLevel = Infinity;
         let totalLevel = 0;
         let count = 0;
         let startTime = 0;
-        let interval;
         const lightLevelEl = document.querySelector('.light-level');
-        const barEl = document.querySelector('.bar');
-        const statusEl = document.querySelector('.status');
         const maxLevelEl = document.getElementById('maxLevel');
+        const minLevelEl = document.getElementById('minLevel');
         const avgLevelEl = document.getElementById('avgLevel');
         const elapsedTimeEl = document.getElementById('elapsedTime');
         const controlButton = document.querySelector('.control-button');
+        const video = document.createElement('video');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-        function toggleMeasurement() {
+        async function toggleMeasurement() {
             if (isMeasuring) {
                 stopMeasurement();
             } else {
-                startMeasurement();
+                await startMeasurement();
             }
         }
 
-        function startMeasurement() {
-            if (!('AmbientLightSensor' in window)) {
-                statusEl.textContent = 'Ambient Light Sensor not supported';
-                return;
-            }
-
-            resetStats();
-            isMeasuring = true;
-            startTime = Date.now();
-            controlButton.textContent = 'Stop';
-            statusEl.textContent = 'Measuring...';
-
+        async function startMeasurement() {
             try {
-                const sensor = new AmbientLightSensor();
-                sensor.addEventListener('reading', () => {
-                    const lux = sensor.illuminance;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.play();
 
-                    // Update light level
-                    lightLevelEl.textContent = `${lux.toFixed(1)} Lux`;
-                    barEl.style.width = `${Math.min((lux / 1000) * 100, 100)}%`;
-
-                    if (lux < 100) {
-                        barEl.style.backgroundColor = '#4CAF50'; // Green
-                    } else if (lux < 500) {
-                        barEl.style.backgroundColor = '#FFC107'; // Yellow
-                    } else {
-                        barEl.style.backgroundColor = '#F44336'; // Red
-                    }
-
-                    // Update stats
-                    maxLevel = Math.max(maxLevel, lux);
-                    totalLevel += lux;
-                    count++;
-
-                    maxLevelEl.textContent = `${maxLevel.toFixed(1)} Lux`;
-                    avgLevelEl.textContent = `${(totalLevel / count).toFixed(1)} Lux`;
-                    elapsedTimeEl.textContent = `${Math.round((Date.now() - startTime) / 1000)}s`;
-                });
-
-                sensor.start();
+                isMeasuring = true;
+                controlButton.textContent = 'Stop';
+                resetStats();
+                startTime = Date.now();
+                measureBrightness();
             } catch (error) {
-                statusEl.textContent = 'Failed to access light sensor';
+                alert('Unable to access the camera. Please check permissions.');
                 console.error(error);
             }
         }
 
         function stopMeasurement() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach((track) => track.stop());
+            }
             isMeasuring = false;
-            clearInterval(interval);
-            statusEl.textContent = 'Measurement stopped';
             controlButton.textContent = 'Start';
+            lightLevelEl.textContent = '0 Lux';
         }
 
         function resetStats() {
             maxLevel = 0;
+            minLevel = Infinity;
             totalLevel = 0;
             count = 0;
             maxLevelEl.textContent = '0 Lux';
+            minLevelEl.textContent = '0 Lux';
             avgLevelEl.textContent = '0 Lux';
             elapsedTimeEl.textContent = '0s';
+        }
+
+        function measureBrightness() {
+            if (!isMeasuring) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            let totalBrightness = 0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+                totalBrightness += (r + g + b) / 3;
+            }
+
+            const avgBrightness = totalBrightness / (pixels.length / 4);
+
+            // Update stats
+            lightLevelEl.textContent = `${avgBrightness.toFixed(0)} Lux`;
+            maxLevel = Math.max(maxLevel, avgBrightness);
+            minLevel = Math.min(minLevel, avgBrightness);
+            totalLevel += avgBrightness;
+            count++;
+
+            maxLevelEl.textContent = `${maxLevel.toFixed(0)} Lux`;
+            minLevelEl.textContent = `${minLevel.toFixed(0)} Lux`;
+            avgLevelEl.textContent = `${(totalLevel / count).toFixed(0)} Lux`;
+            elapsedTimeEl.textContent = `${Math.round((Date.now() - startTime) / 1000)}s`;
+
+            requestAnimationFrame(measureBrightness);
         }
     </script>
 </body>
