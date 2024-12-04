@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Reaction Time Tester</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            padding: 10px 0;
+            font-size: 2rem;
+            color: #4CAF50; /* Signature green color */
+        }
+        .message {
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #333;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .touch-area {
+            width: 300px;
+            height: 300px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        .touch-area.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .touch-area.wrong {
+            background-color: #FF5722; /* Red color for incorrect click */
+            color: white;
+        }
+        .share-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none; /* Initially hidden */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        .share-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Reaction Time Tester</h1>
+<div class="message" id="message">
+    Touch the box to start the test.<br> 
+    When the box turns green, tap it as quickly as possible!
+</div>
+<div class="touch-area" id="touchArea">Start</div>
+<div class="result" id="result"></div>
+<button class="share-button" id="shareButton">Share Result</button>
+
+<script>
+    let startTime = null;
+    let timeoutID = null;
+    let isReady = true; // Initial state to allow the first click
+
+    const message = document.getElementById("message");
+    const result = document.getElementById("result");
+    const touchArea = document.getElementById("touchArea");
+    const shareButton = document.getElementById("shareButton");
+
+    touchArea.addEventListener("click", () => {
+        if (!isReady) {
+            // Prevent early clicks if not ready
+            touchArea.classList.add("wrong"); // Change color to red
+            result.textContent = "Too soon!";
+            message.textContent = "You clicked too early! Restarting...";
+            clearTimeout(timeoutID); // Cancel the timer to prevent color change
+            setTimeout(() => {
+                touchArea.classList.remove("wrong"); // Reset color after 0.5s
+                resetGame(); // Restart the game after showing the wrong message
+            }, 500);
+            return;
+        }
+
+        if (startTime === null) {
+            // Start the game
+            isReady = false; // Set ready to false while waiting
+            result.textContent = "";
+            shareButton.style.display = "none"; // Hide share button
+            message.textContent = "Wait for the box to turn green. Then tap it as fast as you can!";
+            touchArea.textContent = ""; // Remove text while waiting
+            touchArea.classList.remove("active");
+
+            // Random delay between 2 to 5 seconds
+            const randomDelay = Math.random() * 3000 + 2000;
+            timeoutID = setTimeout(() => {
+                touchArea.classList.add("active"); // Turn the box green
+                touchArea.textContent = "Tap!";
+                startTime = Date.now();
+                message.textContent = "Tap the box now!";
+                isReady = true; // Allow tapping after color change
+            }, randomDelay);
+        } else {
+            // Stop the game
+            const reactionTime = Date.now() - startTime;
+            if (reactionTime > 0) {
+                const emoji = getEmoji(reactionTime);
+                result.innerHTML = `${reactionTime} ms!! ${emoji}`;
+                shareButton.style.display = "inline-block"; // Show share button
+                shareButton.onclick = () => shareResult(reactionTime);
+            } else {
+                result.textContent = "Too soon! Wait for the box to turn green.";
+            }
+            resetGame();
+        }
+    });
+
+    function resetGame() {
+        touchArea.classList.remove("active");
+        touchArea.textContent = "Start";
+        message.textContent = "Touch the box to start the test. When the box turns green, tap it as quickly as possible!";
+        clearTimeout(timeoutID);
+        startTime = null;
+        isReady = true; // Allow restarting
+    }
+
+    function getEmoji(time) {
+        if (time > 600) return "🐢";
+        if (time > 500) return "🚗";
+        if (time > 400) return "✈️";
+        if (time > 300) return "🚀";
+        return "⚡️";
+    }
+
+    function shareResult(reactionTime) {
+        const shareText = `I tested my reaction time on the Reaction Time Tester! My result: ${reactionTime} ms. Can you beat my score?`;
+        if (navigator.share) {
+            // Use Web Share API if available
+            navigator.share({
+                title: 'Reaction Time Tester',
+                text: shareText,
+                url: window.location.href
+            }).catch(err => console.error('Error sharing:', err));
+        } else {
+            // Fallback: Copy to clipboard
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert("Result copied to clipboard! Share it with your friends.");
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

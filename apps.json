@@ -1,5 +1,13 @@
 [
     {
+        "id": "0030",
+        "title": "Reaction Time Tester",
+        "description": "Test your reaction speed with this simple and engaging app. Touch the box as quickly as possible when it turns green and measure your response time. Features include colorful feedback, emoji-based performance ratings, and a share button to challenge friends.",
+        "icon": "icons/0030.webp",
+        "link": "list/0030.html",
+        "category": "Games"
+    },
+    {
         "id": "0029",
         "title": "PDF Splitter",
         "description": "Split your PDF into individual pages with ease. Features include page previews, single-page download options, and a user-friendly interface. Ideal for managing documents efficiently and extracting specific pages as needed.",
