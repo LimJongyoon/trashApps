@@ -38,6 +38,56 @@
             }
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: red;
+            cursor: pointer;
+        }
+
+        #acceptButton, #declineButton {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #acceptButton { background-color: #4CAF50; color: white; }
+        #acceptButton:hover { background-color: #45a049; }
+        #declineButton { background-color: #e6e6fa; color: black; }
+        #declineButton:hover { background-color: #b6b6d3; }
+
         .button-container {
             display: flex;
             justify-content: center;
@@ -235,10 +285,60 @@
             }
         }
 
+        window.onload = function() {
+            const noShowUntil = localStorage.getItem('noShowUntil');
+            const now = new Date().getTime();
+
+            if (!noShowUntil || now > parseInt(noShowUntil, 10)) {
+                document.getElementById('donationModal').style.display = 'block';
+            }
+
+            document.getElementsByClassName("close")[0].onclick = closeModal;
+        };
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("donationModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        function closeModal() {
+            const modal = document.getElementById('donationModal');
+            modal.style.display = 'none';
+
+            const noShowForWeek = document.getElementById('noShowForWeek').checked;
+            if (noShowForWeek) {
+                const nextShowDate = new Date();
+                nextShowDate.setDate(nextShowDate.getDate() + 3);
+                localStorage.setItem('noShowUntil', nextShowDate.getTime());
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', loadApps);
     </script>
 </head>
 <body>
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>
+                <img src="favicons/apple-touch-icon.png" alt="App Logo" style="width: 32px; height: 32px; vertical-align: middle; padding-bottom: 5px; margin-right: 2px;">
+                Notice
+            </h2>
+            <p>All apps are free to use and open to modification.<br>
+                If you enjoy this app, please consider supporting its development.please!!</p> 
+                <button id="acceptButton" onclick="window.location.href='donation.html';">💰Donate Now</button>
+            <button id="declineButton" onclick="closeModal()">Maybe Later</button>
+
+            <div>
+                <label>
+                    <input type="checkbox" id="noShowForWeek"> Do not show for 3 days
+                </label>
+             </div>
+        </div>
+    </div>
+
     <div class="logo-container">
         <img src="logo/logow.png" alt="TrashApps Logo">
     </div>
@@ -255,7 +355,6 @@
         <button class="category-button" onclick="filterAppsByCategory('Lifestyle')">Lifestyle</button>
         <button class="category-button" onclick="filterAppsByCategory('Games')">Games</button>
     </div>
-    <div class="app-container">
-    </div>
+    <div class="app-container"></div>
 </body>
 </html>
