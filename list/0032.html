@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f5f5f5">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Memory Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.0rem;
+            color: #4CAF50;
+            margin: 20px 0;
+            text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.8);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1;
+            margin-top: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: transparent;
+            background-color: #e6e6fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .tile.revealed {
+            color: #333;
+        }
+
+        .tile.matched {
+            background-color: #abf0ad;
+            color: #333;
+            cursor: default;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #abf0ad;
+            color: rgb(0, 0, 0);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .counter, .timer {
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Memory Game</h1>
+
+<div class="container">
+    <div class="grid" id="grid">
+    </div>
+    <div class="controls">
+        <button class="button" id="startButton" onclick="startGame()">Start</button>
+    </div>
+    <div class="counter" id="moveCounter" style="display: none;">Moves: 0</div>
+    <div class="timer" id="timer" style="display: none;">Time: 0s</div>
+    <div class="result" id="result" style="display: none; margin-top: 20px; font-size: 1.5rem;"></div>
+</div>
+
+<script>
+    const grid = document.getElementById('grid');
+    const moveCounter = document.getElementById('moveCounter');
+    const timerDisplay = document.getElementById('timer');
+    const resultDisplay = document.getElementById('result');
+    const startButton = document.getElementById('startButton');
+    const emojis = ["😀", "🎉", "🍎", "🚀", "🐶", "⚽", "🌟", "🎵"];
+    let tiles = [];
+    let moves = 0;
+    let firstTile = null;
+    let secondTile = null;
+    let matchedPairs = 0;
+    let timer = null;
+    let timeElapsed = 0;
+
+    function startGame() {
+        moves = 0;
+        timeElapsed = 0;
+        matchedPairs = 0;
+        moveCounter.style.display = 'block';
+        timerDisplay.style.display = 'block';
+        resultDisplay.style.display = 'none';
+        startButton.textContent = "Reset";
+        startButton.onclick = resetGame;
+        tiles = shuffle([...emojis, ...emojis]);
+        renderGrid();
+        clearInterval(timer);
+        timer = setInterval(updateTimer, 1000);
+        revealAllTiles();
+        setTimeout(hideAllTiles, 2000);
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function renderGrid() {
+        grid.innerHTML = '';
+        tiles.forEach((emoji, index) => {
+            const tileElement = document.createElement('div');
+            tileElement.classList.add('tile');
+            tileElement.dataset.index = index;
+            tileElement.addEventListener('click', () => revealTile(tileElement, emoji));
+            grid.appendChild(tileElement);
+        });
+    }
+
+    function revealAllTiles() {
+        document.querySelectorAll('.tile').forEach((tile, index) => {
+            tile.textContent = tiles[index];
+            tile.classList.add('revealed');
+        });
+    }
+
+    function hideAllTiles() {
+        document.querySelectorAll('.tile').forEach(tile => {
+            tile.textContent = '';
+            tile.classList.remove('revealed');
+        });
+    }
+
+    function revealTile(tile, emoji) {
+        if (tile.classList.contains('revealed') || tile.classList.contains('matched') || secondTile) return;
+
+        tile.textContent = emoji;
+        tile.classList.add('revealed');
+
+        if (!firstTile) {
+            firstTile = { tile, emoji };
+        } else {
+            secondTile = { tile, emoji };
+            moves++;
+            updateMoveCounter();
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        if (firstTile.emoji === secondTile.emoji) {
+            firstTile.tile.classList.add('matched');
+            secondTile.tile.classList.add('matched');
+            matchedPairs++;
+            if (matchedPairs === emojis.length) {
+                endGame();
+            }
+            resetSelection();
+        } else {
+            setTimeout(() => {
+                firstTile.tile.classList.remove('revealed');
+                secondTile.tile.classList.remove('revealed');
+                firstTile.tile.textContent = '';
+                secondTile.tile.textContent = '';
+                resetSelection();
+            }, 1000);
+        }
+    }
+
+    function resetSelection() {
+        firstTile = null;
+        secondTile = null;
+    }
+
+    function updateMoveCounter() {
+        moveCounter.textContent = `Moves: ${moves}`;
+    }
+
+    function updateTimer() {
+        timeElapsed++;
+        timerDisplay.textContent = `Time: ${timeElapsed}s`;
+    }
+
+    function endGame() {
+        clearInterval(timer);
+        timerDisplay.style.display = 'none';
+        let emoji;
+        if (timeElapsed <= 20) {
+            emoji = "⚡️";
+        } else if (timeElapsed <= 30) {
+            emoji = "🚗";
+        } else if (timeElapsed <= 40) {
+            emoji = "✈️";
+        }else {
+            emoji = "🐢";
+        }
+        resultDisplay.textContent = `${timeElapsed}s. ${emoji}`;
+        resultDisplay.style.display = 'block';
+    }
+
+    function resetGame() {
+        startGame();
+    }
+</script>
+
+</body>
+</html>
