@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Morse Code Translator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        textarea, .result-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+        }
+        .result-box {
+            height: 100px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #333;
+            position: relative;
+            text-align: left; /* 텍스트를 왼쪽 정렬 */
+            line-height: 1.5; /* 줄 간격 조정 */
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ddd;
+            color: #555;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10; /* 버튼을 항상 위로 설정 */
+        }
+        .copy-btn:hover {
+            background-color: #ccc;
+        }
+        button {
+            padding: 10px 18px;
+            font-size: 1rem;
+            background-color: #abf0ad;
+            color: rgb(0, 0, 0);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .morse-table {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 9px;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            text-align: center;
+        }
+        .morse-table div {
+            padding: 5px;
+            background-color: #e6e6fa;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Morse Code Translator</h1>
+    <textarea id="textInput" rows="4" placeholder="Enter text here..." oninput="translateToMorse()"></textarea>
+    <div class="result-box" id="resultBox">
+        <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+        Morse Code: -
+    </div>
+    <button onclick="playMorseCode()">🔊 Play</button>
+    <button onclick="shareAudio()">📤 Share</button>
+</div>
+<div class="morse-table">
+    <div>A: .-</div>
+    <div>B: -...</div>
+    <div>C: -.-.</div>
+    <div>D: -..</div>
+    <div>E: .</div>
+    <div>F: ..-.</div>
+    <div>G: --.</div>
+    <div>H: ....</div>
+    <div>I: ..</div>
+    <div>J: .---</div>
+    <div>K: -.-</div>
+    <div>L: .-..</div>
+    <div>M: --</div>
+    <div>N: -.</div>
+    <div>O: ---</div>
+    <div>P: .--.</div>
+    <div>Q: --.-</div>
+    <div>R: .-.</div>
+    <div>S: ...</div>
+    <div>T: -</div>
+    <div>U: ..-</div>
+    <div>V: ...-</div>
+    <div>W: .--</div>
+    <div>X: -..-</div>
+    <div>Y: -.--</div>
+    <div>Z: --..</div>
+    <div>1: .----</div>
+    <div>2: ..---</div>
+    <div>3: ...--</div>
+    <div>4: ....-</div>
+    <div>5: .....</div>
+    <div>6: -....</div>
+    <div>7: --...</div>
+    <div>8: ---..</div>
+    <div>9: ----.</div>
+    <div>0: -----</div>
+</div>
+
+
+<script>
+    const morseCodeMap = {
+        "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".", "F": "..-.", "G": "--.", "H": "....",
+        "I": "..", "J": ".---", "K": "-.-", "L": ".-..", "M": "--", "N": "-.", "O": "---", "P": ".--.",
+        "Q": "--.-", "R": ".-.", "S": "...", "T": "-", "U": "..-", "V": "...-", "W": ".--", "X": "-..-",
+        "Y": "-.--", "Z": "--..", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....",
+        "6": "-....", "7": "--...", "8": "---..", "9": "----.", "0": "-----", " ": "/"
+    };
+
+    function translateToMorse() {
+        const textInput = document.getElementById("textInput").value.toUpperCase();
+        const result = textInput.split("").map(char => morseCodeMap[char] || "").join(" ");
+        document.getElementById("resultBox").innerHTML = `<button class="copy-btn" onclick="copyToClipboard()">Copy</button>${result || "Morse Code: -"}`;
+    }
+
+    function copyToClipboard() {
+        const resultBox = document.getElementById("resultBox");
+        const morse = Array.from(resultBox.childNodes)
+            .filter(node => node.nodeType === Node.TEXT_NODE) 
+            .map(node => node.nodeValue.trim()) 
+            .join("");
+
+        if (morse === "Morse Code: -" || morse.trim() === "") {
+            alert("Nothing to copy!");
+            return;
+        }
+
+        navigator.clipboard.writeText(morse).then(() => {
+            alert("Copied to clipboard!");
+        }).catch(err => {
+            alert("Failed to copy: " + err);
+        });
+    }
+
+    function playMorseCode() {
+        const morse = document.getElementById("resultBox").innerText;
+        if (morse.trim() === "Morse Code: -") return;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let time = audioContext.currentTime;
+
+        morse.split("").forEach(char => {
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = "sine";
+            oscillator.frequency.value = 440;
+            const gainNode = audioContext.createGain();
+
+            if (char === ".") {
+                oscillator.start(time);
+                oscillator.stop(time + 0.1);
+                time += 0.2;
+            } else if (char === "-") {
+                oscillator.start(time);
+                oscillator.stop(time + 0.3);
+                time += 0.4;
+            } else if (char === " ") {
+                time += 0.2;
+            }
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+        });
+    }
+
+    function shareAudio() {
+        const morse = document.getElementById("resultBox").innerText;
+        if (morse.trim() === "Morse Code: -") {
+            alert("Nothing to share!");
+            return;
+        }
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const sampleRate = audioContext.sampleRate;
+        const audioBuffer = audioContext.createBuffer(1, sampleRate * 10, sampleRate);
+        const channelData = audioBuffer.getChannelData(0);
+        let offset = 0;
+
+        morse.split("").forEach(char => {
+            const duration = char === "." ? 0.1 : char === "-" ? 0.3 : 0;
+            const frequency = char === "." || char === "-" ? 440 : 0;
+            for (let i = 0; i < sampleRate * duration; i++) {
+                channelData[offset++] = Math.sin(2 * Math.PI * frequency * i / sampleRate);
+            }
+            offset += sampleRate * 0.1;
+        });
+
+        const wavBlob = audioBufferToWav(audioBuffer);
+        const file = new File([wavBlob], "morse_code.wav", { type: "audio/wav" });
+
+        if (navigator.share) {
+            navigator.share({
+                files: [file],
+                title: "Morse Code Audio",
+                text: "Here is the Morse code audio file.",
+            }).catch(err => console.log("Sharing failed", err));
+        } else {
+            alert("Sharing is not supported on this device.");
+        }
+    }
+
+    function audioBufferToWav(buffer) {
+        const numOfChan = buffer.numberOfChannels,
+            length = buffer.length * numOfChan * 2 + 44,
+            bufferArray = new ArrayBuffer(length),
+            view = new DataView(bufferArray),
+            channels = [],
+            sampleRate = buffer.sampleRate;
+        let offset = 0;
+
+        writeUTFBytes(view, offset, 'RIFF'); offset += 4;
+        view.setUint32(offset, length - 8, true); offset += 4;
+        writeUTFBytes(view, offset, 'WAVE'); offset += 4;
+        writeUTFBytes(view, offset, 'fmt '); offset += 4;
+        view.setUint32(offset, 16, true); offset += 4;
+        view.setUint16(offset, 1, true); offset += 2;
+        view.setUint16(offset, numOfChan, true); offset += 2;
+        view.setUint32(offset, sampleRate, true); offset += 4;
+        view.setUint32(offset, sampleRate * numOfChan * 2, true); offset += 4;
+        view.setUint16(offset, numOfChan * 2, true); offset += 2;
+        view.setUint16(offset, 16, true); offset += 2;
+        writeUTFBytes(view, offset, 'data'); offset += 4;
+        view.setUint32(offset, length - offset - 4, true); offset += 4;
+
+        for (let i = 0; i < buffer.numberOfChannels; i++) {
+            channels.push(buffer.getChannelData(i));
+        }
+
+        let interleaved = interleave(channels);
+        for (let i = 0; i < interleaved.length; i++, offset += 2) {
+            view.setInt16(offset, interleaved[i] * 0x7FFF, true);
+        }
+
+        return new Blob([view], { type: "audio/wav" });
+    }
+
+    function interleave(input) {
+        let length = input[0].length,
+            result = new Float32Array(length * input.length),
+            index = 0,
+            inputIndex = 0;
+
+        while (index < result.length) {
+            for (let i = 0; i < input.length; i++) {
+                result[index++] = input[i][inputIndex];
+            }
+            inputIndex++;
+        }
+        return result;
+    }
+
+    function writeUTFBytes(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,11 +1,19 @@
 [
     {
+        "id": "0031",
+        "title": "Morse Code Translator",
+        "description": "Easily translate English to Morse code and vice versa. Features include real-time translation, audio playback, and a built-in Morse code reference table for quick learning. Perfect for enthusiasts and learners alike.",
+        "icon": "icons/0031.webp",
+        "link": "list/0031.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0030",
         "title": "Reaction Time Tester",
         "description": "Test your reaction speed with this simple and engaging app. Touch the box as quickly as possible when it turns green and measure your response time. Features include colorful feedback, emoji-based performance ratings, and a share button to challenge friends.",
         "icon": "icons/0030.webp",
         "link": "list/0030.html",
-        "category": "Games"
+        "category": "Utilities"
     },
     {
         "id": "0029",
