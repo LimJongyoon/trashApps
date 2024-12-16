@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Typing Speed Tester</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin: 20px 0;
+            color: #4CAF50;
+            text-shadow: 0 0 5px rgba(76, 175, 80, 0.8);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .difficulty-buttons button {
+            padding: 5px 10px;
+            font-size: 1rem;
+            background-color: #abf0ad;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .difficulty-buttons button:hover {
+            background-color: #45a049;
+        }
+
+        .text {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            text-align: center;
+            background: #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            display: none;
+        }
+
+        textarea {
+            flex: 1;
+            font-size: 1.2rem;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #abf0ad;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .restart-share-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .instruction {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            text-align: center;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Typing Speed Tester</h1>
+    <div class="container">
+        <div class="instruction">Select a difficulty level to begin the test!</div>
+        <div class="difficulty-buttons">
+            <button onclick="setDifficulty(0)">Easy</button>
+            <button onclick="setDifficulty(1)">Medium</button>
+            <button onclick="setDifficulty(2)">Hard</button>
+        </div>
+        <div id="textToType" class="text hidden">
+            TrashApps is fun
+        </div>
+        <div class="input-container">
+            <textarea id="typingInput" placeholder="Start typing here..." disabled></textarea>
+            <button id="finishButton" class="button" onclick="finishTest()">Finish</button>
+        </div>
+        <div id="result" class="result hidden"></div>
+        <div class="restart-share-container" id="restartShareContainer">
+            <button id="restartButton" class="button hidden" onclick="restartTest()">Restart</button>
+            <button id="shareButton" class="button hidden">Share Result</button>
+        </div>
+    </div>
+
+    <script>
+        const textToType = document.getElementById('textToType');
+        const typingInput = document.getElementById('typingInput');
+        const finishButton = document.getElementById('finishButton');
+        const result = document.getElementById('result');
+        const restartButton = document.getElementById('restartButton');
+        const shareButton = document.getElementById('shareButton');
+        const restartShareContainer = document.getElementById('restartShareContainer');
+        const inputContainer = document.querySelector('.input-container');
+
+        const texts = [
+            [
+                "TrashApps is fun",
+                "It has many features",
+                "Request the app you need",
+                "Explore exciting apps"
+            ],
+            [
+                "I will donate to TrashApps one day",
+                "TrashApps is really innovative and unique",
+                "I heard there is an Instagram account too",
+                "Visit TrashApps for more useful apps"
+            ],
+            [
+                "Do not just use mobile apps but also subscribe to YouTube",
+                "New features are continuously being added to enhance user experience",
+                "Recommend TrashApps to your friends and family for an amazing app journey",
+                "Discover hidden gems in the world of TrashApps with innovative designs and concepts"
+            ]
+        ];
+
+        let startTime = null;
+        let timer = null;
+        let selectedDifficulty = 0;
+
+        function setDifficulty(level) {
+            selectedDifficulty = level;
+            const randomText = texts[level][Math.floor(Math.random() * texts[level].length)];
+            textToType.textContent = randomText;
+            textToType.classList.remove('hidden');
+            typingInput.value = "";
+            typingInput.disabled = false;
+            typingInput.focus();
+            inputContainer.style.display = 'flex';
+            result.classList.add('hidden');
+            restartShareContainer.style.display = 'none';
+            restartButton.classList.add('hidden');
+            shareButton.classList.add('hidden');
+            startTime = null;
+        }
+
+        function startTest() {
+            if (!startTime) {
+                startTime = Date.now();
+                result.classList.add('hidden');
+
+                timer = setInterval(() => {
+                    updateResult();
+                }, 100);
+            }
+        }
+
+        function finishTest() {
+            clearInterval(timer);
+            updateResult();
+            typingInput.disabled = true;
+            restartShareContainer.style.display = 'flex';
+            restartButton.classList.remove('hidden');
+
+            const wpm = result.querySelector('strong').textContent;
+            const shareMessage = `I just typed ${wpm} WPM on Typing Speed Tester! Check out TrashApps!`;
+            shareButton.classList.remove('hidden');
+            shareButton.onclick = () => {
+                navigator.share({
+                    title: 'Typing Speed Tester',
+                    text: shareMessage,
+                    url: window.location.href
+                }).catch(err => console.error('Sharing failed', err));
+            };
+        }
+
+        function restartTest() {
+            typingInput.value = "";
+            typingInput.disabled = true;
+            textToType.classList.add('hidden');
+            inputContainer.style.display = 'none';
+            result.classList.add('hidden');
+            restartShareContainer.style.display = 'none';
+            startTime = null;
+        }
+
+        function updateResult() {
+            const typedText = typingInput.value.trim();
+            const targetText = textToType.textContent;
+
+            let correctChars = 0;
+            for (let i = 0; i < typedText.length; i++) {
+                if (typedText[i] === targetText[i]) correctChars++;
+            }
+
+            const wordsTyped = typedText.split(/\s+/).filter(word => word).length;
+            const accuracy = (correctChars / targetText.length) * 100;
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            const wpm = Math.round((wordsTyped / elapsedTime) * 60);
+
+            result.innerHTML = `Words Per Minute: <strong>${wpm}</strong><br>Accuracy: <strong>${accuracy.toFixed(2)}%</strong>`;
+            result.classList.remove('hidden');
+        }
+
+        typingInput.addEventListener('input', startTest);
+        typingInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                finishTest();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -68,6 +68,7 @@
             height: 100%;
             aspect-ratio: 1;
             transition: transform 0.2s, color 0.2s;
+            line-height: 1;
         }
 
         .tile.revealed {
@@ -195,6 +196,9 @@
         if (tile.classList.contains('revealed') || tile.classList.contains('matched') || secondTile) return;
 
         tile.textContent = emoji;
+        tile.style.display = "none";
+        tile.offsetHeight;
+        tile.style.display = "";
         tile.classList.add('revealed');
 
         if (!firstTile) {
