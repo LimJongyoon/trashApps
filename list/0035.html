@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f5f5">
+    <title>Date Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+        }
+
+        .input-box {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #4CAF50;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, button {
+            margin-top: 5px;
+            padding: 10px;
+            font-size: 1rem;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        .highlight {
+            font-size: 1.8rem;
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Date Calculator</h1>
+<div class="container">
+    <div class="input-box">
+        <label>Enter Base Date:</label>
+        <input type="date" id="baseDate">
+    </div>
+
+    <div class="input-box">
+        <h3>Option 1: Calculate Days Between Dates</h3>
+        <label>Enter Target Date:</label>
+        <input type="date" id="targetDate">
+        <button onclick="calculateDaysBetween()">Calculate Days</button>
+        <div class="result" id="resultDaysBetween"></div>
+    </div>
+
+    <div class="input-box">
+        <h3>Option 2: Calculate Date From Days</h3>
+        <label>Enter Days Offset (Negative for Past):</label>
+        <input type="number" id="daysOffset" placeholder="Enter days (+/-)">
+        <button onclick="calculateDateFromOffset()">Calculate Date</button>
+        <div class="result" id="resultDateFromOffset"></div>
+    </div>
+</div>
+
+<script>
+    function calculateDaysBetween() {
+        const baseDateInput = document.getElementById('baseDate').value;
+        const targetDateInput = document.getElementById('targetDate').value;
+
+        if (!baseDateInput || !targetDateInput) {
+            document.getElementById('resultDaysBetween').textContent = "Please enter both dates.";
+            return;
+        }
+
+        const baseDate = new Date(baseDateInput);
+        const targetDate = new Date(targetDateInput);
+        const diffTime = targetDate - baseDate;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
+        const dDay = diffDays > 0 ? `D+${diffDays}` : diffDays < 0 ? `D${diffDays}` : "D-Day";
+        document.getElementById('resultDaysBetween').innerHTML = `
+            <span class="highlight">${dDay}</span>
+        `;
+    }
+
+    function calculateDateFromOffset() {
+        const baseDateInput = document.getElementById('baseDate').value;
+        const daysOffsetInput = parseInt(document.getElementById('daysOffset').value);
+
+        if (!baseDateInput || isNaN(daysOffsetInput)) {
+            document.getElementById('resultDateFromOffset').textContent = "Please enter both the base date and days offset.";
+            return;
+        }
+
+        const baseDate = new Date(baseDateInput);
+        baseDate.setDate(baseDate.getDate() + daysOffsetInput);
+
+        document.getElementById('resultDateFromOffset').innerHTML = `
+            <span class="highlight">${baseDate.toDateString()}</span>
+        `;
+    }
+</script>
+
+</body>
+</html>

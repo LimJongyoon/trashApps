@@ -1,5 +1,21 @@
 [
     {
+        "id": "0035",
+        "title": "Date Calculator",
+        "description": "D-day Quickly calculate the number of days between two dates or find the future/past date by adding or subtracting days. Perfect for planning events, tracking deadlines, or counting special days.",
+        "icon": "icons/0035.webp",
+        "link": "list/0035.html",
+        "category": "Utilities"
+    },
+    {
+        "id": "0034",
+        "title": "BMI Calculator",
+        "description": "Easily calculate your Body Mass Index (BMI) with this app. Enter your height and weight to get your BMI and its classification (e.g., normal, underweight). Features a simple interface and results visualization with dynamic pointers.",
+        "icon": "icons/0034.webp",
+        "link": "list/0034.html",
+        "category": "Lifestyle"
+    },
+    {
         "id": "0033",
         "title": "Typing Speed Tester",
         "description": "Measure your typing speed and accuracy with this engaging tool. Practice with various difficulty levels, share your results, and challenge your friends. Perfect for improving typing skills while having fun.",
