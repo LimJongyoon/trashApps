@@ -1,7 +1,7 @@
 [
     {
         "id": "0035",
-        "title": "Date Calculator",
+        "title": "D-day Date Calculator",
         "description": "D-day Quickly calculate the number of days between two dates or find the future/past date by adding or subtracting days. Perfect for planning events, tracking deadlines, or counting special days.",
         "icon": "icons/0035.webp",
         "link": "list/0035.html",
