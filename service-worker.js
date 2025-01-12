@@ -1,9 +1,9 @@
-const CACHE_NAME = 'TrashApp 0.35.2';
+const CACHE_NAME = 'TrashApp 0.35.3';
 const urlsToCache = [
-  '/trashApps/',
-  '/trashApps/index.html',
-  '/trashApps/appDownloadGuide.html',
-  '/trashApps/donation.html'
+  '/',
+  '/index.html',
+  '/appDownloadGuide.html',
+  '/donation.html'
 ];
 
 self.addEventListener('install', (event) => {
