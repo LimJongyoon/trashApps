@@ -18,7 +18,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  if (url.includes('/trashApps/list/') && url.match(/\/\d{4}\.html$/)) {
+  if (url.includes('/list/') && url.match(/\/\d{4}\.html$/)) {
     event.respondWith(
       caches.match(event.request).then((response) => {
         return response || fetch(event.request).then((fetchResponse) => {
