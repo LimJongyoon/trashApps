@@ -97,7 +97,7 @@
 <h1>PhotoMemo</h1>
 <div class="container">
     <div class="polaroid" id="polaroid">
-        <video id="camera" autoplay></video>
+        <video id="camera" autoplay playsinline></video>
         <img id="photo" src="" alt="Captured Photo" class="hidden">
         <textarea class="caption" id="caption" placeholder="Add your memo here..."></textarea>
     </div>
@@ -119,8 +119,8 @@
 
     let isPhotoTaken = false;
 
-    // Access camera
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+    // Access camera with rear-facing mode
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
         video.srcObject = stream;
         video.play();
     }).catch((err) => {
