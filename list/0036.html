@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f5f5">
+    <title>PhotoMemo - Polaroid Style</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .polaroid {
+            position: relative;
+            display: inline-block;
+            background: white;
+            padding: 10px;
+            border: 10px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .polaroid img, .polaroid video {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .caption {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #abf0ad;
+            color: black;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>PhotoMemo</h1>
+<div class="container">
+    <div class="polaroid" id="polaroid">
+        <video id="camera" autoplay></video>
+        <img id="photo" src="" alt="Captured Photo" class="hidden">
+        <textarea class="caption" id="caption" placeholder="Add your memo here..."></textarea>
+    </div>
+    <div class="controls">
+        <button id="actionButton">Take Photo</button>
+        <button id="downloadButton" class="hidden">Download</button>
+    </div>
+</div>
+
+<canvas id="canvas" class="hidden"></canvas>
+
+<script>
+    const video = document.getElementById('camera');
+    const actionButton = document.getElementById('actionButton');
+    const downloadButton = document.getElementById('downloadButton');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
+    const caption = document.getElementById('caption');
+
+    let isPhotoTaken = false;
+
+    // Access camera
+    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        video.srcObject = stream;
+        video.play();
+    }).catch((err) => {
+        alert('Camera access denied: ' + err.message);
+    });
+
+    // Handle button click
+    actionButton.addEventListener('click', () => {
+        if (!isPhotoTaken) {
+            takePhoto();
+        } else {
+            retakePhoto();
+        }
+    });
+
+    function takePhoto() {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imageData = canvas.toDataURL('image/png');
+        photo.src = imageData;
+
+        isPhotoTaken = true;
+        video.classList.add('hidden');
+        photo.classList.remove('hidden');
+        actionButton.textContent = 'Retake Photo';
+        downloadButton.classList.remove('hidden');
+    }
+
+    function retakePhoto() {
+        photo.src = '';
+
+        isPhotoTaken = false;
+        video.classList.remove('hidden');
+        photo.classList.add('hidden');
+        actionButton.textContent = 'Take Photo';
+        downloadButton.classList.add('hidden');
+    }
+
+    downloadButton.addEventListener('click', () => {
+        if (isPhotoTaken) {
+            const polaroidCanvas = document.createElement('canvas');
+            const context = polaroidCanvas.getContext('2d');
+            polaroidCanvas.width = canvas.width;
+            polaroidCanvas.height = canvas.height + 100;
+
+            context.fillStyle = 'white';
+            context.fillRect(0, 0, polaroidCanvas.width, polaroidCanvas.height);
+            context.drawImage(canvas, 0, 0);
+
+            context.fillStyle = 'black';
+            context.font = '20px Arial';
+            context.textAlign = 'center';
+            context.fillText(caption.value, polaroidCanvas.width / 2, polaroidCanvas.height - 50);
+
+            const link = document.createElement('a');
+            link.href = polaroidCanvas.toDataURL('image/png');
+            link.download = 'polaroid.png';
+            link.click();
+        }
+    });
+</script>
+
+</body>
+</html>

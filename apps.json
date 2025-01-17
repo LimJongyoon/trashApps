@@ -1,5 +1,13 @@
 [
     {
+        "id": "0036",
+        "title": "PhotoMemo",
+        "description": "Capture memories effortlessly with PhotoMemo! Take photos, add personalized notes, and save them as stylish polaroids. Perfect for journaling, event planning, or sharing moments with a creative touch.",
+        "icon": "icons/0036.webp",
+        "link": "list/0036.html",
+        "category": "Lifestyle"
+    },
+    {
         "id": "0035",
         "title": "D-day Date Calculator",
         "description": "D-day Quickly calculate the number of days between two dates or find the future/past date by adding or subtracting days. Perfect for planning events, tracking deadlines, or counting special days.",
