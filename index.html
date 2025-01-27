@@ -12,12 +12,33 @@
     <style>
         .logo-container {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 0px;
         }
 
         .logo-container img {
             width: 40%;
             max-width: 300px;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center; 
+            gap: 15px; 
+            margin-bottom: 10px; 
+        }
+
+        .social-links a {
+            display: inline-block;
+        }
+
+        .social-icon {
+            width: auto; 
+            height: 32px;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.2);
         }
 
         body {
@@ -338,10 +359,20 @@
              </div>
         </div>
     </div>
-
     <div class="logo-container">
         <img src="logo/logow.png" alt="TrashApps Logo">
     </div>
+    <div class="social-links">
+        <a href="https://www.youtube.com/@TrashApps" target="_blank">
+            <img src="icons/youtube.png" alt="YouTube" class="social-icon">
+        </a>
+        <a href="https://www.instagram.com/trash_apps?igsh=aW0xZm14NHBsNGh3&utm_source=qr" target="_blank">
+            <img src="icons/instagram.png" alt="Instagram" class="social-icon">
+        </a>
+        <a href="https://www.tiktok.com/@trashapps.org" target="_blank">
+            <img src="icons/tiktok.png" alt="TikTok" class="social-icon">
+        </a>
+    </div>    
     <div class="button-container">
         <a href="appDownloadGuide.html" class="button">How to Install<br><span style="font-size: 22px;">📥❓</span></a>
         <a href="donation.html" class="button">Donate to Us <br>plz!!<span style="font-size: 22px;">🚀💖</span></a>
