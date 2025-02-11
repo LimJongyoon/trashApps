@@ -1,5 +1,13 @@
 [
     {
+        "id": "0037",
+        "title": "Word Chain Game",
+        "description": "A fun and interactive word chain game! Players take turns entering words that start with the last letter of the previous word. Simple yet challenging gameplay with a 30-second input cooldown.",
+        "icon": "icons/0037.webp",
+        "link": "list/0037.html",
+        "category": "Games"
+    },
+    {
         "id": "0036",
         "title": "PhotoMemo",
         "description": "Capture memories effortlessly with PhotoMemo! Take photos, add personalized notes, and save them as stylish polaroids. Perfect for journaling, event planning, or sharing moments with a creative touch.",

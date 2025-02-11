@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Word Chain Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .description {
+            text-align: left;
+            margin: 30px;
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 15px;
+            margin-top: 0px;
+        }
+        .chat-box {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .message-display {
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #e6e6fa;
+            margin-bottom: 10px;
+            min-height: 80px;
+            font-weight: bold;
+            overflow-y: auto;
+            max-height: 150px;
+        }
+        .highlight {
+            color: #e53935;
+            font-weight: bold;
+        }
+        .last-letter-box {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .message-input {
+            width: 94%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        .send-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .send-button:hover {
+            background-color: #45a049;
+        }
+        .notice {
+            font-size: 0.9rem;
+            color: #e53935;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Word Chain Game</h1>
+    <p class="description">
+        - Enter a word that starts with the last letter of the previous word.<br>
+        - Words must be 1-20 characters long.<br>
+        - You can only submit a word every 30 seconds.
+    </p>
+
+    <div class="chat-box">
+        <div id="lastLetterDisplay" class="last-letter-box">Waiting for the first word...</div>
+        <div id="messageDisplay" class="message-display">Loading previous words...</div>
+        <input type="text" id="messageInput" class="message-input" placeholder="Enter a word (max 20 chars)">
+        <button id="sendButton" class="send-button">Send</button>
+        <div id="alertMessage" class="notice"></div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyATT5WPggjVXS4oJHPh3Pml0Aijyf_yXL0",
+            authDomain: "trashapps-97675.firebaseapp.com",
+            databaseURL: "https://trashapps-97675-default-rtdb.firebaseio.com",
+            projectId: "trashapps-97675",
+            storageBucket: "trashapps-97675.firebasestorage.app",
+            messagingSenderId: "559756184244",
+            appId: "1:559756184244:web:9cb7f070efe23f2ca865e1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messagesRef = ref(db, '0037/messages');
+
+        // DOM elements
+        const messageDisplay = document.getElementById('messageDisplay');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const alertMessage = document.getElementById('alertMessage');
+        const lastLetterDisplay = document.getElementById('lastLetterDisplay');
+
+        let lastLetter = "";
+        let countdownTimer;
+
+        // Fetch and display previous words and update last letter
+        onValue(messagesRef, (snapshot) => {
+            const messages = snapshot.val() || [];
+            messageDisplay.innerHTML = messages.map(word => `<div>${word}</div>`).join('');
+
+            if (messages.length > 0) {
+                lastLetter = messages[messages.length - 1].slice(-1);
+                lastLetterDisplay.innerHTML = `Next word must start with: <span class="highlight">${lastLetter}</span>`;
+            } else {
+                lastLetterDisplay.textContent = "Waiting for the first word...";
+            }
+        });
+
+        // Check if enough time has passed (30 seconds)
+        function canSendWord(ip) {
+            const lastSentTime = localStorage.getItem(`lastSent-${ip}`);
+            if (!lastSentTime) return true;
+
+            const now = Date.now();
+            const timeDifference = Math.floor((now - parseInt(lastSentTime, 10)) / 1000);  // Difference in seconds
+
+            if (timeDifference >= 30) {
+                alertMessage.textContent = "";
+                return true;
+            } else {
+                startCountdown(30 - timeDifference);
+                return false;
+            }
+        }
+
+        // Start countdown to show remaining time
+        function startCountdown(secondsLeft) {
+            clearInterval(countdownTimer);  // Clear any previous timer
+
+            countdownTimer = setInterval(() => {
+                alertMessage.textContent = `You can send a new word in ${secondsLeft} seconds.`;
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    alertMessage.textContent = "";
+                }
+                secondsLeft--;
+            }, 1000);
+        }
+
+        // Validate and send the new word
+        async function sendWord() {
+            const response = await fetch('https://api64.ipify.org?format=json');
+            const ip = (await response.json()).ip;
+
+            if (!canSendWord(ip)) {
+                return;
+            }
+
+            const newWord = messageInput.value.trim();
+            if (newWord.length === 0 || newWord.length > 20) {
+                alertMessage.textContent = "Word must be 1-20 characters long.";
+                return;
+            }
+
+            if (lastLetter && newWord[0].toLowerCase() !== lastLetter.toLowerCase()) {
+                alertMessage.textContent = `Word must start with "${lastLetter}".`;
+                return;
+            }
+
+            get(messagesRef).then((snapshot) => {
+                let messages = snapshot.val() || [];
+
+                // Add new word and keep only the latest 5 words
+                messages.push(newWord);
+                if (messages.length > 5) messages.shift();
+
+                // Store the new word in Firebase and update the local storage
+                set(messagesRef, messages).then(() => {
+                    localStorage.setItem(`lastSent-${ip}`, Date.now().toString());
+                    messageInput.value = "";  // Clear input field
+                    alertMessage.textContent = "";  // Clear alerts
+                }).catch((error) => {
+                    console.error("Error writing to Firebase:", error);
+                });
+            });
+        }
+
+        sendButton.addEventListener('click', sendWord);
+    </script>
+</body>
+</html>
