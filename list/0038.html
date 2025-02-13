@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <title>Guitar Tuner</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .status.correct {
+            color: green;
+        }
+        .status.incorrect {
+            color: red;
+        }
+        .guitar-visual {
+            width: 100%;
+            height: 150px;
+            position: relative;
+            background: url('guitar_head.png') center/contain no-repeat;
+        }
+        .string {
+            position: absolute;
+            left: 50%;
+            width: 80%;
+            background: gray;
+            transform: translateX(-50%);
+            transition: background 0.3s;
+            text-align: center;
+            font-size: 0.8rem;
+            color: white;
+            font-weight: bold;
+        }
+        #string6 { top: 10%; height: 6px; }
+        #string5 { top: 25%; height: 5px; }
+        #string4 { top: 40%; height: 4px; }
+        #string3 { top: 55%; height: 3px; }
+        #string2 { top: 70%; height: 2px; }
+        #string1 { top: 85%; height: 1.5px; }
+        .active {
+            background: red !important;
+        }
+        .tuning-graph {
+            width: 90%;
+            height: 30px;
+            background: #ddd;
+            margin: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .tuning-target {
+            position: absolute;
+            width: 10%;
+            height: 99%;
+            background: rgba(255, 255, 0, 0.717);
+            left: 45%;
+            border-radius: 5px;
+            border: 1px #000000;
+        }
+        .tuning-indicator {
+            width: 5%;
+            height: 100%;
+            background: red;
+            border-radius: 5px;
+            position: absolute;
+            left: 47.5%;
+            transition: left 0.2s ease-in-out, background 0.2s;
+        }
+        button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 1rem;
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Guitar Tuner</h1>
+    <div class="status" id="status">Select a string to tune</div>
+    <div class="guitar-visual">
+        <div class="string" id="string6">6</div>
+        <div class="string" id="string5">5</div>
+        <div class="string" id="string4">4</div>
+        <div class="string" id="string3">3</div>
+        <div class="string" id="string2">2</div>
+        <div class="string" id="string1">1</div>
+    </div>
+    <div class="tuning-graph">
+        <div class="tuning-target"></div> <!-- 목표 주파수 표시 -->
+        <div class="tuning-indicator" id="tuningIndicator"></div>
+    </div>
+    <div>
+    <button onclick="startTuning()">🎤 Start Tuning</button>
+    </div>
+    <div class="buttons">
+        <button onclick="selectString(6)">E (6th)</button>
+        <button onclick="selectString(5)">A (5th)</button>
+        <button onclick="selectString(4)">D (4th)</button>
+        <button onclick="selectString(3)">G (3rd)</button>
+        <button onclick="selectString(2)">B (2nd)</button>
+        <button onclick="selectString(1)">E (1st)</button>
+    </div>
+</div>
+
+<script>
+    let audioContext;
+    let analyser;
+    let dataArray;
+    let selectedString = null;
+
+    const targetFrequencies = {
+        6: 82.41,  
+        5: 110.00, 
+        4: 146.83, 
+        3: 196.00, 
+        2: 246.94, 
+        1: 329.63  
+    };
+
+    function selectString(stringNum) {
+        document.querySelectorAll('.string').forEach(el => el.classList.remove('active'));
+        document.getElementById(`string${stringNum}`).classList.add('active');
+        selectedString = stringNum;
+        document.getElementById("status").innerText = `Tuning: ${getStringName(stringNum)}`;
+    }
+
+    function getStringName(num) {
+        return {6: "E (6th)", 5: "A (5th)", 4: "D (4th)", 3: "G (3rd)", 2: "B (2nd)", 1: "E (1st)"}[num];
+    }
+
+    async function startTuning() {
+        if (!selectedString) {
+            alert("Please select a string first!");
+            return;
+        }
+
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioContext.createMediaStreamSource(stream);
+        
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        dataArray = new Float32Array(analyser.fftSize);
+        
+        source.connect(analyser);
+        analyzePitch();
+    }
+
+    function analyzePitch() {
+        analyser.getFloatTimeDomainData(dataArray);
+        const frequency = detectPitch(dataArray, audioContext.sampleRate);
+        updateTuningGraph(frequency);
+        requestAnimationFrame(analyzePitch);
+    }
+
+    function detectPitch(buffer, sampleRate) {
+        let maxVal = 0;
+        let maxIndex = 0;
+        
+        for (let i = 0; i < buffer.length; i++) {
+            if (buffer[i] > maxVal) {
+                maxVal = buffer[i];
+                maxIndex = i;
+            }
+        }
+        
+        return maxIndex ? sampleRate / maxIndex : 0;
+    }
+
+    function updateTuningGraph(frequency) {
+        const indicator = document.getElementById("tuningIndicator");
+        const status = document.getElementById("status");
+
+        if (!selectedString) return;
+
+        const targetFrequency = targetFrequencies[selectedString];
+        const offset = (frequency - targetFrequency) * 1.5;
+        const newPos = Math.max(0, Math.min(90, 45 + offset));
+
+        indicator.style.left = `${newPos}%`;
+
+        if (Math.abs(frequency - targetFrequency) < 5) {
+            indicator.style.background = "green";
+            status.textContent = `✅ Perfectly Tuned! (${getStringName(selectedString)})`;
+            status.classList.remove("incorrect");
+            status.classList.add("correct");
+        } else {
+            indicator.style.background = "red";
+            status.textContent = `❌ Out of Tune (${getStringName(selectedString)})`;
+            status.classList.remove("correct");
+            status.classList.add("incorrect");
+        }
+    }
+</script>
+
+</body>
+</html>

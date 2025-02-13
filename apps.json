@@ -1,5 +1,13 @@
 [
     {
+        "id": "0038",
+        "title": "Guitar Tuner",
+        "description": "Easily tune your guitar with real-time pitch detection! Select a string, play the sound, and get instant feedback on whether your note is sharp, flat, or perfectly tuned.",
+        "icon": "icons/0038.webp",
+        "link": "list/0038.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0037",
         "title": "Word Chain Game",
         "description": "A fun and interactive word chain game! Players take turns entering words that start with the last letter of the previous word. Simple yet challenging gameplay with a 30-second input cooldown.",
