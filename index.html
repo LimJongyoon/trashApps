@@ -22,21 +22,35 @@
         }
         .social-links {
             display: flex;
-            justify-content: center; 
-            gap: 15px; 
-            margin-bottom: 10px; 
+            justify-content: center;
+            gap: 10px; /* 아이콘 간 간격 */
+            flex-wrap: wrap; /* 모바일에서도 자동 정렬 */
+            margin-bottom: 8px;
         }
 
         .social-links a {
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 40px;
+            background-color: white;
+            border-radius: 7px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
         }
 
         .social-icon {
-            width: auto; 
-            height: 32px;
-            object-fit: contain;
-            transition: transform 0.3s;
+            width: auto;
+            height: 30px;
         }
+
 
         .social-icon:hover {
             transform: scale(1.2);
