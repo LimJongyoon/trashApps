@@ -1,5 +1,13 @@
 [
     {
+        "id": "0039",
+        "title": "Image Transparency Adjuster",
+        "description": "Easily adjust the transparency of images with a simple slider. Upload an image, control its opacity, and download the processed image in PNG format while maintaining transparency.",
+        "icon": "icons/0039.webp",
+        "link": "list/0039.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0038",
         "title": "Guitar Tuner",
         "description": "Easily tune your guitar with real-time pitch detection! Select a string, play the sound, and get instant feedback on whether your note is sharp, flat, or perfectly tuned.",

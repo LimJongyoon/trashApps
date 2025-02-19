@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chord Scaler</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        .container {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .info-box {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            border: 2px solid #d3d3d3;
+            text-align: left;
+        }
+        .info-box p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+        .chord-input {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            min-height: 50px;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #d3d3d3;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+        .chord-box {
+            min-width: 60px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            background: white;
+        }
+        .button {
+            background-color: #abf0ad;
+            color: black;
+            border: none;
+            cursor: pointer;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #388e3c;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chord Scaler</h1>
+    <div class="container">
+        <input type="text" id="chordInput" placeholder="Enter your chords (e.g., B F♯ G♯m E)" autocomplete="off">
+        <div class="chord-input" id="chordDisplay"></div>
+        <div class="info-box">
+            <p><strong>Key:</strong> <span id="currentKey">Unknown</span></p>
+            <p><strong>Transpose Count:</strong> <span id="transposeCount">0</span></p>
+            <p><strong>Chord Progression:</strong> <span id="chordPattern">N/A</span></p>
+        </div>
+        <div class="button-group">
+            <button class="button" id="transposeUp">Transpose +1</button>
+            <button class="button" id="transposeDown">Transpose -1</button>
+        </div>
+    </div>
+
+    <script>
+        const chordInput = document.getElementById("chordInput");
+        const chordDisplay = document.getElementById("chordDisplay");
+        const transposeUp = document.getElementById("transposeUp");
+        const transposeDown = document.getElementById("transposeDown");
+        const currentKeyEl = document.getElementById("currentKey");
+        const transposeCountEl = document.getElementById("transposeCount");
+        const chordPatternEl = document.getElementById("chordPattern");
+
+        const noteOrder = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+        const enharmonicMap = {"B♯": "C", "E♯": "F", "C♭": "B", "F♭": "E"};
+
+        let transposeCount = 0;
+
+        function normalizeChord(chord) {
+            return enharmonicMap[chord] || chord;
+        }
+
+        function detectKey(chords) {
+            if (chords.length === 0) return "Unknown";
+
+            const majorKeys = {
+                "C": ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
+                "G": ["G", "Am", "Bm", "C", "D", "Em", "F♯dim"],
+                "D": ["D", "Em", "F♯m", "G", "A", "Bm", "C♯dim"],
+                "A": ["A", "Bm", "C♯m", "D", "E", "F♯m", "G♯dim"],
+                "E": ["E", "F♯m", "G♯m", "A", "B", "C♯m", "D♯dim"],
+                "B": ["B", "C♯m", "D♯m", "E", "F♯", "G♯m", "A♯dim"],
+                "F": ["F", "Gm", "Am", "Bb", "C", "Dm", "Edim"]
+            };
+
+            let keyCounts = {};
+            
+            chords.forEach(chord => {
+                Object.keys(majorKeys).forEach(key => {
+                    if (majorKeys[key].includes(chord)) {
+                        keyCounts[key] = (keyCounts[key] || 0) + 1;
+                    }
+                });
+            });
+
+            let detectedKey = Object.keys(keyCounts).reduce((a, b) => keyCounts[a] > keyCounts[b] ? a : b, "Unknown");
+            
+            return detectedKey;
+        }
+
+        function detectChordProgression(chords) {
+            const commonProgressions = {
+                "I-IV-V": [["C", "F", "G"], ["G", "C", "D"], ["D", "G", "A"], ["A", "D", "E"], ["E", "A", "B"]],
+                "ii-V-I": [["Dm", "G", "C"], ["Am", "D", "G"], ["Bm", "E", "A"], ["F♯m", "B", "E"]],
+                "I-V-vi-IV": [["C", "G", "Am", "F"], ["G", "D", "Em", "C"], ["D", "A", "Bm", "G"], ["A", "E", "F♯m", "D"]],
+                "vi-IV-I-V": [["Am", "F", "C", "G"], ["Em", "C", "G", "D"], ["Bm", "G", "D", "A"]],
+                "I-IV-vi-V": [["C", "F", "Am", "G"], ["G", "C", "Em", "D"], ["D", "G", "Bm", "A"]],
+                "I-vi-IV-V": [["C", "Am", "F", "G"], ["G", "Em", "C", "D"], ["D", "Bm", "G", "A"]],
+                "I-V-vi-iii-IV-I-IV-V": [["C", "G", "Am", "Em", "F", "C", "F", "G"], ["G", "D", "Em", "Bm", "C", "G", "C", "D"]],
+                "ii-V7-I": [["Dm", "G7", "C"], ["Am", "D7", "G"], ["Bm", "E7", "A"], ["F♯m", "B7", "E"]],
+                "I-V-vi-iii-IV-V-I": [["C", "G", "Am", "Em", "F", "G", "C"], ["G", "D", "Em", "Bm", "C", "D", "G"]]
+            };
+
+            let progression = "N/A";
+            
+            Object.keys(commonProgressions).forEach(pattern => {
+                commonProgressions[pattern].forEach(seq => {
+                    if (chords.length >= seq.length && chords.join(" ").includes(seq.join(" "))) {
+                        progression = pattern;
+                    }
+                });
+            });
+
+            return progression;
+        }
+
+        function updateChordDisplay() {
+            chordDisplay.innerHTML = "";
+            const chords = chordInput.value.match(/([A-G]♯?|♭?m?)/g) || [];
+            
+            chords.forEach(chord => {
+                if (chord.trim()) {
+                    let box = document.createElement("div");
+                    box.className = "chord-box";
+                    box.textContent = normalizeChord(chord);
+                    chordDisplay.appendChild(box);
+                }
+            });
+
+            let detectedKey = detectKey(chords);
+            let progression = detectChordProgression(chords);
+
+            currentKeyEl.textContent = detectedKey;
+            chordPatternEl.textContent = progression;
+        }
+
+
+        function transposeChord(chord, semitones) {
+            let root = chord.match(/([A-G]♯?|♭?)/)[0];
+            let suffix = chord.replace(root, "");
+            root = normalizeChord(root);
+            let index = noteOrder.indexOf(root);
+            if (index === -1) return chord;
+            let newIndex = (index + semitones + noteOrder.length) % noteOrder.length;
+            return noteOrder[newIndex] + suffix;
+        }
+
+        function updateChordDisplay() {
+            chordDisplay.innerHTML = "";
+            const chords = chordInput.value.match(/([A-G]♯?|♭?m?)/g) || [];
+            chords.forEach(chord => {
+                if (chord.trim()) {
+                    let box = document.createElement("div");
+                    box.className = "chord-box";
+                    box.textContent = normalizeChord(chord);
+                    chordDisplay.appendChild(box);
+                }
+            });
+
+            currentKeyEl.textContent = detectKey(chords);
+        }
+
+        function transposeChords(semitones) {
+            const chords = chordInput.value.match(/([A-G]♯?|♭?m?)/g) || [];
+            const transposedChords = chords.map(chord => transposeChord(chord, semitones)).join(" ").replace(/\s+/g, " ") .trim();
+            chordInput.value = transposedChords;
+            updateChordDisplay();
+
+            transposeCount += semitones;
+            transposeCountEl.textContent = transposeCount;
+        }
+
+        transposeUp.addEventListener("click", () => transposeChords(1));
+        transposeDown.addEventListener("click", () => transposeChords(-1));
+
+        chordInput.addEventListener("input", function () {
+            chordInput.value = chordInput.value.toUpperCase().replace(/[^A-G♯♭M ]/gi, "").replace(/\s+/g, " ").trim();
+            updateChordDisplay();
+        });
+    </script>
+</body>
+</html>
