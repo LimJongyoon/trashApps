@@ -1,5 +1,13 @@
 [
     {
+        "id": "0040",
+        "title": "Chord Transposer ±",
+        "description": "Transpose and analyze chords with ease! Enter your chords, shift them up or down in key, and visualize chord progressions instantly. Perfect for musicians and composers.",
+        "icon": "icons/0040.webp",
+        "link": "list/0040.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0039",
         "title": "Image Transparency Adjuster",
         "description": "Easily adjust the transparency of images with a simple slider. Upload an image, control its opacity, and download the processed image in PNG format while maintaining transparency.",

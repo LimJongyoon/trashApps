@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chord Scaler</title>
+    <title>Chord Transposer ±</title>
     <style>
         * {
             box-sizing: border-box;
@@ -95,6 +95,10 @@
     <h1>Chord Scaler</h1>
     <div class="container">
         <input type="text" id="chordInput" placeholder="Enter your chords (e.g., B F♯ G♯m E)" autocomplete="off">
+        <div class="special-buttons">
+            <button class="button" onclick="insertSymbol('♯')">♯</button>
+        </div>
+
         <div class="chord-input" id="chordDisplay"></div>
         <div class="info-box">
             <p><strong>Key:</strong> <span id="currentKey">Unknown</span></p>
@@ -223,6 +227,17 @@
             });
 
             currentKeyEl.textContent = detectKey(chords);
+        }
+        function insertSymbol(symbol) {
+            let start = chordInput.selectionStart;
+            let end = chordInput.selectionEnd;
+            let text = chordInput.value;
+
+            chordInput.value = text.substring(0, start) + symbol + text.substring(end);
+            
+            chordInput.selectionStart = chordInput.selectionEnd = start + symbol.length;
+
+            updateChordDisplay();
         }
 
         function transposeChords(semitones) {
