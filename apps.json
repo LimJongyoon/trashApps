@@ -1,5 +1,13 @@
 [
     {
+        "id": "0041",
+        "title": "Multi YouTube Player",
+        "description": "Watch multiple YouTube videos simultaneously! Add video links, sync playback, and customize the layout for a seamless viewing experience. Ideal for multitasking, comparisons, and mixed playlists.",
+        "icon": "icons/0041.webp",
+        "link": "list/0041.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0040",
         "title": "Chord Transposer ±",
         "description": "Transpose and analyze chords with ease! Enter your chords, shift them up or down in key, and visualize chord progressions instantly. Perfect for musicians and composers.",
