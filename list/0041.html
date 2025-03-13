@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi YouTube Player</title>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -51,15 +52,13 @@
         }
         .video-container {
             position: relative;
+            width: 100%;
+            height: 200px;
             background: black;
             border-radius: 8px;
             overflow: hidden;
         }
-        .video-container iframe {
-            width: 100%;
-            height: 100%;
-        }
-        .video-controls {
+        .button-group {
             display: flex;
             justify-content: center;
             gap: 10px;
@@ -86,7 +85,7 @@
         <input type="text" id="videoUrl" placeholder="Enter YouTube URL" autocomplete="off">
         <button class="button" onclick="addVideo()">Add Video</button>
 
-        <div class="video-controls">
+        <div class="button-group">
             <button class="button" onclick="syncPlay()">Play All</button>
             <button class="button" onclick="syncPause()">Pause All</button>
             <button class="button" onclick="toggleLayout()">Change Layout</button>
@@ -96,8 +95,8 @@
     </div>
 
     <script>
-        let videos = [];
-        let layoutMode = 2; // Default layout 2x2
+        let players = [];
+        let layoutMode = 2; // Default layout (2 columns)
 
         function extractVideoId(url) {
             let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&]+)/);
@@ -112,50 +111,57 @@
                 return;
             }
 
-            let videoContainer = document.createElement("div");
-            videoContainer.className = "video-container";
-            videoContainer.innerHTML = `
-                <iframe src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                <button class="button" onclick="removeVideo(this)">Remove</button>
-            `;
+            let container = document.createElement("div");
+            container.className = "video-container";
+            let playerId = "player" + players.length;
+            container.innerHTML = `<div id="${playerId}"></div>`;
+
+            document.getElementById("videoGrid").appendChild(container);
             
-            document.getElementById("videoGrid").appendChild(videoContainer);
-            videos.push(videoContainer);
-            updateLayout();
+            let player = new YT.Player(playerId, {
+                height: "200",
+                width: "100%",
+                videoId: videoId,
+                playerVars: { 'autoplay': 0, 'controls': 1 },
+                events: {
+                    "onReady": (event) => event.target.playVideo()
+                }
+            });
+
+            players.push(player);
             document.getElementById("videoUrl").value = "";
+            updateLayout();
         }
 
-        function removeVideo(button) {
-            let container = button.parentElement;
-            container.remove();
-            videos = videos.filter(v => v !== container);
-            updateLayout();
+        function syncPlay() {
+            document.body.style.backgroundColor = "#000"; // 배경색 검정으로 변경
+
+            players.forEach(player => {
+                player.mute();  // 음소거 후 먼저 재생
+                player.playVideo();
+            });
+
+            setTimeout(() => {
+                players.forEach(player => player.unMute()); // 1초 후 음소거 해제
+            }, 1000);
+        }
+
+        function syncPause() {
+            document.body.style.backgroundColor = "#f5f5f5"; // 원래 배경색으로 복구
+            players.forEach(player => player.pauseVideo());
+        }
+
+        function toggleLayout() {
+            let grid = document.getElementById("videoGrid");
+            layoutMode = (layoutMode === 1) ? 2 : 1;
+            grid.style.gridTemplateColumns = `repeat(${layoutMode}, 1fr)`;
         }
 
         function updateLayout() {
             let grid = document.getElementById("videoGrid");
             grid.style.gridTemplateColumns = `repeat(${layoutMode}, 1fr)`;
-            grid.style.gridTemplateRows = `repeat(${Math.ceil(videos.length / layoutMode)}, auto)`;
-        }
-
-        function toggleLayout() {
-            layoutMode = layoutMode === 2 ? 1 : 2;
-            updateLayout();
-        }
-
-        function syncPlay() {
-            videos.forEach(video => {
-                let iframe = video.querySelector("iframe");
-                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-            });
-        }
-
-        function syncPause() {
-            videos.forEach(video => {
-                let iframe = video.querySelector("iframe");
-                iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-            });
         }
     </script>
+
 </body>
 </html>
