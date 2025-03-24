@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spot Pixelator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+    canvas {
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      max-width: 100%;
+    }
+    input[type="file"] {
+      margin-bottom: 10px;
+    }
+    .button {
+      background-color: #abf0ad;
+      color: black;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
+      margin-top: 15px;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <h1>Spot Pixelator</h1>
+  <input type="file" id="upload" accept="image/*" />
+  <canvas id="canvas"></canvas>
+  <button class="button" onclick="downloadImage()">Download</button>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const upload = document.getElementById("upload");
+    let img = new Image();
+    let pixelSize = 10;
+
+    upload.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Handle click to pixelate a selected area
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      pixelateArea(x, y);
+    });
+
+    // Function to pixelate a square region around (x, y)
+    function pixelateArea(x, y) {
+      const size = 100; // Area size in pixels (100x100 square)
+      const imageData = ctx.getImageData(x - size/2, y - size/2, size, size);
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCanvas.width = size;
+      tempCanvas.height = size;
+
+      // Draw small image, scale down
+      tempCtx.imageSmoothingEnabled = false;
+      tempCtx.putImageData(imageData, 0, 0);
+      const scaled = document.createElement("canvas");
+      const scaledCtx = scaled.getContext("2d");
+      scaled.width = size / pixelSize;
+      scaled.height = size / pixelSize;
+      scaledCtx.imageSmoothingEnabled = false;
+      scaledCtx.drawImage(tempCanvas, 0, 0, scaled.width, scaled.height);
+
+      // Scale back up to original size
+      tempCtx.clearRect(0, 0, size, size);
+      tempCtx.drawImage(scaled, 0, 0, scaled.width, scaled.height, 0, 0, size, size);
+
+      const pixelated = tempCtx.getImageData(0, 0, size, size);
+      ctx.putImageData(pixelated, x - size/2, y - size/2);
+    }
+
+    // Download the result
+    function downloadImage() {
+      const link = document.createElement("a");
+      link.download = "spot-pixelated.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>

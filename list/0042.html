@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Photo Pixelator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 90%;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+        }
+        input[type=file] {
+            display: none;
+        }
+        .slider {
+            width: 80%;
+            margin-bottom: 20px;
+        }
+        .button {
+            background-color: #abf0ad;
+            color: black;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
+            touch-action: manipulation;
+        }
+        .button:hover {
+            background-color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Instant Photo Pixelator</h1>
+    <button class="button" onclick="document.getElementById('upload').click()">Select Photo</button>
+    <input type="file" id="upload" accept="image/*">
+    <label for="pixelRange" style="margin-bottom: 10px;">Pixelation Level</label>
+    <input type="range" id="pixelRange" class="slider" min="2" max="50" value="10" oninput="updatePixelSize(this.value)">
+    
+    <canvas id="canvas"></canvas>
+    <button class="button" onclick="downloadImage()">Download Pixelated</button>
+
+    <script>
+        const upload = document.getElementById('upload');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let pixelSize = 10; // Adjust pixelation level
+        let originalImage;
+
+        upload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                originalImage = new Image();
+                originalImage.onload = function() {
+                    canvas.width = originalImage.width;
+                    canvas.height = originalImage.height;
+                    ctx.drawImage(originalImage, 0, 0);
+                    pixelate();
+                }
+                originalImage.src = event.target.result;
+            }
+
+            reader.readAsDataURL(file);
+        });
+
+        function pixelate() {
+            const w = canvas.width * (1 / pixelSize);
+            const h = canvas.height * (1 / pixelSize);
+
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(originalImage, 0, 0, w, h);
+            ctx.drawImage(canvas, 0, 0, w, h, 0, 0, canvas.width, canvas.height);
+        }
+
+        function updatePixelSize(value) {
+            pixelSize = parseInt(value);
+            if (originalImage) {
+                ctx.drawImage(originalImage, 0, 0);
+                pixelate();
+            }
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'pixelated-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,13 @@
 [
     {
+        "id": "0042",
+        "title": "Instant photo Pixelator",
+        "description": "Instantly pixelate your photos! Select an image, adjust pixelation levels, and download your stylish retro creation in seconds. Ideal for creative social media posts and artistic projects.",
+        "icon": "icons/0042.webp",
+        "link": "list/0042.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0041",
         "title": "Multi YouTube Player",
         "description": "Watch multiple YouTube videos simultaneously! Add video links, sync playback, and customize the layout for a seamless viewing experience. Ideal for multitasking, comparisons, and mixed playlists.",
