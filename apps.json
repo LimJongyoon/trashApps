@@ -1,5 +1,13 @@
 [
     {
+        "id": "0043",
+        "title": "Record & Compare Clothes Sizes",
+        "description": "Save and easily compare your clothing measurements! Enter and store your exact sizes locally to simplify online shopping and ensure the perfect fit every time.",
+        "icon": "icons/0043.webp",
+        "link": "list/0043.html",
+        "category": "Utilities"
+    },
+    {
         "id": "0042",
         "title": "Instant photo Pixelator",
         "description": "Instantly pixelate your photos! Select an image, adjust pixelation levels, and download your stylish retro creation in seconds. Ideal for creative social media posts and artistic projects.",

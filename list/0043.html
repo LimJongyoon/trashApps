@@ -1,116 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spot Pixelator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #f5f5f5;
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      color: #4CAF50;
-      margin-bottom: 10px;
-    }
-    canvas {
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-      max-width: 100%;
-    }
-    input[type="file"] {
-      margin-bottom: 10px;
-    }
-    .button {
-      background-color: #abf0ad;
-      color: black;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
-      margin-top: 15px;
-      touch-action: manipulation;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f5f5">
+    <title>Record & Compare Clothes Sizes</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+        }
+
+        .category-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .category-buttons button {
+            flex: 1;
+            margin: 0 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            background-color: #ccc;
+            cursor: pointer;
+            box-shadow: 0px 4px 4px rgba(0,0,0,0.2);
+        }
+
+        .category-buttons button.active {
+            background-color: #abf0ad;
+            box-shadow: none;
+            font-weight: bold;
+        }
+
+        input, button.action-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button.action-btn {
+            background-color: #abf0ad;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button.action-btn:hover {
+            background-color: #45a049;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            width: 50%;
+            text-align: right;
+        }
+
+    </style>
 </head>
 <body>
-  <h1>Spot Pixelator</h1>
-  <input type="file" id="upload" accept="image/*" />
-  <canvas id="canvas"></canvas>
-  <button class="button" onclick="downloadImage()">Download</button>
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const upload = document.getElementById("upload");
-    let img = new Image();
-    let pixelSize = 10;
+<h1>Record & Compare Clothes Sizes</h1>
 
-    upload.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
+<div class="container">
+    <div class="category-buttons">
+        <button id="topBtn" onclick="setCategory('top')">Top</button>
+        <button id="bottomBtn" onclick="setCategory('bottom')">Bottom</button>
+        <button id="outerBtn" onclick="setCategory('outer')">Outer</button>
+    </div>
+
+    <div id="sizeInputs"></div>
+
+    <button class="action-btn" onclick="saveSizes()">Save Size</button>
+    <button class="action-btn" onclick="loadSizes()">Load Size</button>
+</div>
+
+<script>
+let currentCategory = 'top';
+
+const sizeOptions = {
+    top: ['Length', 'Shoulder Width', 'Chest Width', 'Sleeve Length'],
+    bottom: ['Length', 'Waist Width', 'Hip Width', 'Thigh Width', 'Hem Width'],
+    outer: ['Length', 'Shoulder Width', 'Chest Width', 'Sleeve Length']
+};
+
+function setCategory(category) {
+    currentCategory = category;
+    document.querySelectorAll('.category-buttons button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`${category}Btn`).classList.add('active');
+    renderInputs();
+}
+
+function renderInputs() {
+    const inputsDiv = document.getElementById('sizeInputs');
+    inputsDiv.innerHTML = '';
+
+    sizeOptions[currentCategory].forEach(size => {
+        inputsDiv.innerHTML += `
+        <div class="input-group">
+            <label>${size}</label>
+            <input type="number" id="${size.replace(/ /g, '_')}">
+        </div>
+        `;
+    });
+}
+
+function saveSizes() {
+    const sizeData = {};
+
+    sizeOptions[currentCategory].forEach(size => {
+        const sizeId = size.replace(/ /g, '_');
+        sizeData[sizeId] = document.getElementById(sizeId).value;
     });
 
-    // Handle click to pixelate a selected area
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      pixelateArea(x, y);
-    });
+    localStorage.setItem(`size_${currentCategory}`, JSON.stringify(sizeData));
+    alert("Sizes saved successfully!");
+}
 
-    // Function to pixelate a square region around (x, y)
-    function pixelateArea(x, y) {
-      const size = 100; // Area size in pixels (100x100 square)
-      const imageData = ctx.getImageData(x - size/2, y - size/2, size, size);
-      const tempCanvas = document.createElement("canvas");
-      const tempCtx = tempCanvas.getContext("2d");
-      tempCanvas.width = size;
-      tempCanvas.height = size;
+function loadSizes() {
+    const savedData = JSON.parse(localStorage.getItem(`size_${currentCategory}`));
 
-      // Draw small image, scale down
-      tempCtx.imageSmoothingEnabled = false;
-      tempCtx.putImageData(imageData, 0, 0);
-      const scaled = document.createElement("canvas");
-      const scaledCtx = scaled.getContext("2d");
-      scaled.width = size / pixelSize;
-      scaled.height = size / pixelSize;
-      scaledCtx.imageSmoothingEnabled = false;
-      scaledCtx.drawImage(tempCanvas, 0, 0, scaled.width, scaled.height);
-
-      // Scale back up to original size
-      tempCtx.clearRect(0, 0, size, size);
-      tempCtx.drawImage(scaled, 0, 0, scaled.width, scaled.height, 0, 0, size, size);
-
-      const pixelated = tempCtx.getImageData(0, 0, size, size);
-      ctx.putImageData(pixelated, x - size/2, y - size/2);
+    if(savedData) {
+        Object.keys(savedData).forEach(sizeId => {
+            document.getElementById(sizeId).value = savedData[sizeId];
+        });
+        alert("Sizes loaded successfully!");
+    } else {
+        alert("No saved sizes found.");
     }
+}
 
-    // Download the result
-    function downloadImage() {
-      const link = document.createElement("a");
-      link.download = "spot-pixelated.png";
-      link.href = canvas.toDataURL();
-      link.click();
-    }
-  </script>
+window.onload = () => setCategory(currentCategory);
+
+</script>
+
 </body>
 </html>
