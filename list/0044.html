@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Instagram Story Effect</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+      color: #333;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #4CAF50;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .top-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .button {
+      background-color: #abf0ad;
+      color: black;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      touch-action: manipulation;
+    }
+    .button:hover {
+      background-color: #388e3c;
+    }
+    select {
+      background-color: #e0e0e0;
+      color: black;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+      touch-action: manipulation;
+      appearance: auto;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      margin-bottom: 20px;
+      image-rendering: pixelated;
+    }
+    input[type=file] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Instagram Story Effect</h1>
+
+  <div class="top-controls">
+    <button class="button" onclick="document.getElementById('imageInput').click()">Select Photo</button>
+    <input type="file" id="imageInput" accept="image/*" />
+    <select id="effectSelect">
+      <option disabled selected>Select Effect</option>
+      <option value="pixel">Pixelation Cascade</option>
+      <option value="zoom">Fake-AI Zoom Lag</option>
+      <option value="shuffle">Block Shuffle</option>
+      <option value="vhs">Broken VHS Trail</option>
+      <option value="burn">Reverse Pulse Burn</option>
+    </select>
+  </div>
+
+  <button class="button" onclick="startEffect()">Run Effect</button>
+  <canvas id="canvas" width="400" height="400"></canvas>
+  <button class="button" id="downloadBtn" disabled>Download GIF</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js"></script>
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const downloadBtn = document.getElementById("downloadBtn");
+    let img = new Image();
+    let frames = [];
+    let gifBlob = null;
+
+    document.getElementById("imageInput").addEventListener("change", (e) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+
+    function startEffect() {
+      frames = [];
+      gifBlob = null;
+      downloadBtn.disabled = true;
+      const effect = document.getElementById("effectSelect").value;
+      if (!effect || effect === "Select Effect") return;
+      if (effect === "pixel") runPixelation();
+      else if (effect === "zoom") runZoomLag();
+      else if (effect === "shuffle") runBlockShuffle();
+      else if (effect === "vhs") runVHSEffect();
+      else if (effect === "burn") runBurnEffect();
+    }
+
+    function captureFrame() {
+      frames.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    }
+
+    function renderGIF() {
+      const gif = new GIF({ workers: 2, quality: 10, width: canvas.width, height: canvas.height });
+      frames.forEach(frame => {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        tempCanvas.getContext('2d').putImageData(frame, 0, 0);
+        gif.addFrame(tempCanvas, { delay: 100 });
+      });
+      gif.on('finished', function(blob) {
+        gifBlob = blob;
+        downloadBtn.disabled = false;
+      });
+      gif.render();
+    }
+
+    downloadBtn.addEventListener("click", () => {
+      if (gifBlob) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(gifBlob);
+        link.download = 'effect.gif';
+        link.click();
+      }
+    });
+
+    function getDynamicBlockSize() {
+      const area = canvas.width * canvas.height;
+      if (area < 200 * 200) return 10;
+      if (area < 400 * 400) return 20;
+      return 40;
+    }
+
+    function runPixelation() {
+      let steps = 20, i = 0;
+      const interval = setInterval(() => {
+        const size = Math.max(1, Math.floor((steps - i) * getDynamicBlockSize() / steps));
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        for (let y = 0; y < canvas.height; y += size) {
+          for (let x = 0; x < canvas.width; x += size) {
+            const index = (y * canvas.width + x) * 4;
+            const r = imageData.data[index];
+            const g = imageData.data[index + 1];
+            const b = imageData.data[index + 2];
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            ctx.fillRect(x, y, size, size);
+          }
+        }
+        captureFrame();
+        i++;
+        if (i > steps) {
+          clearInterval(interval);
+          renderGIF();
+        }
+      }, 100);
+    }
+
+    function runZoomLag() {
+      let scale = 1, i = 0;
+      const interval = setInterval(() => {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const offsetX = Math.random() * 20 - 10;
+        const offsetY = Math.random() * 20 - 10;
+        scale += 0.03;
+        ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+        ctx.drawImage(img, 0, 0);
+        captureFrame();
+        i++;
+        if (i > 40) {
+          clearInterval(interval);
+          renderGIF();
+        }
+      }, 100);
+    }
+
+    function runBlockShuffle() {
+      let i = 0;
+      const blockSize = getDynamicBlockSize();
+      const interval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let y = 0; y < canvas.height; y += blockSize) {
+          for (let x = 0; x < canvas.width; x += blockSize) {
+            const dx = Math.floor(Math.random() * canvas.width / blockSize) * blockSize;
+            const dy = Math.floor(Math.random() * canvas.height / blockSize) * blockSize;
+            ctx.drawImage(img, x, y, blockSize, blockSize, dx, dy, blockSize, blockSize);
+          }
+        }
+        captureFrame();
+        i++;
+        if (i > 25) {
+          clearInterval(interval);
+          renderGIF();
+        }
+      }, 120);
+    }
+
+    function runVHSEffect() {
+      let i = 0;
+      const interval = setInterval(() => {
+        ctx.drawImage(img, 0, 0);
+        for (let j = 0; j < 10; j++) {
+          let y = Math.floor(Math.random() * canvas.height);
+          ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.2})`;
+          ctx.fillRect(0, y, canvas.width, 2);
+        }
+        captureFrame();
+        i++;
+        if (i > 30) {
+          clearInterval(interval);
+          renderGIF();
+        }
+      }, 100);
+    }
+
+    function runBurnEffect() {
+      let i = 0, steps = 30;
+      const interval = setInterval(() => {
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        for (let y = 0; y < canvas.height; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            const idx = (y * canvas.width + x) * 4;
+            const d = Math.abs(x - canvas.width / 2) + Math.abs(y - canvas.height / 2);
+            if (d < (steps - i) * getDynamicBlockSize()) {
+              imageData.data[idx] = 255 - imageData.data[idx];
+              imageData.data[idx + 1] = 255 - imageData.data[idx + 1];
+              imageData.data[idx + 2] = 255 - imageData.data[idx + 2];
+            }
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        captureFrame();
+        i++;
+        if (i > steps) {
+          clearInterval(interval);
+          renderGIF();
+        }
+      }, 100);
+    }
+  </script>
+</body>
+</html>

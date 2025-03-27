@@ -1,5 +1,13 @@
 [
     {
+        "id": "0044",
+        "title": "TrashFX Image FX",
+        "description": "Transform your photos with edgy visual effects! Upload an image and apply unique glitch, pixelation, zoom, burn, and shuffle effects. Perfect for eye-catching Instagram stories. Download your animated GIF in seconds.",
+        "icon": "icons/0044.webp",
+        "link": "list/0044.html",
+        "category": "Utilities"
+      },
+      {
         "id": "0043",
         "title": "Record & Compare Clothes Sizes",
         "description": "Save and easily compare your clothing measurements! Enter and store your exact sizes locally to simplify online shopping and ensure the perfect fit every time.",
