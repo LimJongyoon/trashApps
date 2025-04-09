@@ -1,5 +1,13 @@
 [
     {
+        "id": "0045",
+        "title": "Daily Schedule Pie Chart",
+        "description": "Visually design your daily routine with a clean pie chart! Input time and activities, auto-fill the schedule, and download your result as an image. Perfect for productivity tracking and daily planning.",
+        "icon": "icons/0045.webp",
+        "link": "list/0045.html",
+        "category": "Lifestyle"
+      },
+      {
         "id": "0044",
         "title": "Instagram Story Effecter",
         "description": "Transform your photos with edgy visual effects! Upload an image and apply unique glitch, pixelation, zoom, burn, and shuffle effects. Perfect for eye-catching Instagram stories. Download your animated GIF in seconds.",

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Schedule Pie Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <style>
+    body {
+      background: #f5f5f5;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #4CAF50;
+    }
+    table {
+      margin: 20px auto;
+    }
+    canvas {
+      max-width: 400px;
+    }
+    td, th {
+      padding: 6px;
+    }
+    select, input {
+      padding: 6px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #abf0ad;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+    button:hover {
+      background: #388e3c;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Daily Schedule Maker 🍕</h1>
+
+<table border="1">
+  <thead>
+    <tr><th>Start Time</th><th>Activity</th></tr>
+  </thead>
+  <tbody id="scheduleBody">
+    <tr>
+      <td><select class="time-select"></select></td>
+      <td><input placeholder="e.g. Wake up" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<button onclick="addRow()">➕ Add</button>
+<button onclick="generateChart()">🍕 Generate Schedule</button>
+
+<canvas id="scheduleChart" width="400" height="400"></canvas>
+
+<div id="downloadContainer"></div>
+
+<script>
+  let currentChart = null;
+
+  function generateTimeOptions(select) {
+    for (let i = 0; i < 48; i++) {
+      const h = String(Math.floor(i / 2)).padStart(2, '0');
+      const m = i % 2 === 0 ? '00' : '30';
+      const option = document.createElement('option');
+      option.value = i * 30;
+      option.textContent = `${h}:${m}`;
+      select.appendChild(option);
+    }
+  }
+
+  function addRow() {
+    const tbody = document.getElementById('scheduleBody');
+    const row = tbody.rows[0].cloneNode(true);
+    row.querySelectorAll('input').forEach(i => i.value = '');
+    const select = row.querySelector('select');
+    select.innerHTML = '';
+    generateTimeOptions(select);
+    tbody.appendChild(row);
+  }
+
+  function toTime(minutes) {
+    const h = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const m = String(minutes % 60).padStart(2, '0');
+    return `${h}:${m}`;
+  }
+
+  function generateChart() {
+    const rows = document.querySelectorAll('#scheduleBody tr');
+    const inputSchedule = [];
+
+    rows.forEach(row => {
+      const time = parseInt(row.querySelector('select').value);
+      const activity = row.querySelector('input').value.trim();
+      if (!isNaN(time) && activity) inputSchedule.push({ time, activity });
+    });
+
+    if (inputSchedule.length === 0) {
+      alert("Please enter at least one activity.");
+      return;
+    }
+
+    inputSchedule.sort((a, b) => a.time - b.time);
+
+    const schedule = [...inputSchedule];
+    if (schedule[0].time !== 0) {
+      schedule.unshift({ time: 0, activity: schedule[schedule.length - 1].activity });
+    }
+    if (schedule[schedule.length - 1].time !== 1440) {
+      schedule.push({ time: 1440, activity: schedule[0].activity });
+    }
+
+    const merged = [];
+    for (let i = 0; i < schedule.length - 1; i++) {
+      const start = schedule[i].time;
+      const end = schedule[i + 1].time;
+      const duration = (end - start + 1440) % 1440 || 1440;
+      const activity = schedule[i].activity;
+      if (merged.length > 0 && merged[merged.length - 1].activity === activity) {
+        merged[merged.length - 1].duration += duration;
+      } else {
+        merged.push({ start, activity, duration });
+      }
+    }
+
+    const labels = merged.map(b => b.activity);
+    const data = merged.map(b => b.duration);
+    const startTimes = merged.map(b => b.start);
+    const baseColors = ['#4CAF50','#FF9800','#2196F3','#FFC107','#9C27B0','#03A9F4','#E91E63','#8BC34A','#FF5722','#795548','#aaa'];
+
+    const background = [];
+    for (let i = 0; i < merged.length; i++) {
+      if (
+        i === 0 &&
+        merged.length > 1 &&
+        merged[0].activity === merged[merged.length - 1].activity
+      ) {
+        background.push(baseColors[(merged.length - 1) % baseColors.length]);
+      } else {
+        background.push(baseColors[i % baseColors.length]);
+      }
+    }
+
+    const customLabelPlugin = {
+      id: 'externalLabels',
+      afterDatasetsDraw(chart) {
+        const {ctx} = chart;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || !meta.data || !meta.data.length) return;
+        const r = meta.data[0].outerRadius + 20;
+        const cx = meta.data[0].x;
+        const cy = meta.data[0].y;
+        ctx.save();
+        ctx.fillStyle = '#333';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        for (let h = 0; h < 24; h++) {
+          const a = (h / 24) * 2 * Math.PI - Math.PI / 2;
+          const x = cx + r * Math.cos(a);
+          const y = cy + r * Math.sin(a);
+          ctx.fillText(`${h}`, x, y);
+        }
+        ctx.restore();
+      }
+    };
+
+    if (currentChart) currentChart.destroy();
+
+    currentChart = new Chart(document.getElementById('scheduleChart'), {
+      type: 'pie',
+      data: { labels, datasets: [{ data, backgroundColor: background }] },
+      options: {
+        responsive: true,
+        rotation: -Math.PI / 2,
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            formatter: (val, ctx) => ctx.chart.data.labels[ctx.dataIndex],
+            color: '#fff',
+            font: { weight: 'bold', size: 12 }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const start = startTimes[ctx.dataIndex];
+                const end = (start + ctx.raw) % 1440;
+                return `${toTime(start)}~${toTime(end)} ${ctx.label}`;
+              }
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels, customLabelPlugin]
+    });
+
+    const container = document.getElementById('downloadContainer');
+    container.innerHTML = ''; // reset
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = '📸 Download Image';
+    downloadBtn.onclick = () => {
+      const canvas = document.getElementById('scheduleChart');
+      const link = document.createElement('a');
+      link.download = 'schedule.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+    container.appendChild(downloadBtn);
+  }
+
+  window.onload = () => {
+    const select = document.querySelector('.time-select');
+    generateTimeOptions(select);
+  };
+</script>
+</body>
+</html>
