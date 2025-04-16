@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Aim Practice Mobile</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+    }
+    h1, h2 {
+      color: #4CAF50;
+    }
+    .screen {
+      display: none;
+      padding: 20px;
+    }
+    .active {
+      display: block;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #abf0ad;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      touch-action: manipulation;
+    }
+    select, input[type="text"] {
+      font-size: 1rem;
+      padding: 5px;
+      margin: 10px 0;
+    }
+    #dot {
+      position: absolute;
+      border-radius: 50%;
+      background-color: #333;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    #game-area {
+      position: relative;
+      width: 100vw;
+      height: 80vh;
+      overflow: hidden;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="start-screen" class="screen active">
+    <h1>Aim Practice Mobile</h1>
+    <label for="difficulty">Select difficulty:</label>
+    <select id="difficulty">
+      <option value="80">Easy</option>
+      <option value="50">Medium</option>
+      <option value="25">Hard</option>
+    </select>
+    <br />
+    <button id="startButton">Start</button>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <h2>Click the Dot! (30 times)</h2>
+    <div id="game-area">
+      <div id="dot"></div>
+    </div>
+    <p>Clicks: <span id="click-count">0</span>/30</p>
+  </div>
+
+  <div id="result-screen" class="screen">
+    <h2>Result</h2>
+    <p>Your time: <span id="result-time"></span> seconds</p>
+    <input type="text" id="nickname" placeholder="Enter your nickname (max 10 chars)" maxlength="10" />
+    <button id="submitScore">Submit Score</button>
+    <h3>Top 5</h3>
+    <ul id="ranking-list"></ul>
+    <button id="retryButton">Play Again</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      get,
+      onValue,
+      remove
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyATT5WPggjVXS4oJHPh3Pml0Aijyf_yXL0",
+      authDomain: "trashapps-97675.firebaseapp.com",
+      databaseURL: "https://trashapps-97675-default-rtdb.firebaseio.com",
+      projectId: "trashapps-97675",
+      storageBucket: "trashapps-97675.appspot.com",
+      messagingSenderId: "559756184244",
+      appId: "1:559756184244:web:9cb7f070efe23f2ca865e1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const scoresRef = ref(db, "0046/scores");
+
+    const dot = document.getElementById("dot");
+    const gameArea = document.getElementById("game-area");
+    const clickCountEl = document.getElementById("click-count");
+    const resultTimeEl = document.getElementById("result-time");
+    const nicknameInput = document.getElementById("nickname");
+    const rankingList = document.getElementById("ranking-list");
+
+    let clickCount = 0;
+    const totalClicks = 30;
+    let startTime, endTime, recordTime;
+    let dotSize = 50;
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+      document.getElementById(id).classList.add("active");
+    }
+
+    function startGame() {
+      dotSize = parseInt(document.getElementById("difficulty").value);
+      clickCount = 0;
+      clickCountEl.textContent = "0";
+      dot.style.width = dotSize + "px";
+      dot.style.height = dotSize + "px";
+      showScreen("game-screen");
+      moveDot();
+      startTime = performance.now();
+    }
+
+    function moveDot() {
+      const maxX = gameArea.clientWidth - dotSize;
+      const maxY = gameArea.clientHeight - dotSize;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      dot.style.left = x + "px";
+      dot.style.top = y + "px";
+    }
+
+    function clickDot() {
+      clickCount++;
+      if (clickCount === 1) navigator.vibrate?.(50);
+      if (clickCount < totalClicks) {
+        clickCountEl.textContent = clickCount;
+        moveDot();
+      } else {
+        endTime = performance.now();
+        recordTime = ((endTime - startTime) / 1000).toFixed(2);
+        resultTimeEl.textContent = recordTime;
+        showScreen("result-screen");
+        updateRanking();
+      }
+    }
+
+    function submitScore() {
+      const name = nicknameInput.value.trim().substring(0, 10);
+      if (name.length === 0) return alert("Please enter a nickname.");
+
+      const newRef = push(scoresRef);
+      const newScore = {
+        nickname: name,
+        time: parseFloat(recordTime),
+        ts: Date.now()
+      };
+
+      set(newRef, newScore).then(cleanUpScores);
+    }
+
+    async function cleanUpScores() {
+      const snapshot = await get(scoresRef);
+      if (!snapshot.exists()) return;
+      const all = snapshot.val();
+      const entries = Object.entries(all);
+
+      const sorted = entries.sort(([, a], [, b]) => a.time - b.time).slice(0, 5);
+      const keepKeys = new Set(sorted.map(([key]) => key));
+
+      for (const [key] of entries) {
+        if (!keepKeys.has(key)) {
+          await remove(ref(db, `0046/scores/${key}`));
+        }
+      }
+      updateRanking();
+    }
+
+    function updateRanking() {
+      onValue(scoresRef, (snapshot) => {
+        const all = snapshot.val();
+        const sorted = Object.values(all || {}).sort((a, b) => a.time - b.time).slice(0, 5);
+        rankingList.innerHTML = "";
+        sorted.forEach((entry, idx) => {
+          const li = document.createElement("li");
+          li.textContent = `#${idx + 1}: ${entry.nickname} - ${entry.time}s`;
+          rankingList.appendChild(li);
+        });
+      });
+    }
+
+    // Event Binding
+    document.getElementById("startButton").addEventListener("click", startGame);
+    dot.addEventListener("click", clickDot);
+    document.getElementById("submitScore").addEventListener("click", submitScore);
+    document.getElementById("retryButton").addEventListener("click", () => showScreen("start-screen"));
+  </script>
+</body>
+</html>

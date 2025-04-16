@@ -1,5 +1,13 @@
 [
     {
+        "id": "0046",
+        "title": "Aim Practice Mobile",
+        "description": "Test your speed and accuracy by clicking the moving dot 30 times! Choose your difficulty, record your time, and compete for the top 5 global ranks. Perfect for mobile aim training and reflex testing.",
+        "icon": "icons/0046.webp",
+        "link": "list/0046.html",
+        "category": "Games"
+      },
+      {
         "id": "0045",
         "title": "Daily Schedule Pie Chart",
         "description": "Visually design your daily routine with a clean pie chart! Input time and activities, auto-fill the schedule, and download your result as an image. Perfect for productivity tracking and daily planning.",
