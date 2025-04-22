@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FlipText</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #4CAF50;
+      font-size: 1.8rem;
+    }
+
+    .example {
+      font-size: 1rem;
+      color: #2b362c;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 1.2rem;
+      width: 80%;
+      max-width: 400px;
+      border: 2px solid #2b362c;
+      border-radius: 5px;
+      margin: 10px auto 20px auto;
+      display: block;
+    }
+
+    .button-section {
+      margin-bottom: 20px;
+    }
+
+    .button-row {
+      margin-top: 10px;
+    }
+
+    .button-row button {
+      margin: 0 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #e6e6fa;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    #output {
+      font-size: 2.5rem;
+      color: #2b362c;
+      font-weight: bold;
+      background: transparent;
+      display: inline-block;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    @media (min-width: 600px) {
+      input[type="text"] {
+        font-size: 1.4rem;
+      }
+
+      #output {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>FlipText</h1>
+  <div class="example">Example: <b>HELLO</b> → <b>OLLƎH</b></div>
+
+  <input type="text" id="inputText" placeholder="Enter your vibe..." />
+
+  <div class="button-section">
+    <!-- Flip It button on its own line -->
+    <div>
+      <button style="width: 80%; max-width: 400px;" onclick="generateMirrorText()">Flip It</button>
+    </div>
+    <!-- Copy + Download side by side -->
+    <div class="button-row">
+      <button onclick="copyText()">Copy Text</button>
+      <button onclick="downloadImage()">Download PNG</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    const mirrorMap = {
+      A: '∀', B: '𐐒', C: 'Ɔ', D: '◖', E: 'Ǝ',
+      F: 'Ⅎ', G: 'פ', H: 'H', I: 'I', J: 'ſ',
+      K: 'ʞ', L: '⅃', M: 'W', N: 'N', O: 'O',
+      P: 'Ԁ', Q: 'Ό', R: 'ᴚ', S: 'S', T: '⊥',
+      U: '∩', V: 'Λ', W: 'M', X: 'X', Y: '⅄', Z: 'Z',
+      a: 'ɐ', b: 'q', c: 'ɔ', d: 'p', e: 'ǝ',
+      f: 'ɟ', g: 'ƃ', h: 'ɥ', i: 'ᴉ', j: 'ɾ',
+      k: 'ʞ', l: 'l', m: 'ɯ', n: 'u', o: 'o',
+      p: 'd', q: 'b', r: 'ɹ', s: 's', t: 'ʇ',
+      u: 'n', v: 'ʌ', w: 'ʍ', x: 'x', y: 'ʎ', z: 'z',
+      ' ': ' ', '.': '.', '!': '¡', '?': '¿', ',': ','
+    };
+
+    let latestResult = '';
+
+    function generateMirrorText() {
+      navigator.vibrate(50);
+      const input = document.getElementById("inputText").value || "your vibe today";
+      const reversed = input.split("").reverse().map(c => mirrorMap[c] || c).join("");
+      latestResult = reversed;
+
+      const outputEl = document.getElementById("output");
+      outputEl.textContent = "";
+      let i = 0;
+      const interval = setInterval(() => {
+        outputEl.textContent += reversed[i];
+        i++;
+        if (i >= reversed.length) clearInterval(interval);
+      }, 60);
+    }
+
+    function downloadImage() {
+      const target = document.getElementById("output");
+
+      html2canvas(target, {
+        backgroundColor: null,
+        scale: 2
+      }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "mirrorpost.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+
+    function copyText() {
+      if (!latestResult) return;
+      navigator.clipboard.writeText(latestResult).then(() => {
+        navigator.vibrate(30);
+        alert("Text copied!");
+      });
+    }
+  </script>
+</body>
+</html>

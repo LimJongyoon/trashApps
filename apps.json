@@ -1,5 +1,13 @@
 [
     {
+        "id": "0047",
+        "title": "FlipText",
+        "description": "Flip your words into stylish mirrored text! Instantly reverse any sentence, copy it, or download it as a transparent PNG image. Perfect for eye-catching social media posts and playful typography.",
+        "icon": "icons/0047.webp",
+        "link": "list/0047.html",
+        "category": "Utilities"
+      },
+      {
         "id": "0046",
         "title": "Aim Practice Mobile",
         "description": "Test your speed and accuracy by clicking the moving dot 30 times! Choose your difficulty, record your time, and compete for the top 5 global ranks. Perfect for mobile aim training and reflex testing.",
