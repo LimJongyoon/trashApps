@@ -68,6 +68,7 @@
       display: inline-block;
       padding: 0;
       margin-top: 30px;
+      font-family: 'Segoe UI Symbol', 'Noto Sans Symbols', 'Arial Unicode MS', sans-serif;
     }
 
     @media (min-width: 600px) {
@@ -152,9 +153,12 @@
     }
 
     function copyText() {
-      if (!latestResult) return;
+      if (!latestResult) {
+        alert("No text to copy. Please enter and flip something!");
+        return;
+      }
       navigator.clipboard.writeText(latestResult).then(() => {
-        navigator.vibrate(30);
+        navigator.vibrate?.(30);
         alert("Text copied!");
       });
     }
