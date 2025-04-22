@@ -119,8 +119,11 @@
     let latestResult = '';
 
     function generateMirrorText() {
-      navigator.vibrate(50);
-      const input = document.getElementById("inputText").value || "your vibe today";
+      navigator.vibrate?.(50);
+      const inputBox = document.getElementById("inputText");
+      inputBox.blur(); // iOS 입력 반영용
+
+      const input = inputBox.value.trim() || "your vibe today";
       const reversed = input.split("").reverse().map(c => mirrorMap[c] || c).join("");
       latestResult = reversed;
 
