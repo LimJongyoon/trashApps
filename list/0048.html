@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>5.1 Surround Layout</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #4CAF50;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .room {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      align-items: center;
+      justify-items: center;
+    }
+
+    .speaker {
+      font-size: 1.1rem;
+      color: #2b362c;
+    }
+
+    .icon {
+      display: block;
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+
+    .fl .icon { transform: rotate(90deg); }
+    .c  .icon { transform: rotate(140deg); }
+    .fr .icon { transform: rotate(170deg); }
+
+    .sl .icon { transform: rotate(40deg); }
+    .sr .icon { transform: rotate(220deg); }
+
+    .person {
+      font-size: 3rem;
+    }
+
+    button {
+      margin-top: 5px;
+      padding: 6px 14px;
+      background-color: #e6e6fa;
+      border: 2px solid #2b362c;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+      touch-action: manipulation;
+    }
+
+    #playAll {
+      font-size: 1.2rem;
+      margin-top: 40px;
+      padding: 12px 24px;
+    }
+
+    @media (min-width: 600px) {
+      button {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>5.1 Surround Speaker Test</h1>
+
+  <div class="room">
+    <!-- Top Row -->
+    <div class="speaker fl">
+      <span class="icon">🔉</span>Front Left
+      <br/><button>Play</button>
+    </div>
+    <div class="speaker c">
+      <span class="icon">🔊</span>Center
+      <br/><button>Play</button>
+    </div>
+    <div class="speaker fr">
+      <span class="icon">🔉</span>Front Right
+      <br/><button>Play</button>
+    </div>
+
+    <!-- Middle Row -->
+    <div class="speaker sl">
+      <span class="icon">🔈</span>Surround Left
+      <br/><button>Play</button>
+    </div>
+    <div class="person">🙂</div>
+    <div class="speaker sr">
+      <span class="icon">🔈</span>Surround Right
+      <br/><button>Play</button>
+    </div>
+  </div>
+
+  <!-- 큰 Play All 버튼 -->
+  <div>
+    <button id="playAll">▶️ Play All</button>
+  </div>
+
+  <!-- Audio Elements -->
+  <audio id="frontLeft" src="../sounds/front_left.mp3"></audio>
+  <audio id="center" src="../sounds/center.mp3"></audio>
+  <audio id="frontRight" src="../sounds/front_right.mp3"></audio>
+  <audio id="surroundLeft" src="../sounds/surround_left.mp3"></audio>
+  <audio id="surroundRight" src="../sounds/surround_right.mp3"></audio>
+
+  <script>
+    const audioMap = {
+      'frontLeft': document.getElementById('frontLeft'),
+      'center': document.getElementById('center'),
+      'frontRight': document.getElementById('frontRight'),
+      'surroundLeft': document.getElementById('surroundLeft'),
+      'surroundRight': document.getElementById('surroundRight')
+    };
+
+    // 볼륨 설정 (중앙이 더 큼)
+    window.addEventListener('DOMContentLoaded', () => {
+      audioMap.frontLeft.volume = 0.9;
+      audioMap.center.volume = 1.0;
+      audioMap.frontRight.volume = 0.9;
+      audioMap.surroundLeft.volume = 0.8;
+      audioMap.surroundRight.volume = 0.8;
+    });
+
+    // 버튼 순서대로 오디오 연결
+    const buttons = document.querySelectorAll('.speaker button');
+    const ids = Object.keys(audioMap);
+    buttons.forEach((btn, idx) => {
+      const id = ids[idx];
+      btn.addEventListener("mousedown", () => playSound(id));
+      btn.addEventListener("touchstart", () => playSound(id));
+    });
+
+    function playSound(id) {
+      const audio = audioMap[id];
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(err => console.warn(err));
+      }
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    // ▶️ Play All 순차 재생
+    const playAllBtn = document.getElementById("playAll");
+    playAllBtn.addEventListener("click", async () => {
+      playAllBtn.disabled = true;
+
+      const sequence = [
+        'frontLeft',
+        'center',
+        'frontRight',
+        'surroundLeft',
+        'surroundRight'
+      ];
+
+      for (let id of sequence) {
+        playSound(id);
+        await new Promise(resolve => setTimeout(resolve, 1200)); // 1.2초 간격
+      }
+
+      playAllBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
