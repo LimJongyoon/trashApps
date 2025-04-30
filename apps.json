@@ -1,5 +1,13 @@
 [
     {
+        "id": "0049",
+        "title": "Trash Hangman",
+        "description": "Classic Hangman with a twist! Choose a random word or enter your own to play. Includes custom animations, death drop effects, and a sleek modern UI. Great for quick word guessing fun on mobile or desktop!",
+        "icon": "icons/0049.webp",
+        "link": "list/0049.html",
+        "category": "Games"
+    },
+    {
         "id": "0048",
         "title": "Surround Sound Speaker Test",
         "description": "Test your 5.1 surround sound setup with this interactive speaker layout. Tap each speaker to hear its channel, or use the 'Play All' button to cycle through the sequence automatically. Perfect for speaker alignment and home theater setups.",

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trash Hangman</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #4CAF50;
+    }
+    .section {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    .hangman-container {
+      position: relative;
+      width: 200px;
+      height: 250px;
+      margin: 0 auto 20px;
+    }
+    .pole, .beam, .rope, .base {
+      background: #000;
+      position: absolute;
+    }
+    .pole { width: 8px; height: 220px; left: 20px; top: 20px; }
+    .beam { width: 100px; height: 8px; left: 20px; top: 20px; }
+    .rope { width: 2px; height: 30px; left: 120px; top: 28px; transition: height 0.5s; }
+    .base { width: 160px; height: 8px; bottom: 0; left: 0; }
+    .head, .body, .arm-left, .arm-right, .leg-left, .leg-right,
+    .eye-left, .eye-right {
+      position: absolute;
+      background: #000;
+      display: none;
+      transition: top 0.5s, background 0.3s;
+    }
+    .head { width: 30px; height: 30px; border-radius: 50%; left: 106px; top: 58px; }
+    .body { width: 4px; height: 80px; left: 120px; top: 88px; }
+    .arm-left, .arm-right { width: 30px; height: 4px; top: 110px; }
+    .arm-left { left: 91px; transform: rotate(-30deg); transform-origin: right center; }
+    .arm-right { left: 120px; transform: rotate(30deg); transform-origin: left center; }
+    .leg-left, .leg-right { width: 30px; height: 4px; top: 160px; }
+    .leg-left { left: 92px; transform: rotate(-40deg); transform-origin: right center; }
+    .leg-right { left: 120px; transform: rotate(55deg); transform-origin: left center; }
+    .eye-left, .eye-right {
+      width: 4px; height: 4px; background: white;
+      border: 2px solid red; border-radius: 50%; top: 66px;
+    }
+    .eye-left { left: 113px; }
+    .eye-right { left: 123px; }
+    .word { font-size: 2rem; letter-spacing: 10px; margin: 20px 0; }
+    .letters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    button {
+      font-size: 1.2rem; padding: 10px 15px;
+      border: none; background: #e6e6fa;
+      border-radius: 8px; cursor: pointer;
+      touch-action: manipulation;
+    }
+    .status { margin-top: 20px; font-size: 1.2rem; }
+    input[type="text"] {
+      padding: 8px; font-size: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 5px; width: 180px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Hangman</h1>
+
+<!-- Intro Section -->
+<div id="introSection" class="section visible">
+  <button onclick="startRandomGame()">Play with Random Word</button><br><br>
+  <button onclick="showCustomInput()">Play with My Word</button>
+</div>
+
+<!-- Custom Word Input -->
+<div id="inputSection" class="section">
+  <p>Enter your word (3–12 English letters):</p>
+  <input type="text" id="customWordInput" maxlength="12" />
+  <br><br>
+  <button onclick="startCustomGame()">Start Game</button>
+</div>
+
+<!-- Game Section -->
+<div id="gameSection" class="section">
+  <div class="hangman-container">
+    <div class="pole"></div>
+    <div class="beam"></div>
+    <div class="rope" id="rope"></div>
+    <div class="base"></div>
+    <div class="head" id="part-head"></div>
+    <div class="eye-left" id="eye-left"></div>
+    <div class="eye-right" id="eye-right"></div>
+    <div class="body" id="part-body"></div>
+    <div class="arm-left" id="part-arm-left"></div>
+    <div class="arm-right" id="part-arm-right"></div>
+    <div class="leg-left" id="part-leg-left"></div>
+    <div class="leg-right" id="part-leg-right"></div>
+  </div>
+  <div class="word" id="wordDisplay"></div>
+  <div class="letters" id="letterButtons"></div>
+  <div class="status" id="statusText"></div>
+  <br>
+  <button onclick="resetGame()">Reset</button>
+  <button onclick="goToMenu()">Back to Menu</button>
+</div>
+
+<script>
+  const parts = [
+    'part-head', 'part-body', 'part-arm-left',
+    'part-arm-right', 'part-leg-left', 'part-leg-right'
+  ];
+  let wordList = [
+    "APPLE", "BANANA", "HOUSE", "BRAIN", "MOUSE", "CLOUD", "PLANT", "WATER", "HAPPY", "SUGAR", "HEART", "SHEET", "TABLE", "CHAIR", "STONE", "GLASS", "LIGHT", "NIGHT", "SLEEP", "CANDY", "SOUND", "SNAKE", "SHARP", "ALARM", "DRINK", "GRAPE", "LEMON", "MUSIC", "GHOST", "ANGEL", "PIZZA", "COOKIE", "BREAD", "SPOON", "KNIFE", "BRUSH", "PAINT", "SMILE", "TEETH", "SHOES", "TRUCK", "TRAIN", "PLANE", "STORM", "RIVER", "TIGER", "ZEBRA", "OCEAN", "HONEY", "JOKER", "LAUGH", "SMOKE", "CLOCK", "BROOM", "WITCH", "MAGIC", "CROSS", "GLOVE", "FENCE", "GRAIN", "ARROW", "CROWN", "ROBOT", "LASER", "CABLE", "DOORS", "COVER", "SHEET", "FLAME", "CRANE",
+    "PEACH", "TOWER", "STARS", "ANGRY", "CATCH", "LEAFY", "WORMS", "CREEK", "FIELD", "PANDA", "WAVES", "ROADS", "MAPLE", "GRASS", "TWIST", "CURLY", "DREAM", "SLEEP", "BLADE", "BONES", "FRUIT", "EAGLE", "VIRUS", "SHELL", "CRUSH", "RAISE", "BASIC", "WINGS", "BLAZE", "BRAVE"];
+  let target = "";
+  let guessed = new Set();
+  let wrong = 0;
+  let isCustomWord = false;
+
+  const sections = {
+    intro: document.getElementById("introSection"),
+    input: document.getElementById("inputSection"),
+    game: document.getElementById("gameSection")
+  };
+
+  const wordDisplay = document.getElementById("wordDisplay");
+  const letterButtons = document.getElementById("letterButtons");
+  const statusText = document.getElementById("statusText");
+
+  function showSection(name) {
+    Object.values(sections).forEach(s => s.classList.remove("visible"));
+    sections[name].classList.add("visible");
+  }
+
+  function startRandomGame() {
+    isCustomWord = false;
+    target = getRandomWord();
+    startGame();
+  }
+
+  function getRandomWord() {
+    return wordList[Math.floor(Math.random() * wordList.length)];
+  }
+
+  function showCustomInput() {
+    showSection("input");
+  }
+
+  function startCustomGame() {
+    const input = document.getElementById("customWordInput").value.trim().toUpperCase();
+    if (!/^[A-Z]{3,12}$/.test(input)) {
+      alert("Please enter 3–12 English letters only.");
+      return;
+    }
+    isCustomWord = true;
+    target = input;
+    startGame();
+  }
+
+  function startGame() {
+    guessed = new Set();
+    wrong = 0;
+    document.getElementById("rope").style.height = "30px";
+    parts.forEach(id => {
+      document.getElementById(id).style.display = "none";
+      document.getElementById(id).style.background = "#000";
+    });
+    ["eye-left", "eye-right"].forEach(id => {
+      document.getElementById(id).style.display = "none";
+    });
+    letterButtons.innerHTML = "";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(char => {
+      const btn = document.createElement("button");
+      btn.textContent = char;
+      btn.onclick = () => guessLetter(char, btn);
+      letterButtons.appendChild(btn);
+    });
+    updateDisplay();
+    statusText.textContent = "Wrong: 0 / 6";
+    showSection("game");
+  }
+
+  function guessLetter(letter, button) {
+    button.disabled = true;
+    if (target.includes(letter)) {
+      guessed.add(letter);
+      updateDisplay();
+      if (target.split('').every(c => guessed.has(c))) {
+        statusText.textContent = "🎉 You Win!";
+      }
+    } else {
+      showNextPart();
+      wrong++;
+      statusText.textContent = `Wrong: ${wrong} / 6`;
+      if (wrong >= 6) {
+        triggerDeath();
+        statusText.textContent = `💀 You Lose! Word was: ${target}`;
+        Array.from(letterButtons.children).forEach(btn => btn.disabled = true);
+      }
+    }
+  }
+
+  function updateDisplay() {
+    wordDisplay.textContent = target.split('').map(c => guessed.has(c) ? c : "_").join(" ");
+  }
+
+  function showNextPart() {
+    if (wrong < parts.length) {
+      document.getElementById(parts[wrong]).style.display = 'block';
+    }
+  }
+
+  function triggerDeath() {
+  document.getElementById("rope").style.height = "60px";
+
+  ["eye-left", "eye-right"].forEach(id => {
+    document.getElementById(id).style.display = "block";
+  });
+
+  parts.forEach(id => {
+    document.getElementById(id).style.background = "#777";
+  });
+
+  document.getElementById("part-head").style.top = "88px";
+  document.getElementById("part-body").style.top = "118px";
+  document.getElementById("part-arm-left").style.top = "140px";
+  document.getElementById("part-arm-right").style.top = "140px";
+  document.getElementById("part-leg-left").style.top = "190px";
+  document.getElementById("part-leg-right").style.top = "190px";
+  document.getElementById("eye-left").style.top = "96px";
+  document.getElementById("eye-right").style.top = "96px";
+}
+
+
+  function resetGame() {
+    if (!isCustomWord) {
+      target = getRandomWord(); // 랜덤일 경우 새 단어로
+    }
+    startGame(); // 동일 단어 or 새 단어로 시작
+  }
+
+  function goToMenu() {
+    guessed = new Set();
+    wrong = 0;
+    showSection("intro");
+  }
+</script>
+
+</body>
+</html>

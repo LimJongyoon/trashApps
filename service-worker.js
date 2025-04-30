@@ -1,4 +1,4 @@
-const CACHE_NAME = 'TrashApp 0.48.1';
+const CACHE_NAME = 'TrashApp 0.49.1';
 const urlsToCache = [
   '/',
   '/index.html',
