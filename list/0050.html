@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Picture Guess Game</title>
+  <style>
+    body, html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: #f5f5f5;
+    font-family: sans-serif;
+    color: #2b362c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    #app {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    }
+
+    header {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    }   
+
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #2b362c;
+      cursor: pointer;
+      padding: 4px 10px;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+
+    h1 {
+      color: #4CAF50;
+      font-size: 1.8rem;
+      margin: 10;
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .visible {
+      display: block;
+    }
+
+    .card {
+      width: 300px;
+      height: 300px;
+      border-radius: 10px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card img {
+      max-width: 80%;
+      max-height: 80%;
+    }
+
+    .card .answer {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        background-color: #abf0ad;
+        color: black;
+        cursor: pointer;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    input[type="file"], input[type="text"] {
+      margin: 5px 0;
+      padding: 10px;
+      font-size: 1rem;
+      width: 80%;
+      max-width: 300px;
+      border: 2px solid #2b362c;
+      border-radius: 5px;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @media (min-width: 600px) {
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <button class="back-btn" onclick="goHome()">←</button>
+  </header>
+  <h1>Picture Guess Game</h1>
+  <!-- Home Section -->
+  <div id="home" class="section visible">
+    <button onclick="startDefaultGame()">Start Game</button>
+    <button onclick="openGameMaker()">Create Custom Game</button>
+  </div>
+
+  <!-- Game Section -->
+  <div id="quiz" class="section">
+    <div class="card" id="cardArea"></div>
+    <div class="button-container">
+      <button id="mainBtn" onclick="handleFlip()">Show Answer</button>
+    </div>
+  </div>
+
+  <!-- Game Maker Section -->
+  <div id="maker" class="section">
+    <h2>Create Your Game</h2>
+    <form id="customForm">
+      <div id="uploadFields"></div>
+      <button type="submit">Start Custom Game</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const logos = [
+  { img: "../images/nvidia.png", answer: "NVIDIA" },
+  { img: "../images/tesla.png", answer: "Tesla" },
+  { img: "../images/netflix.png", answer: "Netflix" },
+  { img: "../images/instagram.png", answer: "Instagram" },
+  { img: "../images/amazon.png", answer: "Amazon" },
+  { img: "../images/hyundai.png", answer: "Hyundai" },
+  { img: "../images/google.png", answer: "Google" },
+  { img: "../images/starbucks.png", answer: "Starbucks" },
+  { img: "../images/nike.png", answer: "Nike" },
+  { img: "../images/apple.png", answer: "Apple" }
+];
+
+let quizSet = [];
+let index = 0;
+let isAnswerShown = false;
+
+function shuffleArray(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function showSection(name) {
+  document.querySelectorAll(".section").forEach(sec => sec.classList.remove("visible"));
+  document.getElementById(name).classList.add("visible");
+}
+
+function goHome() {
+  showSection("home");
+}
+
+function startDefaultGame() {
+  quizSet = shuffleArray([...logos]).slice(0, 5);
+  index = 0;
+  isAnswerShown = false;
+  showSection("quiz");
+  showCard();
+}
+
+function openGameMaker() {
+  showSection("maker");
+  const container = document.getElementById("uploadFields");
+  container.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    container.innerHTML += `
+      <input type="file" accept="image/*" required id="img${i}"><br>
+      <input type="text" placeholder="Brand name" required id="text${i}"><br><br>
+    `;
+  }
+}
+
+document.getElementById("customForm").onsubmit = async function(e) {
+  e.preventDefault();
+  quizSet = [];
+  for (let i = 0; i < 5; i++) {
+    const file = document.getElementById(`img${i}`).files[0];
+    const text = document.getElementById(`text${i}`).value;
+    if (file && text) {
+      const url = URL.createObjectURL(file);
+      quizSet.push({ img: url, answer: text });
+    }
+  }
+  index = 0;
+  isAnswerShown = false;
+  showSection("quiz");
+  showCard();
+};
+
+function showCard() {
+  const card = document.getElementById("cardArea");
+  card.innerHTML = `<img src="${quizSet[index].img}" alt="logo" />`;
+  document.getElementById("mainBtn").textContent = "Show Answer";
+  isAnswerShown = false;
+}
+
+function handleFlip() {
+  const card = document.getElementById("cardArea");
+  if (!isAnswerShown) {
+    card.innerHTML = `<div class="answer">${quizSet[index].answer}</div>`;
+    isAnswerShown = true;
+    document.getElementById("mainBtn").textContent = (index === quizSet.length - 1) ? "Finish" : "Next";
+  } else {
+    index++;
+    if (index < quizSet.length) {
+      showCard();
+    } else {
+      goHome();
+    }
+  }
+}
+
+window.onload = () => {
+  showSection("home");
+};
+</script>
+
+</body>
+</html>
