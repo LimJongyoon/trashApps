@@ -65,6 +65,19 @@
   </section>
 
   <script>
+    // BLE 이름 → 작품 제목 매핑
+    const artworkMap = {
+      "f03569": "1. 우제류를 위하여",
+      "f06616": "2. 마두",
+      "f07812": "3. 트리",
+      "f02313": "4. 동으로 동으로",
+      "f02904": "5. 보이스 모자",
+      "f04423": "6. 비상 (1983)",
+      "f05618": "7. 오호라 나는 곤고한 사람이로다",
+      "f06329": "8. 그림자를 삼키다",
+      "f06685": "9. 번역된 도자기"
+    };
+
     const devicesMap = new Map();
 
     function renderList() {
@@ -74,9 +87,9 @@
       const sorted = [...devicesMap.entries()]
         .sort((a, b) => b[1].rssi - a[1].rssi);
 
-      for (const [name, info] of sorted) {
+      for (const [title, info] of sorted) {
         const li = document.createElement('li');
-        li.textContent = `${name} - RSSI: ${info.rssi} dBm`;
+        li.textContent = `${title} - RSSI: ${info.rssi} dBm`;
         ul.appendChild(li);
       }
     }
@@ -96,12 +109,15 @@
         });
 
         navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
-          const name = event.device.name || "UNKNOWN";
+          const name = event.device.name;
           const rssi = event.rssi;
 
-          console.log(`📡 Received: ${name} (RSSI: ${rssi})`);
+          if (!name || !(name in artworkMap)) return;
 
-          devicesMap.set(name, { rssi: rssi, timestamp: Date.now() });
+          const title = artworkMap[name];
+          console.log(`📡 ${title} (RSSI: ${rssi})`);
+
+          devicesMap.set(title, { rssi: rssi, timestamp: Date.now() });
           renderList();
         });
 
