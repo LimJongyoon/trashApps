@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BLE + Audio Test</title>
+</head>
+<body>
+  <h2>🎧 Meta Glasses 웹앱 테스트</h2>
+
+  <section>
+    <h3>1. 🔵 BLE 스캔 (RSSI 포함)</h3>
+    <button id="bleScanBtn">Start BLE Scan</button>
+    <ul id="bleList"></ul>
+  </section>
+
+  <hr>
+
+  <section>
+    <h3>2. 🎙️ 마이크 입력 장치 테스트</h3>
+    <button onclick="listMicDevices()">List Microphones</button>
+    <select id="micList" style="width: 100%; margin-top: 8px;"></select>
+  </section>
+
+  <script>
+    // 필터링할 BLE 이름들
+    const allowedNames = [
+      "f03569", // 1. 우제류를 위하여
+      "f06616", // 2. 마두
+      "f07812", // 3. 트리
+      "f02313", // 4. 동으로 동으로
+      "f02904", // 5. 보이스 모자
+      "f04423", // 6. 비상 (1983)
+      "f05618", // 7. 오호라 나는 곤고한 사람이로다
+      "f06329", // 8. 그림자를 삼키다
+      "f06685"  // 9. 번역된 도자기
+    ];
+
+    // BLE Scan
+    document.getElementById('bleScanBtn').addEventListener('click', async () => {
+      try {
+        const options = {
+          acceptAllAdvertisements: true
+        };
+
+        const bleList = document.getElementById('bleList');
+        bleList.innerHTML = "";
+
+        const scan = await navigator.bluetooth.requestLEScan(options);
+
+        navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
+          const name = event.device.name;
+          const rssi = event.rssi;
+
+          if (allowedNames.includes(name)) {
+            const li = document.createElement('li');
+            li.textContent = `${name} → RSSI: ${rssi} dBm`;
+            bleList.appendChild(li);
+          }
+        });
+
+        alert('Scanning started... Move near a BLE beacon.');
+
+        // Stop after 15 seconds
+        setTimeout(() => {
+          scan.stop();
+          alert('BLE Scan stopped.');
+        }, 15000);
+
+      } catch (err) {
+        alert('BLE scan error: ' + err);
+      }
+    });
+
+    // Microphone Device List
+    async function listMicDevices() {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const micList = document.getElementById('micList');
+        micList.innerHTML = "";
+
+        devices
+          .filter(d => d.kind === 'audioinput')
+          .forEach(d => {
+            const option = document.createElement('option');
+            option.value = d.deviceId;
+            option.textContent = d.label || `Microphone ${d.deviceId}`;
+            micList.appendChild(option);
+          });
+      } catch (err) {
+        alert('Microphone error: ' + err);
+      }
+    }
+  </script>
+</body>
+</html>
