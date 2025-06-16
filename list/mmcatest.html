@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,10 +13,12 @@
       background: #f8f8f8;
       color: #222;
     }
+
     h2 {
       font-size: 1.4rem;
       margin-bottom: 1rem;
     }
+
     section {
       margin-bottom: 2rem;
       background: #fff;
@@ -23,15 +26,18 @@
       border-radius: 8px;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     }
+
     button {
       padding: 0.6rem 1rem;
       font-size: 1rem;
       margin-bottom: 1rem;
     }
+
     ul {
       padding: 0;
       list-style: none;
     }
+
     li {
       padding: 0.5rem;
       margin-bottom: 0.4rem;
@@ -40,12 +46,14 @@
       font-size: 0.95rem;
       line-height: 1.4;
     }
+
     select,
     audio {
       width: 100%;
       margin-top: 0.5rem;
       font-size: 1rem;
     }
+
     code {
       background: #f0f0f0;
       padding: 2px 4px;
@@ -54,6 +62,7 @@
     }
   </style>
 </head>
+
 <body>
   <h2>Meta Glasses Web Test</h2>
 
@@ -140,18 +149,17 @@
             serviceText += `${key} → [${hex}]<br>`;
           });
 
-          // iBeacon major/minor 파싱
-          let major = null,
-            minor = null;
+          // iBeacon major/minor 파싱 및 필터링
           const appleData = manuDataRaw.get(0x004c);
-          if (appleData && appleData.byteLength >= 22) {
-            const view = new DataView(appleData.buffer);
-            major = view.getUint16(20);
-            minor = view.getUint16(22);
+          if (!appleData || appleData.byteLength < 25) return;
 
-              if (major !== 40011) return; 
-              if (minor !== 45942) return; 
-          }
+          const view = new DataView(appleData.buffer);
+          const major = view.getUint16(20);
+          const minor = view.getUint16(22);
+
+          // 원하는 Major / Minor 아니면 필터링
+          if (major !== 40011 || minor !== 45942) return;
+
 
           const key = id + Date.now();
           devicesMap.set(key, {
@@ -224,4 +232,5 @@
     }
   </script>
 </body>
+
 </html>
