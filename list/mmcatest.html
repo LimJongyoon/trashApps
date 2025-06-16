@@ -1,13 +1,13 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>BLE + Audio Test</title>
+  <title>BLE + Mic Test</title>
 </head>
 <body>
-  <h2>🎧 Meta Glasses 웹앱 테스트</h2>
+  <h2>🎧 Meta Glasses 웹앱 통합 테스트</h2>
 
+  <!-- BLE 테스트 -->
   <section>
     <h3>1. 🔵 BLE 스캔 (RSSI 포함)</h3>
     <button id="bleScanBtn">Start BLE Scan</button>
@@ -16,37 +16,36 @@
 
   <hr>
 
+  <!-- 마이크 목록 + 테스트 -->
   <section>
-    <h3>2. 🎙️ 마이크 입력 장치 테스트</h3>
+    <h3>2. 🎙️ 마이크 테스트</h3>
     <button onclick="listMicDevices()">List Microphones</button>
     <select id="micList" style="width: 100%; margin-top: 8px;"></select>
+    <br><br>
+    <button onclick="testMic()">Test Mic (Record 3s)</button>
+    <audio id="player" controls style="display:none; margin-top:10px;"></audio>
   </section>
 
   <script>
-    // 필터링할 BLE 이름들
     const allowedNames = [
-      "f03569", // 1. 우제류를 위하여
-      "f06616", // 2. 마두
-      "f07812", // 3. 트리
-      "f02313", // 4. 동으로 동으로
-      "f02904", // 5. 보이스 모자
-      "f04423", // 6. 비상 (1983)
-      "f05618", // 7. 오호라 나는 곤고한 사람이로다
-      "f06329", // 8. 그림자를 삼키다
-      "f06685"  // 9. 번역된 도자기
+      "f03569", "f06616", "f07812", "f02313", "f02904",
+      "f04423", "f05618", "f06329", "f06685"
     ];
 
-    // BLE Scan
+    // BLE 스캔
     document.getElementById('bleScanBtn').addEventListener('click', async () => {
+      const bleList = document.getElementById('bleList');
+      bleList.innerHTML = "";
+
+      if (!navigator.bluetooth || !navigator.bluetooth.requestLEScan) {
+        alert("❌ 이 브라우저는 BLE 광고 스캔(requestLEScan)을 지원하지 않습니다.\n\n➡ Chrome에서 chrome://flags/#enable-experimental-web-platform-features 설정이 필요합니다.");
+        return;
+      }
+
       try {
-        const options = {
+        const scan = await navigator.bluetooth.requestLEScan({
           acceptAllAdvertisements: true
-        };
-
-        const bleList = document.getElementById('bleList');
-        bleList.innerHTML = "";
-
-        const scan = await navigator.bluetooth.requestLEScan(options);
+        });
 
         navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
           const name = event.device.name;
@@ -59,12 +58,11 @@
           }
         });
 
-        alert('Scanning started... Move near a BLE beacon.');
+        alert('📡 BLE 스캔 시작됨. 15초 동안 주변 장치를 탐색합니다.');
 
-        // Stop after 15 seconds
         setTimeout(() => {
           scan.stop();
-          alert('BLE Scan stopped.');
+          alert('⏹️ BLE 스캔 종료됨.');
         }, 15000);
 
       } catch (err) {
@@ -72,7 +70,7 @@
       }
     });
 
-    // Microphone Device List
+    // 마이크 목록
     async function listMicDevices() {
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -90,6 +88,31 @@
           });
       } catch (err) {
         alert('Microphone error: ' + err);
+      }
+    }
+
+    // 마이크 녹음 테스트 (3초 후 재생)
+    async function testMic() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = document.getElementById('player');
+          audio.src = audioUrl;
+          audio.style.display = 'block';
+          audio.play();
+        };
+
+        mediaRecorder.start();
+        alert("🎤 녹음 시작 (3초간)... 말해보세요!");
+        setTimeout(() => mediaRecorder.stop(), 3000);
+      } catch (err) {
+        alert('Recording failed: ' + err);
       }
     }
   </script>
