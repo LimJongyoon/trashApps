@@ -1,28 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BLE + Mic Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f8f8f8;
+      color: #222;
+    }
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    section {
+      margin-bottom: 2rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    ul {
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      padding: 0.5rem;
+      margin-bottom: 0.4rem;
+      background: #e6e6fa;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    select, audio {
+      width: 100%;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
-  <h2>🎧 Meta Glasses 웹앱 통합 테스트</h2>
 
-  <!-- BLE 테스트 -->
+  <h2>Meta Glasses Web Test</h2>
+
   <section>
-    <h3>1. 🔵 BLE 스캔 (RSSI 포함)</h3>
+    <h3>BLE Scan (Real-time RSSI)</h3>
     <button id="bleScanBtn">Start BLE Scan</button>
     <ul id="bleList"></ul>
   </section>
 
-  <hr>
-
-  <!-- 마이크 목록 + 테스트 -->
   <section>
-    <h3>2. 🎙️ 마이크 테스트</h3>
+    <h3>Microphone Test</h3>
     <button onclick="listMicDevices()">List Microphones</button>
-    <select id="micList" style="width: 100%; margin-top: 8px;"></select>
-    <br><br>
-    <button onclick="testMic()">Test Mic (Record 3s)</button>
+    <select id="micList"></select>
+    <button onclick="testMic()">Record 3 Seconds</button>
     <audio id="player" controls style="display:none; margin-top:10px;"></audio>
   </section>
 
@@ -32,13 +70,28 @@
       "f04423", "f05618", "f06329", "f06685"
     ];
 
-    // BLE 스캔
+    const devicesMap = new Map();
+
+    function renderList() {
+      const ul = document.getElementById('bleList');
+      ul.innerHTML = "";
+
+      const sorted = [...devicesMap.entries()]
+        .sort((a, b) => b[1].rssi - a[1].rssi);
+
+      for (const [name, info] of sorted) {
+        const li = document.createElement('li');
+        li.textContent = `${name} - RSSI: ${info.rssi} dBm`;
+        ul.appendChild(li);
+      }
+    }
+
     document.getElementById('bleScanBtn').addEventListener('click', async () => {
       const bleList = document.getElementById('bleList');
       bleList.innerHTML = "";
 
       if (!navigator.bluetooth || !navigator.bluetooth.requestLEScan) {
-        alert("❌ 이 브라우저는 BLE 광고 스캔(requestLEScan)을 지원하지 않습니다.\n\n➡ Chrome에서 chrome://flags/#enable-experimental-web-platform-features 설정이 필요합니다.");
+        console.error("Web Bluetooth LE Scan not supported.");
         return;
       }
 
@@ -52,25 +105,21 @@
           const rssi = event.rssi;
 
           if (allowedNames.includes(name)) {
-            const li = document.createElement('li');
-            li.textContent = `${name} → RSSI: ${rssi} dBm`;
-            bleList.appendChild(li);
+            devicesMap.set(name, { rssi: rssi, timestamp: Date.now() });
+            renderList();
           }
         });
 
-        alert('📡 BLE 스캔 시작됨. 15초 동안 주변 장치를 탐색합니다.');
-
         setTimeout(() => {
           scan.stop();
-          alert('⏹️ BLE 스캔 종료됨.');
+          console.log("BLE scan stopped.");
         }, 15000);
 
       } catch (err) {
-        alert('BLE scan error: ' + err);
+        console.error('BLE scan error:', err);
       }
     });
 
-    // 마이크 목록
     async function listMicDevices() {
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -87,11 +136,10 @@
             micList.appendChild(option);
           });
       } catch (err) {
-        alert('Microphone error: ' + err);
+        console.error('Microphone error:', err);
       }
     }
 
-    // 마이크 녹음 테스트 (3초 후 재생)
     async function testMic() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -109,12 +157,13 @@
         };
 
         mediaRecorder.start();
-        alert("🎤 녹음 시작 (3초간)... 말해보세요!");
+        console.log("Recording started...");
         setTimeout(() => mediaRecorder.stop(), 3000);
       } catch (err) {
-        alert('Recording failed: ' + err);
+        console.error('Recording failed:', err);
       }
     }
   </script>
+
 </body>
 </html>
