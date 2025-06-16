@@ -48,144 +48,152 @@
 </head>
 <body>
 
-  <h2>Meta Glasses Web Test</h2>
+<h2>Meta Glasses Web Test</h2>
 
-  <section>
-    <h3>BLE Scan (Real-time RSSI)</h3>
-    <button id="bleScanBtn">Start BLE Scan</button>
-    <ul id="bleList"></ul>
-  </section>
+<section>
+  <h3>BLE Scan (Real-time RSSI)</h3>
+  <button id="bleScanBtn">Start BLE Scan</button>
+  <ul id="bleList"></ul>
+</section>
 
-  <section>
-    <h3>Microphone Test</h3>
-    <button onclick="listMicDevices()">List Microphones</button>
-    <select id="micList"></select>
-    <button onclick="testMic()">Record 3 Seconds</button>
-    <audio id="player" controls style="display:none; margin-top:10px;"></audio>
-  </section>
+<section>
+  <h3>Microphone Test</h3>
+  <button onclick="listMicDevices()">List Microphones</button>
+  <select id="micList"></select>
+  <button onclick="testMic()">Record 3 Seconds</button>
+  <audio id="player" controls style="display:none; margin-top:10px;"></audio>
+</section>
 
-  <script>
-    const artworkMap = {
-      "40011:54726": "4. 동으로 동으로",
-      "40011:46043": "1. 우제류를 위하여",
-      "40011:54728": "2. 마두",
-      "40011:46042": "3. 트리",
-      "40011:54695": "5. 보이스 모자",
-      "40011:45942": "6. 비상 (1983)",
-      "40011:46043": "7. 오호라 나는 곤고한 사람이로다",
-      "40011:54706": "8. 그림자를 삼키다",
-      "40011:54696": "9. 번역된 도자기"
-    };
+<script>
+  const devicesMap = new Map();
 
-    const devicesMap = new Map();
+  function renderList() {
+    const ul = document.getElementById('bleList');
+    ul.innerHTML = "";
 
-    function renderList() {
-      const ul = document.getElementById('bleList');
-      ul.innerHTML = "";
+    const sorted = [...devicesMap.entries()]
+      .sort((a, b) => b[1].rssi - a[1].rssi);
 
-      const sorted = [...devicesMap.entries()]
-        .sort((a, b) => b[1].rssi - a[1].rssi);
+    for (const [key, info] of sorted) {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <strong>${info.name}</strong><br>
+        ID: ${info.id}<br>
+        RSSI: ${info.rssi} dBm<br>
+        txPower: ${info.txPower}<br>
+        UUIDs: ${info.uuids || '(none)'}<br>
+        Major: ${info.major ?? '-'}, Minor: ${info.minor ?? '-'}<br>
+        <u>Manufacturer Data:</u><br>${info.manuText || '(none)'}
+        <u>Service Data:</u><br>${info.serviceText || '(none)'}
+      `;
+      ul.appendChild(li);
+    }
+  }
 
-      for (const [title, info] of sorted) {
-        const li = document.createElement('li');
-        li.textContent = `${title} - RSSI: ${info.rssi} dBm`;
-        ul.appendChild(li);
-      }
+  document.getElementById('bleScanBtn').addEventListener('click', async () => {
+    const bleList = document.getElementById('bleList');
+    bleList.innerHTML = "";
+
+    if (!navigator.bluetooth || !navigator.bluetooth.requestLEScan) {
+      alert("Web Bluetooth LE Scan not supported.");
+      return;
     }
 
-    document.getElementById('bleScanBtn').addEventListener('click', async () => {
-      const bleList = document.getElementById('bleList');
-      bleList.innerHTML = "";
+    try {
+      const scan = await navigator.bluetooth.requestLEScan({ acceptAllAdvertisements: true });
 
-      if (!navigator.bluetooth || !navigator.bluetooth.requestLEScan) {
-        console.error("Web Bluetooth LE Scan not supported.");
-        return;
-      }
+      navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
+        const name = event.device.name || "(no name)";
+        const id = event.device.id || "(no id)";
+        const rssi = event.rssi;
+        const txPower = event.txPower || "(unknown)";
+        const uuids = event.uuids ? event.uuids.join(', ') : '(none)';
+        const manuDataRaw = event.manufacturerData;
+        const serviceDataRaw = event.serviceData;
 
-      try {
-        const scan = await navigator.bluetooth.requestLEScan({
-          acceptAllAdvertisements: true
+        let manuText = "";
+        manuDataRaw.forEach((value, key) => {
+          const hex = Array.from(new Uint8Array(value.buffer)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+          manuText += `ID: 0x${key.toString(16)} → [${hex}]<br>`;
         });
 
-        navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
-          const rssi = event.rssi;
-
-          // iBeacon 데이터 파싱
-          const manuData = event.manufacturerData.get(0x004C); // Apple ID
-          if (!manuData) {
-            console.warn("❌ No manufacturer data (iBeacon) found");
-            return;
-          }
-
-          const data = new DataView(manuData.buffer);
-          const major = data.getUint16(18);
-          const minor = data.getUint16(20);
-          const key = `${major}:${minor}`;
-
-          if (artworkMap[key]) {
-            const title = artworkMap[key];
-            console.log(`🎯 ${title} (RSSI: ${rssi})`);
-            devicesMap.set(title, { rssi, timestamp: Date.now() });
-            renderList();
-          } else {
-            console.log(`⚠️ Unknown beacon - Major: ${major}, Minor: ${minor}, RSSI: ${rssi}`);
-          }
+        let serviceText = "";
+        serviceDataRaw.forEach((value, key) => {
+          const hex = Array.from(new Uint8Array(value.buffer)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+          serviceText += `${key} → [${hex}]<br>`;
         });
 
-        setTimeout(() => {
-          scan.stop();
-          console.log("BLE scan stopped.");
-        }, 15000);
+        // Try iBeacon parsing (Apple ID = 0x004C)
+        let major = null, minor = null;
+        const appleData = manuDataRaw.get(0x004C);
+        if (appleData && appleData.byteLength >= 22) {
+          const dataView = new DataView(appleData.buffer);
+          major = dataView.getUint16(18);
+          minor = dataView.getUint16(20);
+        }
 
-      } catch (err) {
-        console.error('BLE scan error:', err);
-      }
-    });
+        const key = id + Date.now(); // ensure uniqueness
+        devicesMap.set(key, {
+          name, id, rssi, txPower, uuids, manuText, serviceText, major, minor
+        });
+        renderList();
+      });
 
-    async function listMicDevices() {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const micList = document.getElementById('micList');
-        micList.innerHTML = "";
+      setTimeout(() => {
+        scan.stop();
+        console.log("BLE scan stopped.");
+      }, 20000);
 
-        devices
-          .filter(d => d.kind === 'audioinput')
-          .forEach(d => {
-            const option = document.createElement('option');
-            option.value = d.deviceId;
-            option.textContent = d.label || `Microphone ${d.deviceId}`;
-            micList.appendChild(option);
-          });
-      } catch (err) {
-        console.error('Microphone error:', err);
-      }
+    } catch (err) {
+      console.error('BLE scan error:', err);
+      alert("BLE scan failed: " + err.message);
     }
+  });
 
-    async function testMic() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        const audioChunks = [];
+  async function listMicDevices() {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const micList = document.getElementById('micList');
+      micList.innerHTML = "";
 
-        mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunks);
-          const audioUrl = URL.createObjectURL(audioBlob);
-          const audio = document.getElementById('player');
-          audio.src = audioUrl;
-          audio.style.display = 'block';
-          audio.play();
-        };
-
-        mediaRecorder.start();
-        console.log("Recording started...");
-        setTimeout(() => mediaRecorder.stop(), 3000);
-      } catch (err) {
-        console.error('Recording failed:', err);
-      }
+      devices
+        .filter(d => d.kind === 'audioinput')
+        .forEach(d => {
+          const option = document.createElement('option');
+          option.value = d.deviceId;
+          option.textContent = d.label || `Microphone ${d.deviceId}`;
+          micList.appendChild(option);
+        });
+    } catch (err) {
+      console.error('Microphone error:', err);
     }
-  </script>
+  }
+
+  async function testMic() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+
+      mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = document.getElementById('player');
+        audio.src = audioUrl;
+        audio.style.display = 'block';
+        audio.play();
+      };
+
+      mediaRecorder.start();
+      console.log("Recording started...");
+      setTimeout(() => mediaRecorder.stop(), 3000);
+    } catch (err) {
+      console.error('Recording failed:', err);
+    }
+  }
+</script>
 
 </body>
 </html>
