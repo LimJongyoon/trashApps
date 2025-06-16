@@ -65,11 +65,6 @@
   </section>
 
   <script>
-    const allowedNames = [
-      "f03569", "f06616", "f07812", "f02313", "f02904",
-      "f04423", "f05618", "f06329", "f06685"
-    ];
-
     const devicesMap = new Map();
 
     function renderList() {
@@ -101,13 +96,13 @@
         });
 
         navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
-          const name = event.device.name;
+          const name = event.device.name || "UNKNOWN";
           const rssi = event.rssi;
 
-          if (allowedNames.includes(name)) {
-            devicesMap.set(name, { rssi: rssi, timestamp: Date.now() });
-            renderList();
-          }
+          console.log(`📡 Received: ${name} (RSSI: ${rssi})`);
+
+          devicesMap.set(name, { rssi: rssi, timestamp: Date.now() });
+          renderList();
         });
 
         setTimeout(() => {
